@@ -1,0 +1,112 @@
+# Football Club OS — development reverse proxy.
+#
+# Caddy replaces Traefik because of one requirement Traefik makes hard: clubs
+# bring their own domains, and each needs a certificate issued on first request
+# without anyone touching configuration. Caddy's on-demand TLS does exactly
+# that — see Caddyfile.production, where it is switched on.
+#
+# Development stays on HTTP: `*.localhost` is treated as a secure context by
+# browsers (so service workers, camera access and Secure cookies all behave),
+# and avoiding a local CA keeps first-run friction at zero. The `ask` endpoint
+# that guards certificate issuance is still implemented and tested — see
+# app/tenants/public_router.py.
+
+{
+	admin :2019
+	auto_https off
+	log {
+		output stdout
+		format console
+		level INFO
+	}
+}
+
+(common) {
+	encode zstd gzip
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+	}
+}
+
+# --- platform hosts ---------------------------------------------------------
+
+# The platform address. One host, two applications:
+#
+#   /            the marketing site        (public-web, Next.js)
+#   /pricing     ...and its other pages
+#   everything   the admin application     (admin-web, the SPA)
+#   else
+#
+# The split is by an explicit list of marketing paths rather than by "anything
+# that isn't a club slug", because the set of marketing pages is one we own and
+# the set of club slugs is not. A club slug that collided with `/pricing` would
+# otherwise silently shadow a customer's whole workspace — which is why the API
+# refuses to issue reserved slugs (app/tenants/slugs.py).
+http://footbola.localhost {
+	import common
+
+	@marketing path / /pricing /pricing/* /_next/* /__nextjs* /favicon.ico
+	handle @marketing {
+		reverse_proxy public-web:3000 {
+			header_up X-Forwarded-Host {host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	# The admin SPA, including Vite's dev-server endpoints. In production this
+	# is a static bundle and the @vite matchers are inert.
+	handle {
+		reverse_proxy admin-web:5173
+	}
+}
+
+http://api.footbola.localhost {
+	import common
+	reverse_proxy api:8000
+}
+
+http://admin.footbola.localhost {
+	import common
+	# Vite's HMR websocket upgrades on the same origin; Caddy proxies it
+	# transparently, so no extra websocket block is needed.
+	reverse_proxy admin-web:5173
+}
+
+http://auth.footbola.localhost {
+	import common
+	reverse_proxy keycloak:8080
+}
+
+http://mail.footbola.localhost {
+	import common
+	reverse_proxy mailpit:8025
+}
+
+# The S3 API, not the console. Public club media (crests, hero images,
+# partner logos) is served from here by its plain URL, so this has to be the
+# object endpoint the browser can actually GET.
+http://files.footbola.localhost {
+	import common
+	reverse_proxy minio:9000
+}
+
+# MinIO's own admin UI, kept on a separate host so it is never confused with
+# the media origin.
+http://storage.footbola.localhost {
+	import common
+	reverse_proxy minio:9001
+}
+
+# --- club sites -------------------------------------------------------------
+# Everything else is a club domain. The app resolves which club from the Host
+# header; an unknown host 404s rather than falling back to a default club,
+# which would serve one club's content on another's domain.
+
+http:// {
+	import common
+	reverse_proxy public-web:3000 {
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

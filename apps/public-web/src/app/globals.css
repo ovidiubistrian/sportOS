@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/* Public site tokens.
+ *
+ * Neutrals and semantics are the platform's and identical for every club.
+ * Only the `--brand*` group is injected per club, from the palette computed by
+ * the API — including the contrast-corrected text variants. A club supplies
+ * three colours and picks a template; there is no mechanism for arbitrary CSS,
+ * which is what keeps every club site recognisably the same product.
+ */
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+:root {
+  --page: #ffffff;
+  --page-alt: #f6f7f9;
+  --ink: #10141a;
+  --ink-muted: #59626e;
+  --ink-faint: #8a929c;
+  --rule: #e3e7ec;
+  --rule-strong: #c9d0d8;
+  /* Not a brand colour: the one red on a club site that must mean "this
+     removes something", whatever colour the club itself plays in. */
+  --danger: #bb1f2f;
+
+  /* Overridden per club at render time. */
+  --brand: #1f4b99;
+  --brand-hover: #17376f;
+  --brand-contrast: #ffffff;
+  --brand-text: #1f4b99;
+  --brand-secondary: #e4b33c;
+  --brand-accent: #1f4b99;
+}
+
+[data-mode="dark"] {
+  --page: #0c0f14;
+  --page-alt: #131820;
+  --ink: #eef2f6;
+  --ink-muted: #9aa4b0;
+  --ink-faint: #6c7682;
+  --rule: #222a34;
+  --rule-strong: #333d49;
+  --danger: #f4707d;
+  --brand-text: var(--brand-text-dark, var(--brand));
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-page-alt: var(--page-alt);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-danger: var(--danger);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-brand-text: var(--brand-text);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-accent: var(--brand-accent);
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

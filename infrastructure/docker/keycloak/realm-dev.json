@@ -1,0 +1,251 @@
+{
+  "realm": "football-os",
+  "enabled": true,
+  "displayName": "Football Club OS (development)",
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "failureFactor": 10,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 3600,
+  "ssoSessionMaxLifespan": 36000,
+  "clients": [
+    {
+      "clientId": "admin-web",
+      "name": "Admin Web",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://admin.footbola.localhost",
+      "baseUrl": "/",
+      "redirectUris": [
+        "http://footbola.localhost/*",
+        "http://admin.footbola.localhost/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://footbola.localhost",
+        "http://admin.footbola.localhost",
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://footbola.localhost/*##http://admin.footbola.localhost/*##http://localhost:5173/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "football-os-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "football-os-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "super-admin",
+      "name": "Platform Super Admin",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "rootUrl": "http://platform.footbola.localhost",
+      "redirectUris": [
+        "http://footbola.localhost/*",
+        "http://admin.footbola.localhost/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://footbola.localhost",
+        "http://admin.footbola.localhost",
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://footbola.localhost/*##http://admin.footbola.localhost/*##http://localhost:5173/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "football-os-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "football-os-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "footbola-registration",
+      "name": "Registration (service account)",
+      "description": "Creates accounts during sign-up. Confidential, service account only, and holds exactly one realm-management role: manage-users.",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "secret": "dev-only-registration-secret",
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "supporter-web",
+      "name": "Supporter sign-in",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "",
+      "baseUrl": "/",
+      "redirectUris": [
+        "http://csm-resita.localhost/*",
+        "http://fcexample.localhost/*",
+        "http://northern.localhost/*",
+        "http://*.localhost/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://csm-resita.localhost/*##http://fcexample.localhost/*##http://northern.localhost/*##http://*.localhost/*##http://localhost:3000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "football-os-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "football-os-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "footbola-domains",
+      "name": "Club domain registration",
+      "description": "Adds a verified club domain to the supporter client's redirect list. Holds manage-clients and nothing else.",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "dev-only-domains-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "attributes": {}
+    }
+  ],
+  "users": [
+    {
+      "id": "0192a000-0000-7000-8000-000000000001",
+      "username": "owner@fcexample.test",
+      "email": "owner@fcexample.test",
+      "firstName": "Diana",
+      "lastName": "Marinescu",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0192a000-0000-7000-8000-000000000002",
+      "username": "academy@fcexample.test",
+      "email": "academy@fcexample.test",
+      "firstName": "Radu",
+      "lastName": "Ionescu",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0192a000-0000-7000-8000-000000000003",
+      "username": "coach.u15@fcexample.test",
+      "email": "coach.u15@fcexample.test",
+      "firstName": "Ana",
+      "lastName": "Popescu",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0192a000-0000-7000-8000-000000000004",
+      "username": "owner@northern.test",
+      "email": "owner@northern.test",
+      "firstName": "Lena",
+      "lastName": "Brandt",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "0192a000-0000-7000-8000-000000000005",
+      "username": "platform@footbola.test",
+      "email": "platform@footbola.test",
+      "firstName": "Platform",
+      "lastName": "Operator",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "verifyEmail": true,
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "no-reply@footbola.test",
+    "fromDisplayName": "Football Club OS",
+    "ssl": "false",
+    "starttls": "false",
+    "auth": "false"
+  },
+  "clientScopeMappings": {},
+  "registrationEmailAsUsername": true,
+  "rememberMe": true
+}

@@ -1,0 +1,924 @@
+/**
+ * API contract types.
+ *
+ * Hand-written for the vertical slice. Phase 0 replaces this file with output
+ * generated from `docs/api/openapi.v1.json` in CI, so drift between the server
+ * and the client becomes a failing build rather than a runtime surprise.
+ */
+
+export interface PageMeta {
+  limit: number;
+  offset: number | null;
+  total: number | null;
+  total_is_estimate: boolean;
+  next_cursor: string | null;
+  has_more: boolean;
+}
+
+export interface Page<T> {
+  data: T[];
+  page: PageMeta;
+}
+
+export interface TenantSummary {
+  id: string;
+  slug: string;
+  legal_name: string;
+  trading_name: string | null;
+  default_locale: string;
+  /** Every language this tenant publishes in. */
+  supported_locales: string[];
+  default_currency: string;
+  timezone: string;
+  status: "PENDING" | "ACTIVE" | "SUSPENDED" | "CLOSED";
+  is_demo: boolean;
+}
+
+export interface ClubSummary {
+  id: string;
+  slug: string;
+  display_name: string;
+  short_name: string;
+  template: SiteTemplate;
+  color_primary: string;
+  /** Derived server-side, including contrast-corrected text variants. */
+  palette: Record<string, string>;
+  /** The club's row in the shared competition directory, once it has one. */
+  directory_club_id: string | null;
+}
+
+export type SiteTemplate = "CLASSIC" | "BOLD" | "COMPACT" | "EDITORIAL";
+export type ColorMode = "LIGHT" | "DARK" | "AUTO";
+
+/** Per-colour readability assessment, shown next to each picker. */
+export interface ColorCheck {
+  color: string;
+  /** Black or white — whichever is readable on a fill of this colour. */
+  on_color: string;
+  /** The colour adjusted until it is readable as text on white. */
+  text_variant: string;
+  was_adjusted: boolean;
+  contrast_on_white: number;
+  meets_aa_as_text: boolean;
+  meets_aa_as_surface: boolean;
+  advice: string | null;
+}
+
+export interface Branding {
+  club_id: string;
+  template: SiteTemplate;
+  color_mode: ColorMode;
+  color_primary: string;
+  color_secondary: string | null;
+  color_accent: string | null;
+  tagline: string | null;
+  social: Record<string, string>;
+  /** Resolved from the asset id server-side; null once the image is deleted. */
+  crest_url: string | null;
+  hero_url: string | null;
+  crest_media_id: string | null;
+  hero_media_id: string | null;
+  /** On the club, not the branding — edited here because this is the page
+   *  where a club decides how its name appears. */
+  display_name: string | null;
+  short_name: string | null;
+  palette: Record<string, string>;
+  checks: Record<string, ColorCheck>;
+  available_templates: SiteTemplate[];
+  available_color_modes: ColorMode[];
+  /** The footer. Every field optional; a club that fills none gets its name. */
+  contact_email: string | null;
+  contact_phone: string | null;
+  address: string | null;
+  legal_line: string | null;
+  sponsors_title: string | null;
+  sponsors: { name: string; url: string | null; media_id: string | null; logo_url?: string | null }[];
+}
+
+export interface BrandingUpdate {
+  template?: SiteTemplate;
+  color_mode?: ColorMode;
+  color_primary?: string;
+  color_secondary?: string | null;
+  color_accent?: string | null;
+  tagline?: string | null;
+  social?: Record<string, string>;
+  crest_media_id?: string | null;
+  hero_media_id?: string | null;
+  display_name?: string;
+  short_name?: string;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  address?: string | null;
+  legal_line?: string | null;
+  sponsors_title?: string | null;
+  sponsors?: { name: string; url?: string | null; media_id?: string | null }[];
+}
+
+/**
+ * One club the user may enter, and the tenant it belongs to.
+ *
+ * The admin is one application at one address; the club slug in the URL says
+ * which club you are working in. This list is what makes that resolvable at
+ * sign-in, before any tenant has been chosen — and it is a routing aid, never
+ * an authorization input.
+ */
+export interface Workspace {
+  tenant_id: string;
+  tenant_name: string;
+  club: ClubSummary;
+}
+
+export interface MeResponse {
+  user_id: string;
+  email: string;
+  is_platform_user: boolean;
+  active_tenant: TenantSummary | null;
+  tenants: TenantSummary[];
+  clubs: ClubSummary[];
+  /** Every club across every tenant this user belongs to. */
+  workspaces: Workspace[];
+  permissions: string[];
+}
+
+export interface TeamSummary {
+  id: string;
+  name: string;
+  code: string;
+  age_group: string | null;
+}
+
+export interface Team extends TeamSummary {
+  club_id: string;
+  gender: string;
+  level: string;
+  is_academy: boolean;
+  status: string;
+  /** What this team plays. Inherited from the club unless it is the exception. */
+  sport: string;
+}
+
+/** A sport the platform knows how to run, and what differs about it. */
+export interface Sport {
+  key: string;
+  name: string;
+  scoring_unit: string;
+  draws_possible: boolean;
+  period_count: number;
+  period_minutes: number | null;
+  tracks_minute: boolean;
+  positions: string[];
+  event_kinds: string[];
+  /** Whether a league feed can fill fixtures in, or the club enters them. */
+  has_provider: boolean;
+}
+
+export type PlayerStatus =
+  | "TRIAL"
+  | "REGISTERED"
+  | "LOANED_OUT"
+  | "INACTIVE"
+  | "DEPARTED";
+
+export interface PlayerSummary {
+  id: string;
+  person_id: string;
+  display_name: string;
+  status: PlayerStatus;
+  primary_position: string | null;
+  shirt_number: number | null;
+  team: TeamSummary | null;
+  birth_date: string | null;
+  photo_url: string | null;
+}
+
+export interface PlayerDetail extends PlayerSummary {
+  photo_media_id: string | null;
+  first_name: string;
+  last_name: string;
+  secondary_positions: string[];
+  preferred_foot: string | null;
+  nationality: string[];
+  federation_id: string | null;
+  joined_club_on: string | null;
+  left_club_on: string | null;
+  club_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlayerFilters {
+  club_id?: string;
+  team_id?: string;
+  status?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
+  with_total?: boolean;
+}
+
+/** Stable error codes. Branch on these, never on `message`. */
+export type ApiErrorCode =
+  | "VALIDATION_ERROR"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "UNAUTHENTICATED"
+  | "STEP_UP_REQUIRED"
+  | "PERMISSION_DENIED"
+  | "TENANT_MISMATCH"
+  | "TENANT_CONTEXT_MISSING"
+  | "TENANT_SUSPENDED"
+  | "FEATURE_NOT_ENABLED"
+  | "LIMIT_EXCEEDED"
+  | "RATE_LIMITED"
+  | "INTERNAL_ERROR";
+
+export interface ApiErrorBody {
+  code: ApiErrorCode | string;
+  message: string;
+  details: Record<string, unknown>;
+  request_id: string | null;
+}
+
+// --- Newsroom --------------------------------------------------------------
+
+export type ContentStatus =
+  | "DRAFT"
+  | "IN_REVIEW"
+  | "SCHEDULED"
+  | "PUBLISHED"
+  | "ARCHIVED";
+
+export type ArticleType =
+  | "ANNOUNCEMENT"
+  | "MATCH_REPORT"
+  | "MATCH_PREVIEW"
+  | "SIGNING"
+  | "DEPARTURE"
+  | "ACADEMY"
+  | "INTERVIEW";
+
+/**
+ * A body block. Deliberately not HTML — the four public templates each render
+ * these in their own character, and text cannot become markup.
+ */
+export type Block =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; level: 2 | 3; text: string }
+  | { type: "quote"; text: string; attribution?: string | null }
+  | { type: "list"; ordered: boolean; items: string[] };
+
+export interface TranslationSummary {
+  locale: string;
+  title: string;
+  slug: string;
+  status: "DRAFT" | "READY";
+  /** Publishable, not merely present: a title with an empty body is a stub. */
+  is_complete: boolean;
+}
+
+export interface TranslationDetail {
+  locale: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  body: Block[];
+  seo_title: string | null;
+  seo_description: string | null;
+  status: "DRAFT" | "READY";
+}
+
+export interface ContentSummary {
+  id: string;
+  club_id: string;
+  kind: string;
+  article_type: ArticleType;
+  status: ContentStatus;
+  published_at: string | null;
+  scheduled_for: string | null;
+  is_pinned: boolean;
+  cover_media_id: string | null;
+  cover_url: string | null;
+  title: string;
+  locales: TranslationSummary[];
+  updated_at: string;
+}
+
+export interface ContentDetail extends ContentSummary {
+  translations: TranslationDetail[];
+  category_id: string | null;
+}
+
+export interface ContentFilters {
+  club_id?: string;
+  status?: ContentStatus;
+  article_type?: ArticleType;
+  q?: string;
+  limit?: number;
+  offset?: number;
+  with_total?: boolean;
+}
+
+export interface ContentCreate {
+  club_id: string;
+  article_type: ArticleType;
+  translation: {
+    locale: string;
+    title: string;
+    body?: Block[];
+    excerpt?: string | null;
+    slug?: string | null;
+  };
+}
+
+export interface TranslationInput {
+  locale: string;
+  title: string;
+  slug?: string | null;
+  excerpt?: string | null;
+  body: Block[];
+  seo_title?: string | null;
+  seo_description?: string | null;
+  status?: "DRAFT" | "READY" | null;
+}
+
+// --- Writing assistant -----------------------------------------------------
+
+export interface ArticleTypeSpec {
+  key: ArticleType;
+  name: string;
+  description: string;
+  skeleton: Block[];
+}
+
+export interface AssistantStatus {
+  available: boolean;
+  /** Present whenever `available` is false. Shown verbatim to the editor. */
+  reason: string | null;
+  requests_used: number;
+  requests_limit: number | null;
+  article_types: ArticleTypeSpec[];
+}
+
+export interface AssistRequest {
+  content_item_id?: string | null;
+  locale: string;
+  title: string;
+  blocks: Block[];
+}
+
+export interface PolishSuggestion {
+  usage_id: string;
+  blocks: Block[];
+  summary_of_changes: string;
+  requests_used: number;
+  duration_ms: number;
+}
+
+export interface HeadlineSuggestion {
+  usage_id: string;
+  headlines: string[];
+  requests_used: number;
+  duration_ms: number;
+}
+
+
+// --- Media -----------------------------------------------------------------
+
+/** What an image is *for*. Decides where it may be rendered and how it crops. */
+export type MediaPurpose =
+  | "CREST"
+  | "HERO"
+  | "PARTNER_LOGO"
+  | "COMPETITION_BADGE"
+  | "ARTICLE_IMAGE"
+  | "TEAM_PHOTO"
+  | "PLAYER_PHOTO";
+
+export interface MediaAsset {
+  id: string;
+  club_id: string;
+  purpose: MediaPurpose;
+  /** Stable and unsigned — public site media is served straight from storage. */
+  url: string;
+  width: number;
+  height: number;
+  size_bytes: number;
+  content_type: string;
+  alt_text: string | null;
+  /** A label so an editor recognises their own upload. Never part of the URL. */
+  original_filename: string | null;
+}
+
+
+// --- Sign-up ---------------------------------------------------------------
+
+export interface PlatformLocale {
+  code: string;
+  /** In the language itself — a speaker scans for their own word. */
+  endonym: string;
+  english_name: string;
+}
+
+export interface SlugCheck {
+  slug: string;
+  available: boolean;
+  /** Offered when the obvious address is taken. */
+  suggestion: string | null;
+}
+
+export interface SignUpInput {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  club_name: string;
+  slug: string;
+  country_code: string;
+  locale: string;
+}
+
+export interface SignUpResult {
+  club_slug: string;
+  email: string;
+  verification_required: boolean;
+}
+
+export interface TeamInput {
+  club_id: string;
+  name: string;
+  code: string;
+  gender?: string;
+  age_group?: string | null;
+  level?: string;
+  is_academy?: boolean;
+  sport?: string | null;
+}
+
+export interface TeamUpdate {
+  name?: string;
+  code?: string;
+  gender?: string;
+  age_group?: string | null;
+  level?: string;
+  is_academy?: boolean;
+  status?: "ACTIVE" | "ARCHIVED";
+  sport?: string;
+}
+
+export interface PlayerUpdate {
+  first_name?: string;
+  last_name?: string;
+  birth_date?: string | null;
+  nationality?: string[];
+  status?: string;
+  primary_position?: string | null;
+  secondary_positions?: string[];
+  preferred_foot?: string | null;
+  federation_id?: string | null;
+  photo_media_id?: string | null;
+  joined_club_on?: string | null;
+  left_club_on?: string | null;
+}
+
+export interface RegistrationChange {
+  team_id: string | null;
+  season_id?: string | null;
+  shirt_number?: number | null;
+}
+
+/* --- competitions ---------------------------------------------------------- */
+
+export interface Competition {
+  id: string;
+  key: string;
+  name: string;
+  short_name: string | null;
+  format: "LEAGUE" | "KNOCKOUT" | "GROUP_KNOCKOUT";
+  scope: string;
+  tier: number | null;
+}
+
+/** A season the club has actually entered — what a fixture is filed under. */
+export interface CompetitionEntry {
+  id: string;
+  competition_id: string;
+  competition_name: string;
+  competition_format: Competition["format"];
+  season_name: string;
+  is_current: boolean;
+}
+
+export interface DirectoryClub {
+  id: string;
+  name: string;
+  short_name: string;
+  crest_url: string | null;
+}
+
+export type MatchStatus =
+  | "SCHEDULED"
+  | "POSTPONED"
+  | "CANCELLED"
+  | "FINISHED"
+  | "AWARDED";
+
+export interface Match {
+  id: string;
+  competition_season_id: string;
+  competition_name: string;
+  home: DirectoryClub;
+  away: DirectoryClub;
+  round_kind: string;
+  round_number: number | null;
+  round_label: string | null;
+  kickoff_at: string | null;
+  kickoff_is_confirmed: boolean;
+  venue_name: string | null;
+  status: MatchStatus;
+  home_score: number | null;
+  away_score: number | null;
+  ticket_url: string | null;
+  is_home: boolean;
+}
+
+export interface TableRow {
+  position: number;
+  club: DirectoryClub;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  points: number;
+  form: string[];
+}
+
+export interface JoinCompetitionInput {
+  club_id: string;
+  competition_id: string;
+  season_name: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface MatchCreate {
+  club_id: string;
+  competition_season_id: string;
+  opponent_club_id: string;
+  at_home: boolean;
+  round_kind?: string;
+  round_number?: number | null;
+  round_label?: string | null;
+  kickoff_at?: string | null;
+  kickoff_is_confirmed?: boolean;
+  venue_name?: string | null;
+  ticket_url?: string | null;
+}
+
+export interface MatchUpdate {
+  kickoff_at?: string | null;
+  kickoff_is_confirmed?: boolean;
+  venue_name?: string | null;
+  ticket_url?: string | null;
+  status?: MatchStatus;
+  home_score?: number | null;
+  away_score?: number | null;
+}
+
+/* --- shop ------------------------------------------------------------------ */
+
+export interface ProductVariant {
+  id: string;
+  label: string;
+  sku: string | null;
+  stock: number;
+  sort_order: number;
+}
+
+export interface Product {
+  id: string;
+  club_id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  /** Minor units. Never a float — see backend/app/core/money.py. */
+  price_minor: number;
+  currency: string;
+  cover_media_id: string | null;
+  cover_url: string | null;
+  is_active: boolean;
+  sort_order: number;
+  variants: ProductVariant[];
+}
+
+export interface VariantInput {
+  id?: string;
+  label: string;
+  sku?: string | null;
+  stock: number;
+  sort_order?: number;
+}
+
+export interface ProductInput {
+  club_id: string;
+  name: string;
+  description?: string | null;
+  price_minor: number;
+  cover_media_id?: string | null;
+  is_active?: boolean;
+  sort_order?: number;
+  variants?: VariantInput[];
+}
+
+export interface ProductChanges {
+  name?: string;
+  description?: string | null;
+  price_minor?: number;
+  cover_media_id?: string | null;
+  is_active?: boolean;
+  sort_order?: number;
+  variants?: VariantInput[];
+}
+
+export type OrderStatus =
+  | "PENDING"
+  | "AWAITING_COLLECTION"
+  | "COLLECTED"
+  | "CANCELLED";
+
+export interface ShopOrderLine {
+  description: string;
+  unit_price_minor: number;
+  quantity: number;
+  total_minor: number;
+}
+
+export interface ShopOrder {
+  id: string;
+  reference: string;
+  status: OrderStatus;
+  currency: string;
+  total_minor: number;
+  buyer_name: string;
+  buyer_email: string | null;
+  buyer_phone: string | null;
+  note: string | null;
+  placed_at: string | null;
+  collected_at: string | null;
+  lines: ShopOrderLine[];
+}
+
+/* --- the super-admin console ----------------------------------------------- */
+
+export interface PlatformTenant {
+  id: string;
+  slug: string;
+  name: string;
+  status: "PENDING" | "ACTIVE" | "SUSPENDED" | "CLOSED";
+  country_code: string;
+  default_locale: string;
+  supported_locales: string[];
+  default_currency: string;
+  plan: string | null;
+  subscription_status: string | null;
+  trial_ends_at: string | null;
+  clubs: number;
+  players: number;
+  created_at: string;
+}
+
+export interface PlatformPlan {
+  id: string;
+  key: string;
+  name: string;
+  tier: string;
+  version: number;
+  features: { feature_key: string; enabled: boolean; limit_value: number | null }[];
+}
+
+export interface PlatformCompetition {
+  id: string;
+  country_code: string | null;
+  key: string;
+  name: string;
+  short_name: string | null;
+  format: "LEAGUE" | "KNOCKOUT" | "GROUP_KNOCKOUT";
+  scope: string;
+  tier: number | null;
+  sort_order: number;
+  is_active: boolean;
+  /** How many club-seasons are filed against it. */
+  seasons: number;
+}
+
+
+/** Somebody who works at the club, and the one job they hold. */
+export interface StaffMember {
+  user_id: string;
+  email: string;
+  display_name: string;
+  role_key: string;
+  role_name: string;
+  club_id: string | null;
+  team_id: string | null;
+  scope_label: string | null;
+  /** Invited, never signed in. */
+  pending: boolean;
+  last_login_at: string | null;
+  granted_at: string | null;
+}
+
+export interface StaffRole {
+  key: string;
+  name: string;
+  scope_level: "TENANT" | "CLUB" | "TEAM";
+  description: string;
+  /** False when the caller holds less than the role would grant. */
+  grantable: boolean;
+}
+
+export interface StaffInvite {
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  club_id?: string | null;
+  team_id?: string | null;
+}
+
+/** Somebody on a team's touchline, as the club presents them. */
+export interface TeamStaffMember {
+  id: string;
+  team_id: string;
+  person_id: string;
+  name: string;
+  role: string;
+  title: string | null;
+  photo_media_id: string | null;
+  is_public: boolean;
+  sort_order: number;
+}
+
+export interface TeamStaffInput {
+  person_id?: string | null;
+  first_name?: string;
+  last_name?: string;
+  role: string;
+  title?: string | null;
+  photo_media_id?: string | null;
+  is_public?: boolean;
+  sort_order?: number;
+}
+
+export const TEAM_STAFF_ROLES = [
+  "HEAD_COACH",
+  "ASSISTANT_COACH",
+  "GOALKEEPING_COACH",
+  "FITNESS_COACH",
+  "ANALYST",
+  "PHYSIO",
+  "DOCTOR",
+  "TEAM_MANAGER",
+  "KIT_MANAGER",
+  "PRESS_OFFICER",
+  "PRESIDENT",
+  "DIRECTOR",
+] as const;
+
+/* --- analytics ------------------------------------------------------------- */
+
+export interface AnalyticsMetric {
+  value: number;
+  previous: number;
+  /** Null when there is nothing to compare against — not the same as no change. */
+  change_percent: number | null;
+}
+
+export interface AnalyticsPoint {
+  day: string;
+  sessions: number;
+  views: number;
+}
+
+export interface AnalyticsCount {
+  label: string;
+  value: number;
+  unique: number | null;
+}
+
+export interface AnalyticsFunnelStep {
+  label: string;
+  value: number;
+  of_total_percent: number;
+  from_previous_percent: number | null;
+}
+
+export interface AnalyticsOverview {
+  range: string;
+  since: string;
+  until: string;
+  live: number;
+  sessions: AnalyticsMetric;
+  visitors: AnalyticsMetric;
+  views: AnalyticsMetric;
+  signups: AnalyticsMetric;
+  conversion_percent: number;
+  conversion_previous_percent: number;
+  series: AnalyticsPoint[];
+  funnel: AnalyticsFunnelStep[];
+  sources: AnalyticsCount[];
+  pages: AnalyticsCount[];
+  devices: AnalyticsCount[];
+  browsers: AnalyticsCount[];
+  campaigns: AnalyticsCount[];
+  /** Empty when no geography database is installed. */
+  countries: AnalyticsCount[];
+  cities: AnalyticsCount[];
+}
+
+export type AnalyticsRange = "today" | "7d" | "30d" | "90d";
+
+/* --- email marketing ------------------------------------------------------- */
+
+export interface EmailTemplate {
+  id: string;
+  club_id: string;
+  key: string;
+  name: string;
+  subject: string;
+  preheader: string | null;
+  blocks: Block[];
+  cta_label: string | null;
+  cta_url: string | null;
+  locale: string | null;
+  is_active: boolean;
+}
+
+export interface EmailTemplateInput {
+  club_id: string;
+  key: string;
+  name: string;
+  subject: string;
+  preheader?: string | null;
+  blocks?: Block[];
+  cta_label?: string | null;
+  cta_url?: string | null;
+}
+
+export interface EmailTemplateChanges {
+  name?: string;
+  subject?: string;
+  preheader?: string | null;
+  blocks?: Block[];
+  cta_label?: string | null;
+  cta_url?: string | null;
+  is_active?: boolean;
+}
+
+export interface EmailPreview {
+  subject: string;
+  html: string;
+  text: string;
+}
+
+/** Who a campaign is aimed at. Both pools carry their own consent record. */
+export type CampaignAudience = "NEWSLETTER" | "SUPPORTERS" | "EVERYONE";
+
+export type CampaignKind = "NEWS" | "OFFER" | "MATCHDAY" | "MEMBERSHIP" | "ANNOUNCEMENT";
+
+export interface Campaign {
+  id: string;
+  club_id: string;
+  template_id: string;
+  name: string;
+  kind: CampaignKind;
+  audience: CampaignAudience;
+  locale: string | null;
+  status: "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "FAILED" | "CANCELLED";
+  total: number;
+  sent: number;
+  failed: number;
+  opened: number;
+  unsubscribed: number;
+  error: string | null;
+}
+
+export interface CampaignInput {
+  club_id: string;
+  template_id: string;
+  name: string;
+  kind?: CampaignKind;
+  audience?: CampaignAudience;
+  locale?: string | null;
+}
+
+export interface AudienceSize {
+  total: number;
+  newsletter: number;
+  supporters: number;
+  /** Which way the club's email currently leaves — SMTP or MAILGUN. */
+  provider: string;
+}

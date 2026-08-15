@@ -1,0 +1,330 @@
+/* Football Club OS — design tokens.
+ *
+ * Three colour families, kept strictly apart (docs/architecture/14-design-system.md):
+ *
+ *   neutral   the interface. Identical in every tenant.
+ *   semantic  meaning. Fixed, never club-branded — "paid" must look the same
+ *             everywhere or it stops being information.
+ *   brand     identity. Injected per club at runtime, used for the primary
+ *             action, active nav, focus rings and links. Never for backgrounds,
+ *             table headers, status or large fills.
+ *
+ * Components consume tokens. A raw hex or px value in a component is a bug.
+ *
+ * The neutrals are very slightly blue (hue ~220). A pure grey interface reads
+ * as cheap on modern displays; a faint cool cast reads as considered, and it
+ * lets a club's colour — which is almost always saturated — sit on top without
+ * fighting the chrome.
+ */
+
+@import "tailwindcss";
+
+/* Tailwind scans the app that imports this file, and an app cannot see into a
+ * workspace package: it is reached through a node_modules symlink, which
+ * auto-detection skips. Without this, any utility used *only* by a component in
+ * here is silently never generated — the class stays on the element and simply
+ * does nothing, which is how a centred dialog ends up pinned to the left edge.
+ * The package declares its own sources so every consumer gets them. */
+@source "./**/*.{ts,tsx}";
+
+@theme {
+  /* --- spacing: 4px base ------------------------------------------------ */
+  --spacing: 0.25rem;
+
+  /* --- radius ----------------------------------------------------------- */
+  /* Small radii on controls, larger on containers. The difference is what
+     makes a card read as a surface and a button as an object on it. */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* --- type ------------------------------------------------------------- */
+  --font-sans:
+    "Inter var", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  --text-xs: 0.75rem;      --text-xs--line-height: 1.0625rem;
+  --text-sm: 0.8125rem;    --text-sm--line-height: 1.25rem;   /* 13px: admin default */
+  --text-base: 0.875rem;   --text-base--line-height: 1.375rem;
+  --text-lg: 1rem;         --text-lg--line-height: 1.5rem;
+  --text-xl: 1.1875rem;    --text-xl--line-height: 1.625rem;
+  --text-2xl: 1.5rem;      --text-2xl--line-height: 1.875rem;
+  --text-3xl: 1.875rem;    --text-3xl--line-height: 2.25rem;
+  /* Display sizes exist for one job: the big numbers on a dashboard. They are
+     tightly tracked, because large text at default tracking looks loose. */
+  --text-4xl: 2.5rem;      --text-4xl--line-height: 2.75rem;
+  --text-5xl: 3.25rem;     --text-5xl--line-height: 3.375rem;
+
+  /* --- elevation -------------------------------------------------------- */
+  /* Four steps, each a hairline plus a soft spread. The hairline is what keeps
+     a surface legible in dark mode, where a pure shadow disappears. */
+  --shadow-xs: 0 1px 2px 0 rgb(9 14 24 / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(9 14 24 / 0.05), 0 1px 3px 0 rgb(9 14 24 / 0.06);
+  --shadow-md: 0 4px 12px -2px rgb(9 14 24 / 0.08), 0 2px 6px -2px rgb(9 14 24 / 0.05);
+  --shadow-lg: 0 12px 32px -8px rgb(9 14 24 / 0.14), 0 4px 12px -4px rgb(9 14 24 / 0.08);
+  --shadow-xl: 0 24px 56px -12px rgb(9 14 24 / 0.20), 0 8px 20px -8px rgb(9 14 24 / 0.10);
+
+  /* --- motion ----------------------------------------------------------- */
+  /* One easing for entrances, one for exits, one duration scale. Interfaces
+     look expensive when everything moves at the same speed and curve. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 280ms;
+}
+
+:root {
+  color-scheme: light;
+
+  /* --- neutral: page → surface → raised --------------------------------- */
+  --bg: #f6f7f9;
+  --bg-subtle: #f0f2f5;
+  --bg-muted: #e8ebf0;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f6f7f9;
+  --surface-hover: #f4f6f9;
+  --surface-active: #eceff4;
+
+  --border: #e3e7ed;
+  --border-strong: #c9d0da;
+  --border-subtle: #edf0f4;
+
+  --text: #0d1220;
+  --text-secondary: #59616f;
+  --text-tertiary: #868e9d;
+  --text-disabled: #b0b7c2;
+  --text-inverse: #ffffff;
+
+  /* --- semantic --------------------------------------------------------- */
+  --success: #04724d;
+  --success-bg: #e4f5ec;
+  --success-border: #b6e2cb;
+  --warning: #8a5300;
+  --warning-bg: #fdf1de;
+  --warning-border: #f0d5a4;
+  --danger: #bb1f2f;
+  --danger-bg: #fdeaec;
+  --danger-border: #f5c2c7;
+  --info: #17549f;
+  --info-bg: #e8f0fc;
+  --info-border: #bcd3f4;
+
+  /* --- brand: overridden per club at runtime ---------------------------- */
+  --brand: #1f4b99;
+  --brand-hover: #173a78;
+  --brand-contrast: #ffffff;
+  --brand-subtle: #eaf0fa;
+  --brand-border: #c6d7f0;
+  /* Text-safe variant, derived at upload time when the true brand colour
+     fails 4.5:1. A club's colour must never make its own UI unreadable. */
+  --brand-text: #1f4b99;
+
+  /* The sidebar is its own environment: near-black in both themes, so the
+     club's colour reads as identity against it rather than as decoration. */
+  --nav-bg: #0d1220;
+  --nav-surface: #171d2c;
+  --nav-border: #232a3b;
+  --nav-text: #e7eaf0;
+  --nav-text-secondary: #8891a3;
+
+  --ring: var(--brand);
+  --overlay: rgb(9 14 24 / 0.45);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #080b12;
+  --bg-subtle: #0c1018;
+  --bg-muted: #161c28;
+  --surface: #0f141d;
+  --surface-raised: #151b26;
+  --surface-sunken: #0a0e15;
+  --surface-hover: #171e2a;
+  --surface-active: #1d2531;
+
+  --border: #212936;
+  --border-strong: #333d4e;
+  --border-subtle: #171e29;
+
+  --text: #e9edf4;
+  --text-secondary: #98a2b3;
+  --text-tertiary: #6b7484;
+  --text-disabled: #495263;
+  --text-inverse: #080b12;
+
+  --success: #3ecf8e;
+  --success-bg: #0a2419;
+  --success-border: #16452f;
+  --warning: #e3a94a;
+  --warning-bg: #251b0c;
+  --warning-border: #453118;
+  --danger: #f4707d;
+  --danger-bg: #2a1116;
+  --danger-border: #4c1f27;
+  --info: #6fa8f7;
+  --info-bg: #0d1c31;
+  --info-border: #1c3459;
+
+  --brand-subtle: #131e33;
+  --brand-border: #23375c;
+
+  --nav-bg: #0a0e15;
+  --nav-surface: #131926;
+  --nav-border: #1d2534;
+  --nav-text: #e9edf4;
+  --nav-text-secondary: #7c8698;
+
+  --overlay: rgb(2 4 8 / 0.65);
+
+  /* Dark surfaces need less shadow and more edge. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 12px 32px -8px rgb(0 0 0 / 0.6);
+  --shadow-xl: 0 24px 56px -12px rgb(0 0 0 / 0.7);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-muted: var(--bg-muted);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-subtle: var(--border-subtle);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inverse: var(--text-inverse);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-info-border: var(--info-border);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-border: var(--brand-border);
+  --color-brand-text: var(--brand-text);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-surface: var(--nav-surface);
+  --color-nav-border: var(--nav-border);
+  --color-nav-text: var(--nav-text);
+  --color-nav-text-secondary: var(--nav-text-secondary);
+  --color-overlay: var(--overlay);
+}
+
+/* --- base ---------------------------------------------------------------- */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings and large numerals get negative tracking. At display sizes the
+   default spacing reads as loose, which is the single most common reason an
+   otherwise clean interface looks unfinished. */
+h1, h2, h3, .display {
+  letter-spacing: -0.018em;
+}
+
+.display {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+/* Numbers in tables and prices must align. Non-aligned digits in a financial
+   column is the fastest way for an operational tool to look amateur. */
+table, .tabular, [data-numeric] {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Scrollbars are part of the interface. The default on Windows is a wide grey
+   slab that breaks an otherwise quiet layout. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border: 3px solid transparent;
+  border-radius: var(--radius-full);
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- shared animations ---------------------------------------------------- */
+
+@keyframes fos-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fos-slide-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fos-scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fos-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.animate-fade-in  { animation: fos-fade-in var(--duration-base) var(--ease-out-soft); }
+.animate-slide-up { animation: fos-slide-up var(--duration-base) var(--ease-out-soft); }
+.animate-scale-in { animation: fos-scale-in var(--duration-fast) var(--ease-out-soft); }

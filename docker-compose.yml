@@ -1,0 +1,238 @@
+name: football-os
+
+x-api-base: &api-base
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+    target: dev
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql+asyncpg://app_runtime:${POSTGRES_APP_PASSWORD}@postgres:5432/footbola
+    DATABASE_MIGRATOR_URL: postgresql+psycopg://app_migrator:${POSTGRES_MIGRATOR_PASSWORD}@postgres:5432/footbola
+    DATABASE_PLATFORM_URL: postgresql+asyncpg://app_platform:${POSTGRES_PLATFORM_PASSWORD}@postgres:5432/footbola
+    REDIS_URL: redis://redis:6379/0
+    OIDC_ISSUER: http://keycloak:8080/realms/football-os
+    OIDC_PUBLIC_ISSUER: http://auth.footbola.localhost/realms/football-os
+    SMTP_HOST: mailpit
+    SMTP_PORT: "1025"
+    S3_ENDPOINT_URL: http://minio:9000
+  volumes:
+    - ./backend:/app
+    # The shared message catalogues, read-only. `tests/i18n` compares them
+    # against the backend's locale registry, so the two can never drift into
+    # a tenant configured for a language whose interface does not exist.
+    - ./packages/i18n:/packages/i18n:ro
+    - api-venv:/app/.venv
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+
+services:
+  # Routes by hostname and, in production, issues a certificate per club domain
+  # on demand. See infrastructure/docker/caddy/Caddyfile.production.
+  proxy:
+    image: caddy:2.9-alpine
+    ports:
+      - "80:80"
+      - "${CADDY_ADMIN_PORT:-2019}:2019"
+    volumes:
+      - ./infrastructure/docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2019/config/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: footbola
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
+      MIGRATOR_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD}
+      PLATFORM_PASSWORD: ${POSTGRES_PLATFORM_PASSWORD}
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    ports:
+      # Host ports are configurable so the stack coexists with other projects.
+      - "${POSTGRES_HOST_PORT:-5442}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d footbola"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "${REDIS_HOST_PORT:-6389}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm --http-relative-path=/
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_HOSTNAME: http://auth.footbola.localhost
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./infrastructure/docker/keycloak/realm-dev.json:/opt/keycloak/data/import/realm-dev.json:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q 'UP' <&3"
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    environment:
+      MP_MAX_MESSAGES: "5000"
+
+  # Runs migrations + reference/demo seed once, then exits.
+  init:
+    <<: *api-base
+    command: ["/app/scripts/init.sh"]
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      keycloak: { condition: service_healthy }
+
+  api:
+    <<: *api-base
+    command:
+      ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "5678:5678"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      init: { condition: service_completed_successfully }
+
+  # Dispatches the transactional outbox and runs periodic maintenance.
+  # A separate deployable from the API so event throughput and request
+  # throughput scale independently. See app/events/runner.py for why Celery is
+  # not here yet.
+  outbox-relay:
+    <<: *api-base
+    command: ["python", "-m", "app.events.runner"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      init: { condition: service_completed_successfully }
+
+  feed-scheduler:
+    <<: *api-base
+    command: ["python", "-m", "app.integrations.scheduler"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      init: { condition: service_completed_successfully }
+
+  public-web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/node/Dockerfile
+      target: dev
+    command: ["pnpm", "--filter", "@footbola/public-web", "dev"]
+    environment:
+      # Server-side calls stay on the internal network; the browser never needs
+      # to reach the API directly for public pages.
+      API_INTERNAL_URL: http://api:8000
+      NEXT_PUBLIC_API_URL: http://api.footbola.localhost
+      REDIS_URL: redis://redis:6379/1
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-dev-only-revalidate-secret}
+      # Where the club's own staff sign in. Rendered in every site footer,
+      # because staff arrive at the club's address, not the platform's.
+      NEXT_PUBLIC_ADMIN_URL: ${ADMIN_URL:-http://footbola.localhost/signin}
+      # Supporter sign-in. Two issuers, deliberately: the browser is sent to the
+      # public one, and the code-for-token exchange never leaves the network.
+      OIDC_ISSUER: http://keycloak:8080/realms/football-os
+      OIDC_PUBLIC_ISSUER: http://auth.footbola.localhost/realms/football-os
+      SUPPORTER_CLIENT_ID: supporter-web
+    volumes:
+      - ./apps:/repo/apps
+      - ./packages:/repo/packages
+      - node-modules:/repo/node_modules
+      - public-node-modules:/repo/apps/public-web/node_modules
+      - public-next-cache:/repo/apps/public-web/.next
+      - ui-node-modules:/repo/packages/ui/node_modules
+      - api-client-node-modules:/repo/packages/api-client/node_modules
+    depends_on:
+      api: { condition: service_started }
+
+  admin-web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/node/Dockerfile
+      target: dev
+      args:
+        APP_DIR: apps/admin-web
+    command: ["pnpm", "--filter", "@footbola/admin-web", "dev"]
+    environment:
+      VITE_API_URL: http://api.footbola.localhost
+      VITE_OIDC_ISSUER: http://auth.footbola.localhost/realms/football-os
+      VITE_OIDC_CLIENT_ID: admin-web
+    volumes:
+      - ./apps:/repo/apps
+      - ./packages:/repo/packages
+      # Source is bind-mounted for hot reload, but each package's node_modules
+      # must stay inside the container: pnpm links workspace deps from there,
+      # and the bind mount would otherwise hide them behind the host directory.
+      - node-modules:/repo/node_modules
+      - admin-node-modules:/repo/apps/admin-web/node_modules
+      - ui-node-modules:/repo/packages/ui/node_modules
+      - api-client-node-modules:/repo/packages/api-client/node_modules
+
+volumes:
+  caddy-data:
+  caddy-config:
+  postgres-data:
+  redis-data:
+  minio-data:
+  api-venv:
+  node-modules:
+  admin-node-modules:
+  public-node-modules:
+  public-next-cache:
+  ui-node-modules:
+  api-client-node-modules:
+  geoip-data:

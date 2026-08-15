@@ -1,0 +1,122 @@
+[project]
+name = "football-os-backend"
+version = "0.1.0"
+description = "Football Club OS — modular monolith backend"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.6",
+    "uvicorn[standard]>=0.34.0",
+    "pydantic>=2.10.4",
+    "pydantic-settings>=2.7.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "psycopg[binary]>=3.2.3",
+    "alembic>=1.14.0",
+    "redis>=5.2.1",
+    "httpx>=0.28.1",
+    "pyjwt[crypto]>=2.10.1",
+    "structlog>=24.4.0",
+    "uuid-utils>=0.10.0",
+    "python-multipart>=0.0.20",
+    "email-validator>=2.2.0",
+    # The writing assistant. Imported lazily inside the provider so a
+    # deployment without a key never touches it.
+    "anthropic>=0.75.0",
+    # Object storage and image validation for club media (crests, hero
+    # images, partner logos).
+    "aioboto3>=13.2.0",
+    "pillow>=11.0.0",
+    # Reading the MaxMind-format city database used by analytics. Imported
+    # lazily, so a deployment without the data file never loads it.
+    "geoip2>=4.8.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.4",
+    "mypy>=1.14.0",
+    "debugpy>=1.8.11",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 96
+target-version = "py312"
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",      # pycodestyle, pyflakes
+    "I",                 # isort
+    "N",                 # pep8-naming
+    "UP",                # pyupgrade
+    "B",                 # bugbear
+    "C4",                # comprehensions
+    "SIM",               # simplify
+    "TID",               # tidy imports
+    "RUF",
+]
+ignore = [
+    "B008",   # FastAPI Depends() in defaults is the documented idiom
+    # Domain exceptions are named after the condition, not suffixed with
+    # "Error": `raise TicketAlreadyUsed()` reads as the domain rule it enforces,
+    # and these names are part of the agreed error contract
+    # (docs/architecture/12-api-conventions.md §5).
+    "N818",
+    # `from sqlalchemy.dialects.postgresql import UUID as PgUUID` disambiguates
+    # the column type from `uuid.UUID`. The alias is a class, not a constant.
+    "N811",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/*" = ["E501"]
+"tests/*" = ["S101"]
+# Demo seeds are prose in three languages. Wrapping sample article copy to 96
+# columns makes it harder to read, not easier.
+"app/platform/seeds/demo.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+disallow_untyped_decorators = false
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = ["uuid_utils.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests", "app"]
+python_files = ["test_*.py"]
+addopts = "-q --strict-markers"
+markers = [
+    "isolation: tenant isolation guarantees",
+    "permissions: authorization matrix",
+    "concurrency: concurrent access invariants",
+    "events: domain events and the outbox",
+    "audit: audit trail and redaction",
+    "entitlements: plan-driven feature access",
+    "branding: club design, colours and host resolution",
+    "cms: articles, translations and the publishing workflow",
+    "ai: the writing assistant, its gate and its meter",
+    "media: uploads, image validation and storage",
+    "i18n: supported languages and translation completeness",
+    "identity: sign-up, slugs and account creation",
+    "competitions: fixtures, results and league tables",
+    "teams: squads, squad editing and player registrations",
+    "commerce: the club shop, baskets and orders",
+    "fans: supporter accounts and what they can see",
+    "staff: staff logins and the roles they are given",
+    "sports: the sport registry and what differs between team sports",
+    "marketing: email templates, campaigns and consent",
+    "platform: the super-admin console",
+    "integrations: outbound providers such as API-Football",
+]

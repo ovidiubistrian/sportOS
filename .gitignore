@@ -1,0 +1,37 @@
+.env
+.env.local
+*.local
+
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+*.tsbuildinfo
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+
+infrastructure/docker/traefik/certs/*
+!infrastructure/docker/traefik/certs/.gitkeep
+
+playwright-report/
+test-results/
+
+# The GeoIP city database: 124MB of third-party data, refreshed monthly, and
+# larger than GitHub will accept. It belongs in the Docker volume the compose
+# file mounts at /app/data — fetch it with scripts/fetch_geoip.py.
+backend/data/

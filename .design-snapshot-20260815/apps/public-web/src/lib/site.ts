@@ -1,0 +1,257 @@
+import { headers } from "next/headers";
+import { cache } from "react";
+
+/**
+ * Club resolution.
+ *
+ * One deployment serves every club site. The club is resolved from the Host
+ * header on each request — an unknown host 404s and never falls back to a
+ * default club, because serving one club's content on another's domain is the
+ * worst failure this app can have.
+ *
+ * Calls go to the API over the internal network. The browser never talks to
+ * the API for public pages, so a club site works with no CORS configuration
+ * and no public API surface.
+ */
+
+const API = process.env.API_INTERNAL_URL ?? "http://api:8000";
+
+export type SiteTemplate = "CLASSIC" | "BOLD" | "COMPACT" | "EDITORIAL";
+
+export interface Branding {
+  template: SiteTemplate;
+  color_mode: "LIGHT" | "DARK" | "AUTO";
+  color_primary: string;
+  color_secondary: string | null;
+  color_accent: string | null;
+  tagline: string | null;
+  social: Record<string, string>;
+  crest_url: string | null;
+  crest_alt: string | null;
+  hero_url: string | null;
+  hero_alt: string | null;
+  announcement: string | null;
+  tickets_url: string | null;
+  tickets_label: string | null;
+  palette: Record<string, string>;
+}
+
+export interface Site {
+  club_id: string;
+  slug: string;
+  name: string;
+  short_name: string;
+  founded_year: number | null;
+  country_code: string;
+  locale: string;
+  /** Every language this club publishes in. */
+  locales: string[];
+  timezone: string;
+  branding: Branding;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  code: string;
+  age_group: string | null;
+  level: string;
+  is_academy: boolean;
+}
+
+export type Block =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; level: 2 | 3; text: string }
+  | { type: "quote"; text: string; attribution?: string | null }
+  | { type: "list"; ordered: boolean; items: string[] };
+
+export interface ArticleSummary {
+  id: string;
+  slug: string;
+  locale: string;
+  title: string;
+  excerpt: string | null;
+  published_at: string | null;
+  is_pinned: boolean;
+  cover_url: string | null;
+}
+
+export interface Article extends ArticleSummary {
+  body: Block[];
+  seo_title: string | null;
+  seo_description: string | null;
+  served_locale_fallback: boolean;
+}
+
+export interface SquadPlayer {
+  id: string;
+  name: string;
+  shirt_number: number | null;
+  position: string | null;
+  photo_url: string | null;
+}
+
+async function currentHost(): Promise<string> {
+  const incoming = await headers();
+  return (
+    incoming.get("x-forwarded-host") ?? incoming.get("host") ?? "localhost"
+  );
+}
+
+async function fetchPublic<T>(path: string, revalidate: number): Promise<T | null> {
+  const host = await currentHost();
+  const response = await fetch(`${API}/api/v1/public${path}`, {
+    // The API resolves the club from this header, exactly as it would from a
+    // direct browser request.
+    headers: { "X-Forwarded-Host": host },
+    next: { revalidate, tags: [`site:${host}`] },
+  });
+
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`public API ${path} failed: ${response.status}`);
+  }
+  return (await response.json()) as T;
+}
+
+/** Deduplicated per request: layout and page both need the site. */
+export const getSite = cache(async (): Promise<Site | null> =>
+  fetchPublic<Site>("/site", 60),
+);
+
+export const getTeams = cache(async (): Promise<Team[]> =>
+  (await fetchPublic<Team[]>("/teams", 120)) ?? [],
+);
+
+export const getSquad = cache(
+  async (teamId: string): Promise<SquadPlayer[]> =>
+    (await fetchPublic<SquadPlayer[]>(`/teams/${teamId}/squad`, 120)) ?? [],
+);
+
+export const getNews = cache(
+  async (limit = 12): Promise<ArticleSummary[]> =>
+    (await fetchPublic<ArticleSummary[]>(`/news?limit=${limit}`, 120)) ?? [],
+);
+
+export const getArticle = cache(
+  async (slug: string): Promise<Article | null> =>
+    fetchPublic<Article>(`/news/${encodeURIComponent(slug)}`, 120),
+);
+
+/** Dates render in the club's locale and time zone, never the server's. */
+export function formatDate(iso: string | null, site: Site): string {
+  if (!iso) return "";
+  return new Intl.DateTimeFormat(site.locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: site.timezone,
+  }).format(new Date(iso));
+}
+
+/**
+ * Brand tokens as inline custom properties.
+ *
+ * The palette is computed server-side — including the contrast-corrected text
+ * variants — so the admin shell and the public site are themed from identical
+ * maths, and a club never sees two different versions of its own blue.
+ */
+export function paletteToStyle(branding: Branding): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(branding.palette).filter(([key]) => key.startsWith("--")),
+  );
+}
+
+// --- Fixtures and table ------------------------------------------------------
+
+export interface PublicClubRef {
+  name: string;
+  short_name: string;
+  crest_url: string | null;
+}
+
+export interface PublicMatch {
+  id: string;
+  competition: string;
+  round_label: string | null;
+  home: PublicClubRef;
+  away: PublicClubRef;
+  kickoff_at: string | null;
+  /** False when only the date is known — the page then says so. */
+  kickoff_is_confirmed: boolean;
+  venue_name: string | null;
+  status: string;
+  home_score: number | null;
+  away_score: number | null;
+  ticket_url: string | null;
+  is_home: boolean;
+}
+
+export interface PublicTableRow {
+  position: number;
+  club: PublicClubRef;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goal_difference: number;
+  points: number;
+  form: string[];
+  /** Marked by the API, so a template highlights the club without matching names. */
+  is_us: boolean;
+}
+
+export async function getMatches(upcoming = true, limit = 4): Promise<PublicMatch[]> {
+  // Short cache: a kick-off time can move on the morning of the match, and the
+  // person checking is the one it matters to.
+  return (
+    (await fetchPublic<PublicMatch[]>(`/matches?upcoming=${upcoming}&limit=${limit}`, 60)) ??
+    []
+  );
+}
+
+export async function getTable(): Promise<PublicTableRow[]> {
+  return (await fetchPublic<PublicTableRow[]>("/table", 300)) ?? [];
+}
+
+/* --- shop ------------------------------------------------------------------ */
+
+export interface ShopVariant {
+  id: string;
+  label: string;
+  stock: number;
+}
+
+export interface ShopProduct {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  price_minor: number;
+  currency: string;
+  cover_url: string | null;
+  variants: ShopVariant[];
+}
+
+export interface BasketLine {
+  variant_id: string;
+  product_name: string;
+  variant_label: string;
+  unit_price_minor: number;
+  quantity: number;
+  total_minor: number;
+  cover_url: string | null;
+}
+
+export interface Basket {
+  token: string;
+  currency: string;
+  lines: BasketLine[];
+  total_minor: number;
+}
+
+/** Short revalidate: a stock count that lies is worse than a slower page. */
+export async function getShop(): Promise<ShopProduct[]> {
+  return (await fetchPublic<ShopProduct[]>("/shop", 30)) ?? [];
+}
+
