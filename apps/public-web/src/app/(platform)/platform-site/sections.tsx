@@ -41,8 +41,18 @@ const stroke = {
 
 export const MODULES: { title: string; body: string; icon: ReactNode }[] = [
   {
+    title: "The club website",
+    body: "Four designs, your colours and your crest. News, squads, fixtures, the league table, the club's honours and a footer you fill in yourself. Live on the first day, on your own address.",
+    icon: (
+      <Icon>
+        <rect x="3" y="4" width="18" height="16" rx="2" {...stroke} />
+        <path d="M3 9h18M8 4v5" {...stroke} />
+      </Icon>
+    ),
+  },
+  {
     title: "Squads and players",
-    body: "One player record with registrations, shirt numbers, documents and guardians. A coach sees their own team; nobody sees more than they should.",
+    body: "One player record with registrations, shirt numbers, positions and photographs. A coach sees their own team and nobody sees more than they should. Coaching staff are named and shown on the site.",
     icon: (
       <Icon>
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" {...stroke} />
@@ -52,52 +62,42 @@ export const MODULES: { title: string; body: string; icon: ReactNode }[] = [
     ),
   },
   {
-    title: "Academy and training",
-    body: "Age groups, registrations, session plans and attendance. The register is taken on a phone at the side of the pitch, not typed up on Sunday night.",
-    icon: (
-      <Icon>
-        <path d="M3 7l9-4 9 4-9 4-9-4Z" {...stroke} />
-        <path d="M7 10v5c0 1.7 2.2 3 5 3s5-1.3 5-3v-5" {...stroke} />
-      </Icon>
-    ),
-  },
-  {
     title: "Matchday",
-    body: "Fixtures, squads, results and minutes played. Everything the website needs to be right on Sunday evening without anyone copying it across.",
+    body: "Competitions, fixtures, results and the league table. Connect a league feed and the calendar, scorers, cards and standings fill themselves in — or type them by hand, the way Liga 4 does.",
     icon: (
       <Icon>
         <circle cx="12" cy="12" r="9" {...stroke} />
-        <path d="M12 7.5 15.5 10l-1.3 4h-4.4L8.5 10 12 7.5Z" {...stroke} />
+        <path d="M12 7.5 15.5 10l-1.3 4.1H9.8L8.5 10 12 7.5Z" {...stroke} />
       </Icon>
     ),
   },
   {
-    title: "Club website",
-    body: "Four layouts, your colours, your domain. Squads and fixtures come from the same records your staff already keep, so the site cannot drift out of date.",
+    title: "The club shop",
+    body: "Shirts, scarves and programmes with sizes and stock, a basket that survives a reload, and orders paid at the counter when the supporter collects. No card processing to set up.",
     icon: (
       <Icon>
-        <circle cx="12" cy="12" r="9" {...stroke} />
-        <path d="M3 12h18M12 3c2.5 2.7 3.8 5.8 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3Z" {...stroke} />
+        <path d="M6 2 4 6v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4H6Z" {...stroke} />
+        <path d="M4 6h16M16 10a4 4 0 0 1-8 0" {...stroke} />
       </Icon>
     ),
   },
   {
-    title: "Newsroom",
-    body: "Match reports, signings and farewells — each starting from the right structure. Publish in every language your club plays in, from one article.",
+    title: "Supporters and email",
+    body: "Supporter accounts with their order history, a newsletter list with consent recorded, and campaigns written in the same editor as your news. One-click unsubscribe, always.",
     icon: (
       <Icon>
-        <path d="M4 5h11a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V5Z" {...stroke} />
-        <path d="M17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5" {...stroke} />
+        <rect x="2" y="4" width="20" height="16" rx="2" {...stroke} />
+        <path d="m2 7 10 6 10-6" {...stroke} />
       </Icon>
     ),
   },
   {
-    title: "Members and money",
-    body: "Membership, academy fees and matchday income against one fan record — so the club knows who supports it and how, in one place.",
+    title: "Who reads it",
+    body: "Visitors, where they came from, what they read, and how many went on to buy — counted without cookies, so there is no consent banner to put in front of your own supporters.",
     icon: (
       <Icon>
-        <rect x="2.5" y="6" width="19" height="12" rx="2.5" {...stroke} />
-        <path d="M2.5 10h19" {...stroke} />
+        <path d="M3 3v18h18" {...stroke} />
+        <path d="M7 15l3.5-4 3 2.5L20 7" {...stroke} />
       </Icon>
     ),
   },

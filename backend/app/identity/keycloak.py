@@ -274,14 +274,22 @@ class KeycloakAdmin:
             return str(found[0]["id"]) if found else None
 
     async def invite_user(
-        self, *, email: str, first_name: str, last_name: str
+        self,
+        *,
+        email: str,
+        first_name: str,
+        last_name: str,
+        temporary_password: str | None = None,
     ) -> CreatedUser:
-        """Create a login with no password and email the person a link.
+        """Create a login, either by invitation link or with a starting password.
 
-        Deliberately different from `create_user`: nobody chooses somebody
-        else's password. The account is created with no credential at all and
-        two pending actions, so the invitee sets their own password on a page
-        the club administrator never sees and cannot replay.
+        The link is the better of the two and stays the default: nobody else
+        ever knows the person's password, and there is nothing to read out over
+        the phone. But a club whose coach has no working email — or who is
+        standing in the room — needs to hand over something that works today,
+        so a starting password is allowed and marked **temporary**: Keycloak
+        forces a change at first sign-in, and what the administrator typed
+        stops being a credential the moment it is used once.
 
         An address the realm already knows is returned rather than refused —
         being invited to a second club is normal, and it is the same person.
@@ -295,15 +303,41 @@ class KeycloakAdmin:
             token = await self._access_token(client)
             headers = {"Authorization": f"Bearer {token}"}
 
-            payload = {
+            payload: dict[str, object] = {
                 "username": email,
                 "email": email,
                 "firstName": first_name,
                 "lastName": last_name,
                 "enabled": True,
-                "emailVerified": False,
-                "requiredActions": ["UPDATE_PASSWORD", "VERIFY_EMAIL"],
+                # Marked verified only on the password path, and only because
+                # the club administrator is vouching for this person in the
+                # room. The realm requires a verified address before anybody
+                # may sign in, so leaving it false here would create an account
+                # that can never be finished — which is the whole case this
+                # path exists for. On the link path the address proves itself.
+                "emailVerified": bool(temporary_password),
+                # Verifying the address is required of somebody who arrives by
+                # link — the link went to that address, so proving it costs
+                # them nothing. It is *not* required of somebody handed a
+                # starting password, because the whole reason for that path is
+                # an address that cannot receive: demanding verification would
+                # make the account impossible to finish setting up.
+                "requiredActions": (
+                    ["UPDATE_PASSWORD"]
+                    if temporary_password
+                    else ["UPDATE_PASSWORD", "VERIFY_EMAIL"]
+                ),
             }
+            if temporary_password:
+                # `temporary: true` is the whole point — Keycloak refuses to let
+                # them past the login screen without setting their own.
+                payload["credentials"] = [
+                    {
+                        "type": "password",
+                        "value": temporary_password,
+                        "temporary": True,
+                    }
+                ]
             response = await client.post(
                 f"{_admin_base()}/users", headers=headers, json=payload
             )
@@ -330,8 +364,13 @@ class KeycloakAdmin:
             if not subject_id:
                 raise IdentityProviderUnavailable()
 
-            await self.send_invitation_email(subject_id)
-            log.info("keycloak_user_invited", subject_id=subject_id)
+            if not temporary_password:
+                await self.send_invitation_email(subject_id)
+            log.info(
+                "keycloak_user_invited",
+                subject_id=subject_id,
+                by_link=not temporary_password,
+            )
             return CreatedUser(subject_id=subject_id, email=email)
 
     async def send_invitation_email(self, subject_id: str) -> None:

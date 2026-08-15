@@ -47,7 +47,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Football Club OS API",
+        title="TeamSport360 API",
         version="1.0.0",
         description=(
             "Multi-tenant API for club, academy, ticketing and fan operations. "

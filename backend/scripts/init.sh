@@ -32,7 +32,7 @@ fi
 
 cat <<'BANNER'
 
-  Football Club OS — development environment ready
+  TeamSport360 — development environment ready
 
     Admin           http://admin.footbola.localhost
     API docs        http://api.footbola.localhost/docs

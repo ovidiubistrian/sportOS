@@ -14,12 +14,16 @@ import { MODULES, Plans } from "./sections";
 
 const FAQ = [
   {
+    q: "Is this only for football?",
+    a: "No. Football, futsal, handball, basketball, volleyball, rugby, ice hockey and water polo — each with its own points rules, positions and match events, because two points for a handball win and three for a football one is not a detail. A club running three sports runs them in one account.",
+  },
+  {
     q: "Do we need someone technical?",
     a: "No. A club sets up its website by picking a template and up to three colours; everything else is filling in what you already know — teams, players, fixtures. There is nothing to install and nothing to host.",
   },
   {
     q: "Can we use our own domain?",
-    a: "Yes. Point your domain at us and the certificate is issued automatically on the first visit. Until then your site is live on a footbola address, so you are never waiting on DNS to get started.",
+    a: "Yes. Point your domain at us and the certificate is issued automatically on the first visit. Until then your site is live on a teamsport360.com address, so you are never waiting on DNS to get started.",
   },
   {
     q: "Who can see medical and safeguarding records?",
@@ -41,11 +45,12 @@ export default function LandingPage() {
       <section className="m-hero">
         <div className="m-shell">
           <span className="m-eyebrow">For clubs and academies</span>
-          <h1>Run the whole club from one place.</h1>
+          <h1>Everything your club does, in one place.</h1>
           <p className="m-lead">
-            Squads, academy registrations, training attendance, matchday and the club
-            website — in one system instead of six spreadsheets and a group chat. Set
-            up in an afternoon, by whoever already does the admin.
+            The website, the squads, the fixtures, the shop and the supporters — one
+            system instead of six spreadsheets and a group chat. Football, handball,
+            basketball, volleyball and more, because a CSM is rarely one sport. Set
+            up in an afternoon by whoever already does the admin.
           </p>
           <div className="m-hero-actions">
             <a className="m-btn m-btn-primary m-btn-lg" href="/signup">
@@ -58,6 +63,20 @@ export default function LandingPage() {
           <p className="m-hero-note">
             No card to start. Your club website is live on the first day.
           </p>
+
+          {/* Real screens, not an illustration of one. A club buying this wants
+              to see what its own site will look like, and a mock-up is the one
+              thing a landing page can show that the product cannot deliver. */}
+          <figure className="m-shot">
+            <img
+              src="/product/club-site.jpg"
+              alt="A club's home page: news, the next fixture and the league table."
+              width={1503}
+              height={812}
+              loading="eager"
+            />
+            <figcaption>A club home page, in the club's own colours.</figcaption>
+          </figure>
         </div>
       </section>
 
@@ -95,10 +114,37 @@ export default function LandingPage() {
             never out of date — because nobody has to remember to update it twice.
           </p>
 
+          <div className="m-shots">
+            <figure className="m-shot">
+              <img
+                src="/product/squads.jpg"
+                alt="The squads page: every team, player counts and the head coach."
+                width={1503}
+                height={812}
+                loading="lazy"
+              />
+              <figcaption>Squads, with the coach and the players' faces.</figcaption>
+            </figure>
+            <figure className="m-shot">
+              <img
+                src="/product/shop.jpg"
+                alt="The club shop with sizes, stock and a basket."
+                width={1503}
+                height={812}
+                loading="lazy"
+              />
+              <figcaption>The club shop — sizes, stock, pay on collection.</figcaption>
+            </figure>
+          </div>
+
           <dl className="m-stats">
             <div className="m-stat">
               <dt>Layouts</dt>
               <dd>4</dd>
+            </div>
+            <div className="m-stat">
+              <dt>Sports supported</dt>
+              <dd>8</dd>
             </div>
             <div className="m-stat">
               <dt>Languages per article</dt>

@@ -101,6 +101,7 @@ TEMPLATES: tuple[RoleTemplate, ...] = (
             "players.document.manage",
             "staff.profile.manage",
             "authz.role.read",
+            "authz.role.grant",
             "authz.role.manage",
             "cms.content.read",
             "cms.content.write",

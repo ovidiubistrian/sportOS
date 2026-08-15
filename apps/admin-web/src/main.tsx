@@ -65,9 +65,9 @@ function SignInScreen({ error }: { error?: Error | null }) {
             aria-hidden
             className="mx-auto mb-5 grid size-12 place-items-center rounded-xl bg-brand text-sm font-bold text-brand-contrast shadow-lg"
           >
-            FOS
+            TS360
           </span>
-          <h1 className="text-2xl font-semibold text-nav-text">Football Club OS</h1>
+          <h1 className="text-2xl font-semibold text-nav-text">TeamSport360</h1>
           <p className="mt-1.5 text-sm text-nav-text-secondary">
             One place to run the club, the academy and the website.
           </p>

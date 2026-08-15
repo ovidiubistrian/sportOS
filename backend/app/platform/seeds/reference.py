@@ -86,15 +86,36 @@ async def seed_reference_data() -> None:
                 role.description = template.description
                 role.scope_level = template.scope_level.name
 
-            # Replace rather than merge: the template is the whole truth for a
-            # system role, so a permission dropped from it is dropped here.
-            await session.execute(
-                delete(RolePermission).where(RolePermission.role_id == role.id)
-            )
-            for key in template.permissions:
-                session.add(
-                    RolePermission(role_id=role.id, permission_key=key)
+            # The template is the whole truth for a system role, so this
+            # reconciles rather than merges: permissions it no longer lists are
+            # removed, and ones it has gained are added.
+            #
+            # Reconciled by difference rather than delete-then-reinsert. The
+            # session defers flushes, so a wholesale delete followed by inserts
+            # of the same keys can reach the database in an order that violates
+            # the primary key — which is exactly what happened the first time a
+            # shipped role gained a permission, and it broke start-up.
+            held = {
+                str(row)
+                for row in await session.scalars(
+                    select(RolePermission.permission_key).where(
+                        RolePermission.role_id == role.id
+                    )
                 )
+            }
+            wanted = set(template.permissions)
+
+            removed = held - wanted
+            if removed:
+                await session.execute(
+                    delete(RolePermission).where(
+                        RolePermission.role_id == role.id,
+                        RolePermission.permission_key.in_(removed),
+                    )
+                )
+            for key in sorted(wanted - held):
+                session.add(RolePermission(role_id=role.id, permission_key=key))
+            await session.flush()
 
         log.info(
             "reference_data_seeded",

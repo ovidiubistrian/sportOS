@@ -71,7 +71,22 @@ CATALOGUE: tuple[Permission, ...] = (
     _p("medical.availability.set", "medical", "Set player availability", (T, C, G)),
     # --- authorization ----------------------------------------------------
     _p("authz.role.read", "authz", "View roles and assignments"),
-    _p("authz.role.manage", "authz", "Grant and revoke roles", (T, C), sensitive=True),
+    # Two permissions, because "add the U15 coach" and "make somebody an
+    # administrator" are not the same act. Staffing a club is ordinary work a
+    # club secretary does on a Tuesday; delegating the power to grant roles is
+    # the classic escalation step, and only that one demands a second factor.
+    #
+    # Requiring step-up for both was the wrong line: a tenant owner can already
+    # delete every player and rewrite the website without one, so a lock on
+    # role-granting alone bought no real safety and cost the club the feature.
+    _p("authz.role.grant", "authz", "Give somebody a scoped role", (T, C)),
+    _p(
+        "authz.role.manage",
+        "authz",
+        "Grant roles that can themselves grant roles",
+        (T, C),
+        sensitive=True,
+    ),
     # --- content ----------------------------------------------------------
     _p("cms.content.read", "cms", "View articles and pages"),
     _p("cms.content.write", "cms", "Write articles and pages"),

@@ -23,6 +23,11 @@ x-api-base: &api-base
     # a tenant configured for a language whose interface does not exist.
     - ./packages/i18n:/packages/i18n:ro
     - api-venv:/app/.venv
+    # The GeoIP city database. A named volume, not a bind mount: it is 124MB of
+    # third-party data refreshed monthly, larger than GitHub will accept, and
+    # it belongs in neither the repository nor an image layer. Fetch it with
+    # `scripts/fetch_geoip.py`; analytics works without it, minus geography.
+    - geoip-data:/app/data
   depends_on:
     postgres: { condition: service_healthy }
     redis: { condition: service_healthy }

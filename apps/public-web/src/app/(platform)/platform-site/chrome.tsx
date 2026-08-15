@@ -18,9 +18,9 @@ export function Header() {
       <div className="m-shell m-header-inner">
         <Link href="/" className="m-logo">
           <span className="m-mark" aria-hidden>
-            FOS
+            TS360
           </span>
-          Football Club OS
+          TeamSport360
         </Link>
 
         <nav className="m-nav" aria-label="Main">
@@ -52,9 +52,9 @@ export function Footer() {
           <div>
             <Link href="/" className="m-logo">
               <span className="m-mark" aria-hidden>
-                FOS
+                TS360
               </span>
-              Football Club OS
+              TeamSport360
             </Link>
             <p style={{ marginTop: "0.875rem", maxWidth: "22rem" }}>
               One system for the club, the academy, the matchday and the website.
@@ -102,7 +102,7 @@ export function Footer() {
         </div>
 
         <div className="m-footer-base">
-          <span>© {year} Football Club OS</span>
+          <span>© {year} TeamSport360</span>
           <span>Built for clubs, not for enterprises.</span>
         </div>
       </div>

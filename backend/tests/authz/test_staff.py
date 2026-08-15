@@ -42,6 +42,34 @@ pytestmark = pytest.mark.staff
 BASE = "/api/v1"
 
 
+def unique_email(prefix: str) -> str:
+    # A domain nobody can receive at: these logins are never signed into.
+    return f"{prefix}-{uuid4().hex[:10]}@staffprobe.example.com"
+
+
+async def _forget(admin_engine: Any, email: str) -> None:
+    """Undo an invitation in both systems."""
+    from app.identity.keycloak import get_admin
+
+    async with admin_engine.begin() as conn:
+        subject = (
+            await conn.execute(
+                text("SELECT subject_id FROM user_account WHERE email = :e"), {"e": email}
+            )
+        ).first()
+        for statement in (
+            "DELETE FROM role_assignment WHERE user_id IN "
+            "(SELECT id FROM user_account WHERE email = :e)",
+            "DELETE FROM person WHERE user_id IN "
+            "(SELECT id FROM user_account WHERE email = :e)",
+            "DELETE FROM user_account WHERE email = :e",
+        ):
+            await conn.execute(text(statement), {"e": email})
+
+    if subject:
+        await get_admin().delete_user(subject[0])
+
+
 def context(
     tenant_id: UUID,
     role_key: str,
@@ -395,45 +423,59 @@ class TestTheRoutes:
             "CONTENT_MANAGER",
         }
 
-    async def test_inviting_somebody_requires_a_second_factor(
+    async def test_staffing_a_club_is_ordinary_work(
+        self,
+        client: httpx.AsyncClient,
+        as_user: Any,
+        demo: dict[str, Any],
+        admin_engine: Any,
+    ) -> None:
+        """A club secretary adding the news editor needs no second factor.
+
+        Requiring one made the feature unusable: an owner can already delete
+        every player without stepping up, so a lock on this alone bought no
+        safety and cost the club its own staffing screen.
+        """
+        email = unique_email("ordinary")
+        try:
+            response = await client.post(
+                f"{BASE}/staff",
+                headers=as_user("owner"),
+                json={
+                    "email": email,
+                    "first_name": "Ana",
+                    "last_name": "Editor",
+                    "role": "CONTENT_MANAGER",
+                    "club_id": demo["club_id"],
+                },
+            )
+            assert response.status_code == 201, response.text
+            assert response.json()["role_key"] == "CONTENT_MANAGER"
+        finally:
+            await _forget(admin_engine, email)
+
+    async def test_making_somebody_an_administrator_still_does(
         self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
     ) -> None:
-        """Granting access is exactly the action worth a second factor.
+        """Delegation is the step that matters, and it is the one held back.
 
-        Nothing is created on the way to this refusal — the escalation check
-        and the identity provider both sit behind it.
+        CLUB_ADMIN carries `authz.role.manage`, so granting it hands over the
+        power to hand out roles — the classic escalation step. Nothing is
+        created on the way to this refusal.
         """
         response = await client.post(
             f"{BASE}/staff",
             headers=as_user("owner"),
             json={
-                "email": f"probe-{uuid4().hex[:8]}@staffprobe.example.com",
-                "first_name": "Ana",
-                "last_name": "Editor",
-                "role": "CONTENT_MANAGER",
+                "email": unique_email("delegate"),
+                "first_name": "Nou",
+                "last_name": "Administrator",
+                "role": "CLUB_ADMIN",
                 "club_id": demo["club_id"],
             },
         )
         assert response.status_code == 401
         assert response.json()["code"] == "STEP_UP_REQUIRED"
-
-    async def test_every_mutating_route_is_behind_the_same_door(
-        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
-    ) -> None:
-        somebody = demo["u15_player"]["id"]
-        calls = [
-            client.put(
-                f"{BASE}/staff/{somebody}/role",
-                headers=as_user("owner"),
-                json={"role": "CONTENT_MANAGER", "club_id": demo["club_id"]},
-            ),
-            client.post(f"{BASE}/staff/{somebody}/invitation", headers=as_user("owner")),
-            client.delete(f"{BASE}/staff/{somebody}", headers=as_user("owner")),
-        ]
-        for call in calls:
-            response = await call
-            assert response.status_code == 401
-            assert response.json()["code"] == "STEP_UP_REQUIRED"
 
     async def test_a_coach_cannot_even_read_the_staff_list(
         self, client: httpx.AsyncClient, as_user: Any

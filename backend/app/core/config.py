@@ -141,7 +141,7 @@ class Settings(BaseSettings):
     mailgun_base_url: str = "https://api.eu.mailgun.net/v3"
 
     # What a club's mail says it is from, until the club sets its own.
-    email_from_name: str = "Football Club OS"
+    email_from_name: str = "TeamSport360"
     email_from_address: str = "no-reply@footbola.local"
 
     s3_endpoint_url: str = "http://minio:9000"

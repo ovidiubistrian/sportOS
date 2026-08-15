@@ -39,6 +39,14 @@ export interface SquadLabels {
   staffRole: (role: string) => string;
 }
 
+/** Who may stand in for the head coach. A president may not. */
+const COACHING_ROLES = new Set([
+  "HEAD_COACH",
+  "ASSISTANT_COACH",
+  "GOALKEEPING_COACH",
+  "FITNESS_COACH",
+]);
+
 function faces(roster: SquadPlayer[]): SquadPlayer[] {
   return roster.filter((player) => player.photo_url);
 }
@@ -132,18 +140,22 @@ function Manager({
   labels: SquadLabels;
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-4">
       <span
-        className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full text-sm font-bold"
+        className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-full text-base font-bold sm:size-20"
         style={{
           background: "color-mix(in srgb, var(--brand) 14%, transparent)",
           color: "var(--brand-text)",
+          // A hairline ring in the club's colour: it separates a portrait from
+          // whatever background it was shot against, which is most of what
+          // makes a supplied photograph look deliberate.
+          boxShadow: "0 0 0 2px color-mix(in srgb, var(--brand) 30%, transparent)",
         }}
       >
         {person.photo_url ? (
           <img
             src={person.photo_url}
-            alt=""
+            alt={person.name}
             className="h-full w-full object-cover object-top"
           />
         ) : (
@@ -157,10 +169,12 @@ function Manager({
         )}
       </span>
       <span className="min-w-0">
-        <span className="block text-[11px] font-bold tracking-[0.16em] text-ink-muted uppercase">
+        <span className="block text-[11px] font-bold tracking-[0.18em] text-brand-text uppercase">
           {person.title ?? labels.staffRole(person.role)}
         </span>
-        <span className="block truncate text-base font-semibold">{person.name}</span>
+        <span className="font-display mt-1 block truncate text-xl leading-tight font-bold tracking-tight sm:text-2xl">
+          {person.name}
+        </span>
       </span>
     </div>
   );
@@ -180,8 +194,13 @@ function Feature({
   labels: SquadLabels;
   eyebrow: string;
 }) {
-  // The head coach if there is one, otherwise whoever the club put first.
-  const manager = staff.find((member) => member.role === "HEAD_COACH") ?? staff[0];
+  // The coach, and only a coach. Falling back to "whoever the club listed
+  // first" put the press officer in the manager's place — which is not a
+  // detail, it is the wrong person on the club's shop window. A team with no
+  // coach entered shows no coach.
+  const manager =
+    staff.find((member) => member.role === "HEAD_COACH") ??
+    staff.find((member) => COACHING_ROLES.has(member.role));
   // Photographed players first, so the mosaic leads with faces rather than
   // with whoever happens to wear number 1.
   const tiles = [...faces(roster), ...roster.filter((p) => !p.photo_url)].slice(0, 20);

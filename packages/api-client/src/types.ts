@@ -747,6 +747,12 @@ export interface StaffInvite {
   role: string;
   club_id?: string | null;
   team_id?: string | null;
+  /**
+   * Optional. Left empty, the person receives an invitation link and picks
+   * their own password. Supplied, it is a starting password they are forced
+   * to change the first time they sign in.
+   */
+  temporary_password?: string | null;
 }
 
 /** Somebody on a team's touchline, as the club presents them. */

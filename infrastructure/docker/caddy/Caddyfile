@@ -46,7 +46,10 @@
 http://footbola.localhost {
 	import common
 
-	@marketing path / /pricing /pricing/* /_next/* /__nextjs* /favicon.ico
+	# `/product/*` is the marketing page's own screenshots. Without it they fall
+	# into the admin bucket below and come back as the SPA's HTML shell, which
+	# renders as a broken image rather than as a 404 anybody would notice.
+	@marketing path / /pricing /pricing/* /product/* /_next/* /__nextjs* /favicon.ico
 	handle @marketing {
 		reverse_proxy public-web:3000 {
 			header_up X-Forwarded-Host {host}

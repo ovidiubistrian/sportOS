@@ -8,7 +8,7 @@ answer.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -16,13 +16,14 @@ from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import select
 
-from app.api.deps import Db, Requires
+from app.api.deps import STEP_UP_MAX_AGE, Db, Requires
 from app.audit.service import AuditService
 from app.authz import staff_service as staff
 from app.authz.models import Role, RoleAssignment
 from app.authz.role_templates import BY_KEY_TEMPLATE
+from app.authz.scope import Scope
 from app.core.context import RequestContext
-from app.core.errors import NotFound
+from app.core.errors import NotFound, PermissionDenied, StepUpRequired
 from app.identity.keycloak import get_admin
 from app.identity.models import Person, UserAccount
 from app.teams.models import Team
@@ -31,7 +32,33 @@ from app.tenants.models import Club
 router = APIRouter(tags=["staff"])
 
 READ = "authz.role.read"
-MANAGE = "authz.role.manage"
+# Staffing a club. The narrower `authz.role.manage` — which is sensitive and
+# does demand a second factor — is checked separately, and only when the role
+# being handed out could itself hand out roles.
+MANAGE = "authz.role.grant"
+
+
+def _guard_delegation(ctx: RequestContext, role_key: str, scope: Scope) -> None:
+    """Stop somebody quietly minting another administrator.
+
+    Adding a coach is ordinary club work. Giving somebody the power to add
+    coaches is delegation, and that is the step worth a second factor — so it
+    is checked here rather than by gating the whole screen, which only meant a
+    club could not staff itself at all.
+    """
+    template = BY_KEY_TEMPLATE.get(role_key)
+    if template is None or "authz.role.manage" not in template.permissions:
+        return
+
+    permissions = ctx.permissions
+    if permissions is None or not permissions.allows("authz.role.manage", scope):
+        raise PermissionDenied(permission="authz.role.manage", scope=str(scope))
+
+    principal = ctx.actor
+    if not principal.has_second_factor:
+        raise StepUpRequired("Making somebody an administrator requires two-factor.")
+    if principal.auth_time is None or datetime.now(UTC) - principal.auth_time > STEP_UP_MAX_AGE:
+        raise StepUpRequired("Please re-authenticate to continue.")
 
 
 class RoleOut(BaseModel):
@@ -72,6 +99,11 @@ class InviteIn(BaseModel):
     role: str = Field(min_length=2, max_length=48)
     club_id: UUID | None = None
     team_id: UUID | None = None
+    # Optional. Left empty, the person gets an invitation link and chooses
+    # their own — which is the better path and the default. Supplied, it is a
+    # starting password they are forced to change at first sign-in, for the
+    # coach who has no working email or is standing in the room.
+    temporary_password: str | None = Field(default=None, min_length=10, max_length=128)
 
 
 class ChangeRoleIn(BaseModel):
@@ -210,6 +242,7 @@ async def invite(
     should not leave an invitation email behind.
     """
     scope = staff.scope_for(payload.role, ctx.tenant, payload.club_id, payload.team_id)
+    _guard_delegation(ctx, payload.role, scope)
     if not staff.may_grant(ctx, payload.role, scope):
         from app.core.errors import ValidationFailed
 
@@ -235,6 +268,7 @@ async def invite(
         email=str(payload.email),
         first_name=payload.first_name,
         last_name=payload.last_name,
+        temporary_password=payload.temporary_password,
     )
 
     account = await db.scalar(
@@ -313,6 +347,7 @@ async def change_role(
         raise NotFound("That person does not work here.")
 
     scope = staff.scope_for(payload.role, ctx.tenant, payload.club_id, payload.team_id)
+    _guard_delegation(ctx, payload.role, scope)
     if not staff.may_grant(ctx, payload.role, scope):
         from app.core.errors import ValidationFailed
 

@@ -22,6 +22,9 @@ const PLATFORM_HOST = (process.env.NEXT_PUBLIC_PLATFORM_HOST ?? "footbola.localh
 
 const MARKETING_ROOT = "/platform-site";
 
+/** Paths served straight from `public/`, whichever domain asked for them. */
+const STATIC_ROOTS = ["/product/", "/fonts/", "/icons/"];
+
 function hostOf(request: NextRequest): string {
   // X-Forwarded-Host is set by the proxy; Host is the fallback for direct hits.
   const raw =
@@ -32,6 +35,14 @@ function hostOf(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = hostOf(request);
+
+  // Static files in `public/` belong to no host and must not be rewritten into
+  // a route group — a rewritten screenshot comes back as HTML with the right
+  // status code, which renders as a broken image and looks like a missing
+  // file rather than a routing bug.
+  if (STATIC_ROOTS.some((root) => pathname.startsWith(root))) {
+    return NextResponse.next();
+  }
 
   if (host === PLATFORM_HOST) {
     if (pathname.startsWith(MARKETING_ROOT)) return NextResponse.next();

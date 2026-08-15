@@ -1,5 +1,6 @@
 import {
   TEAM_STAFF_ROLES,
+  useInviteStaff,
   useAddTeamStaff,
   useRemoveTeamStaff,
   useStaff,
@@ -198,14 +199,167 @@ function AccountRow({ member }: { member: StaffMember }) {
   );
 }
 
+/**
+ * Giving somebody a login.
+ *
+ * The role list comes from the server already marked with what this caller may
+ * hand out, so a club administrator is never offered a role that will be
+ * refused. Two ways in: an invitation link, which is the default and the
+ * better one, or a starting password for the coach who has no working email —
+ * marked temporary, so it stops being a credential the moment it is used.
+ */
+function InviteForm({ clubId }: { clubId: string }) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const teams = useTeams();
+  const [teamId, setTeamId] = useState("");
+  // Re-asked once a team is chosen: a team-scoped role cannot be judged
+  // without one, and asking without it made Coach look forbidden when it was
+  // only unanswerable.
+  const roles = useStaffRoles(clubId, teamId || undefined);
+  const invite = useInviteStaff();
+
+  const [first, setFirst] = useState("");
+  const [last, setLast] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("CONTENT_MANAGER");
+  const [password, setPassword] = useState("");
+
+  const chosen = (roles.data ?? []).find((row) => row.key === role);
+  const needsTeam = chosen?.scope_level === "TEAM";
+
+  function submit() {
+    invite.mutate(
+      {
+        email: email.trim(),
+        first_name: first.trim(),
+        last_name: last.trim(),
+        role,
+        club_id: clubId,
+        team_id: needsTeam ? teamId || null : null,
+        temporary_password: password.trim() || null,
+      },
+      {
+        onSuccess: () => {
+          setFirst("");
+          setLast("");
+          setEmail("");
+          setPassword("");
+          toast.success(
+            password.trim()
+              ? t("staff", "invitedWithPassword")
+              : t("staff", "invitedByLink"),
+          );
+        },
+        onError: (error) => toast.error(error.message),
+      },
+    );
+  }
+
+  const ready =
+    first.trim() && last.trim() && email.includes("@") && (!needsTeam || teamId);
+
+  return (
+    <div className="rounded-lg border border-dashed border-border p-4">
+      <p className="text-sm font-medium text-text">{t("staff", "inviteTitle")}</p>
+      <p className="mt-0.5 mb-4 text-xs text-text-secondary">{t("staff", "inviteHint")}</p>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={t("staff", "firstName")}>
+          {(props) => (
+            <Input {...props} value={first} onChange={(e) => setFirst(e.target.value)} />
+          )}
+        </Field>
+        <Field label={t("staff", "lastName")}>
+          {(props) => (
+            <Input {...props} value={last} onChange={(e) => setLast(e.target.value)} />
+          )}
+        </Field>
+        <Field label={t("staff", "email")} className="sm:col-span-2">
+          {(props) => (
+            <Input
+              {...props}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="antrenor@clubul-tau.ro"
+            />
+          )}
+        </Field>
+
+        <Field label={t("staff", "accessRole")} help={chosen?.description}>
+          {(props) => (
+            <Select
+              {...props}
+              value={role}
+              onChange={setRole}
+              options={(roles.data ?? []).map((row) => {
+                const name = t("staff", `role${row.key}` as "roleCOACH");
+                // Three states, not two. A team-scoped role with no team
+                // chosen is not forbidden — it is unanswerable, and saying
+                // "beyond your access" about it was simply wrong.
+                if (row.scope_level === "TEAM" && !teamId) {
+                  return { value: row.key, label: `${name} — ${t("staff", "pickTeamFirst")}` };
+                }
+                return {
+                  value: row.key,
+                  label: row.grantable ? name : `${name} — ${t("staff", "outOfReach")}`,
+                };
+              })}
+            />
+          )}
+        </Field>
+
+        {needsTeam && (
+          <Field label={t("staff", "team")}>
+            {(props) => (
+              <Select
+                {...props}
+                value={teamId}
+                onChange={setTeamId}
+                placeholder={t("staff", "chooseTeam")}
+                options={(teams.data ?? []).map((team) => ({
+                  value: team.id,
+                  label: team.name,
+                }))}
+              />
+            )}
+          </Field>
+        )}
+
+        <Field
+          label={t("staff", "startingPassword")}
+          help={t("staff", "startingPasswordHint")}
+          className="sm:col-span-2"
+        >
+          {(props) => (
+            <Input
+              {...props}
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("staff", "startingPasswordPlaceholder")}
+            />
+          )}
+        </Field>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <Button onClick={submit} loading={invite.isPending} disabled={!ready}>
+          {password.trim() ? t("staff", "createAccount") : t("staff", "sendInvite")}
+        </Button>
+        {chosen && !chosen.grantable && !(chosen.scope_level === "TEAM" && !teamId) && (
+          <span className="text-xs text-warning">{t("staff", "roleOutOfReach")}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AccountsSection() {
   const { t } = useI18n();
   const { club } = useSession();
   const accounts = useStaff();
-  // Scoped to this club, because club-level roles cannot be judged without
-  // one: asking without it listed only the tenant-wide roles and made it look
-  // as though an owner could grant nothing but Finance Manager.
-  const roles = useStaffRoles(club?.id);
 
   return (
     <Section title={t("staff", "accounts")} description={t("staff", "accountsHint")}>
@@ -222,22 +376,7 @@ function AccountsSection() {
           </ul>
         )}
 
-        {/* Inviting somebody is a sensitive action: it needs a second factor,
-            which nobody has enrolled yet. Saying so plainly beats a form that
-            answers every submission with an authentication error. */}
-        <div className="rounded-lg border border-dashed border-border p-4">
-          <p className="text-sm font-medium text-text">{t("staff", "inviteTitle")}</p>
-          <p className="mt-1 text-xs text-text-secondary">{t("staff", "inviteBlocked")}</p>
-          {(roles.data?.length ?? 0) > 0 && (
-            <p className="mt-3 text-xs text-text-tertiary">
-              {t("staff", "inviteRoles")}:{" "}
-              {(roles.data ?? [])
-                .filter((role) => role.grantable)
-                .map((role) => role.name)
-                .join(", ") || "—"}
-            </p>
-          )}
-        </div>
+        {club && <InviteForm clubId={club.id} />}
       </Card>
     </Section>
   );

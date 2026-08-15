@@ -16,15 +16,15 @@ import "./marketing.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Football Club OS — one place to run the club",
-    template: "%s · Football Club OS",
+    default: "TeamSport360 — one place to run the club",
+    template: "%s · TeamSport360",
   },
   description:
     "Squads, academy, matchday, the club website and the money — one system, "
     + "built for clubs that run on volunteers and spreadsheets.",
   openGraph: {
-    title: "Football Club OS",
-    siteName: "Football Club OS",
+    title: "TeamSport360",
+    siteName: "TeamSport360",
     type: "website",
   },
   robots: { index: true, follow: true },

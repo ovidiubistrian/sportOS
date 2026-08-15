@@ -333,7 +333,7 @@ export function PlatformConsole() {
             Platform
           </>
         }
-        title="Every club on Football Club OS"
+        title="Every club on TeamSport360"
         count={rows.length}
         description="Tenants, what they are paying for, and the competitions they can enter."
       />

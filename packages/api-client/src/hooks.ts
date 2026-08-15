@@ -924,6 +924,17 @@ export function useChangeStaffRole(): UseMutationResult<
   });
 }
 
+export function useRemoveStaffAccount(): UseMutationResult<void, ApiError, string> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId) => api.delete(`/api/v1/staff/${userId}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.staff.all });
+    },
+  });
+}
+
 export function useResendInvitation(): UseMutationResult<void, ApiError, string> {
   const api = useApi();
   return useMutation({
