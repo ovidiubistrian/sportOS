@@ -17,16 +17,28 @@ import { SectionHeading } from "./section";
  * club's own red or green without any template passing a palette down.
  */
 
-function Crest({ club, size = 28 }: { club: { name: string; crest_url: string | null }; size?: number }) {
+function Crest({
+  club,
+  size = 28,
+  className,
+}: {
+  club: { name: string; crest_url: string | null };
+  size?: number;
+  /** Sizing classes, for a crest that has to change with the viewport. The
+   *  inline style steps aside when this is given — it would win otherwise. */
+  className?: string;
+}) {
   if (!club.crest_url) return null;
   return (
     <img
       src={club.crest_url}
       alt=""
+      // Kept whatever sizes it: the intrinsic ratio is what stops the row
+      // jumping as crests arrive.
       width={size}
       height={size}
-      className="shrink-0 object-contain"
-      style={{ width: size, height: size }}
+      className={`shrink-0 object-contain ${className ?? ""}`}
+      style={className ? undefined : { width: size, height: size }}
     />
   );
 }
@@ -167,15 +179,20 @@ function Side({
   align: "left" | "right";
 }) {
   return (
+    // `min-w-0`, or the row cannot narrow past the two club names: a flex item
+    // refuses to shrink below its content unless told it may, so on a phone
+    // this band pushed the whole page wider than the screen rather than giving
+    // way. The crest is smaller there too — at 72 points a pair of them plus a
+    // score leaves nothing for the names.
     <div
       className={
         align === "right"
-          ? "flex flex-1 items-center justify-end gap-3"
-          : "flex flex-1 items-center gap-3"
+          ? "flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3"
+          : "flex min-w-0 flex-1 items-center gap-2 sm:gap-3"
       }
     >
       {align === "right" && <Name club={club} />}
-      <Crest club={club} size={72} />
+      <Crest club={club} size={72} className="size-12 sm:size-[72px]" />
       {align === "left" && <Name club={club} />}
     </div>
   );
@@ -185,11 +202,14 @@ function Name({ club }: { club: PublicMatch["home"] }) {
   return (
     <>
       {/* The short name on a phone, the full one once there is room — the
-          abbreviation is the club's own, set in Site & design. */}
-      <span className="font-display text-lg font-extrabold tracking-tight sm:hidden">
+          abbreviation is the club's own, set in Site & design. Truncated even
+          so: a club whose "short" name is not short would otherwise widen the
+          row past the screen, and a clipped name is better than a broken
+          page. */}
+      <span className="font-display truncate text-base font-extrabold tracking-tight sm:hidden">
         {club.short_name}
       </span>
-      <span className="font-display hidden text-lg font-extrabold tracking-tight sm:inline">
+      <span className="font-display hidden truncate text-lg font-extrabold tracking-tight sm:inline">
         {club.name}
       </span>
     </>

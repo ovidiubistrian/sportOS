@@ -813,6 +813,8 @@ export const en = {
     signOut: "Sign out",
     myAccount: "My account",
     accountNav: "Account",
+    menuOpen: "Open menu",
+    menuClose: "Close menu",
     accountLead: "Your details with this club, and everything you have bought here.",
     accountAnonTitle: "Sign in to your supporter account",
     accountAnonBody:

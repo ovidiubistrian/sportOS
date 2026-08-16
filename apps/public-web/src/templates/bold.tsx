@@ -1,4 +1,5 @@
 import { SiteFooter } from "./footer";
+import { MobileNav } from "./mobile-nav";
 import type { Translator } from "@footbola/i18n";
 import Link from "next/link";
 
@@ -56,7 +57,11 @@ export function Shell({
             </span>
           </Link>
           <div className="flex items-center gap-6">
-            <nav aria-label="Main">
+            {/* Hidden rather than wrapped below `md`: five links, a crest and
+                an account button do not fit across a phone, and the row used to
+                push the whole page wider than the screen instead of giving
+                way. */}
+            <nav aria-label="Main" className="hidden md:block">
               <ul className="flex gap-7">
                 {NAV.map((item) => (
                   <li key={item.href}>
@@ -71,6 +76,14 @@ export function Shell({
               </ul>
             </nav>
             <AccountLink label={i18n.t("publicSite", "accountNav")} />
+            <MobileNav
+              items={NAV.map((item) => ({
+                href: item.href,
+                label: i18n.t("publicSite", item.key),
+              }))}
+              openLabel={i18n.t("publicSite", "menuOpen")}
+              closeLabel={i18n.t("publicSite", "menuClose")}
+            />
           </div>
         </div>
       </header>

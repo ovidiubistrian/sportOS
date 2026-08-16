@@ -170,8 +170,12 @@ export function MatchCalendar({
                       lets the date and competition — one line on a phone —
                       become their own grid columns on a wide screen. */}
                   <div className="order-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3 lg:order-3">
-                    <span className="flex items-center justify-end gap-2 text-right sm:gap-2.5">
-                      <span className="text-sm font-bold sm:text-base">
+                    {/* `min-w-0` on both sides: a grid track is `auto`-sized by
+                        default and will not go below its content, so a pair of
+                        long club names widened the whole page on a phone rather
+                        than wrapping or clipping. */}
+                    <span className="flex min-w-0 items-center justify-end gap-2 text-right sm:gap-2.5">
+                      <span className="truncate text-sm font-bold sm:text-base">
                         {match.home.name}
                       </span>
                       <Crest club={match.home} />
@@ -179,9 +183,9 @@ export function MatchCalendar({
                     <span className="shrink-0 text-[11px] font-semibold text-ink-faint">
                       vs.
                     </span>
-                    <span className="flex items-center gap-2 sm:gap-2.5">
+                    <span className="flex min-w-0 items-center gap-2 sm:gap-2.5">
                       <Crest club={match.away} />
-                      <span className="text-sm font-bold sm:text-base">
+                      <span className="truncate text-sm font-bold sm:text-base">
                         {match.away.name}
                       </span>
                     </span>

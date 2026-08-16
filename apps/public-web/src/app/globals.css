@@ -106,6 +106,22 @@
   --color-brand-accent: var(--brand-accent);
 }
 
+/* A net under the layout, not a substitute for it.
+ *
+ * One element wider than the screen used to drag the whole page sideways — the
+ * header included — which made every other section look broken too: a league
+ * table scrolling correctly inside its own container read as a broken table
+ * because the page behind it was moving. The causes are fixed where they were,
+ * but a club site renders club names, competition names and sponsor logos
+ * nobody here has seen, and one long word should degrade into a clipped word
+ * rather than into a page that slides.
+ *
+ * `clip` rather than `hidden`: `hidden` makes this a scroll container, which
+ * would break the sticky header. */
+html {
+  overflow-x: clip;
+}
+
 body {
   background: var(--page);
   color: var(--ink);

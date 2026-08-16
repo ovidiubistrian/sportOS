@@ -805,6 +805,8 @@ export const ro: Catalogue = {
     signOut: "Ieși din cont",
     myAccount: "Contul meu",
     accountNav: "Cont",
+    menuOpen: "Deschide meniul",
+    menuClose: "Închide meniul",
     accountLead: "Datele tale la acest club și tot ce ai cumpărat de aici.",
     accountAnonTitle: "Intră în contul de suporter",
     accountAnonBody:
