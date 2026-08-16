@@ -98,7 +98,14 @@ class KeycloakAdmin:
         action pending**. That is what stops someone claiming a club's identity
         with an address they do not control — the tenant exists but stays
         `PENDING` until Keycloak confirms the address.
+
+        Unless `REQUIRE_EMAIL_VERIFICATION=false`, which creates the account
+        already verified. Only sane while an instance has no working mailbox:
+        a pending action that can never be delivered is an account nobody can
+        sign in to, and the first person it locks out is whoever is standing
+        the platform up.
         """
+        verify = settings.require_email_verification
         async with httpx.AsyncClient(timeout=settings.identity_timeout_seconds) as client:
             token = await self._access_token(client)
             headers = {"Authorization": f"Bearer {token}"}
@@ -109,8 +116,8 @@ class KeycloakAdmin:
                 "firstName": first_name,
                 "lastName": last_name,
                 "enabled": True,
-                "emailVerified": False,
-                "requiredActions": ["VERIFY_EMAIL"],
+                "emailVerified": not verify,
+                "requiredActions": ["VERIFY_EMAIL"] if verify else [],
                 "credentials": [{"type": "password", "value": password, "temporary": False}],
             }
             response = await client.post(

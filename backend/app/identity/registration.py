@@ -34,6 +34,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.authz.models import Role, RoleAssignment
+from app.core.config import settings
 from app.core.countries import currency_for
 from app.core.errors import Conflict, ValidationFailed
 from app.core.ids import new_id
@@ -207,7 +208,11 @@ async def _create_records(session: AsyncSession, signup: SignUp, subject_id: str
         # Not ACTIVE. The address is claimed but the account is unproven until
         # the verification email is answered — otherwise anyone could take a
         # club's name with an address they do not control.
-        status="PENDING",
+        #
+        # ACTIVE immediately where verification is switched off, because a
+        # tenant left PENDING by a mail that will never arrive is a club that
+        # can sign in and then find nothing works.
+        status="PENDING" if settings.require_email_verification else "ACTIVE",
     )
     session.add(tenant)
     # Flushed before anything references it. These models carry foreign key
@@ -260,7 +265,7 @@ async def _create_records(session: AsyncSession, signup: SignUp, subject_id: str
         id=new_id(),
         subject_id=subject_id,
         email=signup.email,
-        email_verified=False,
+        email_verified=not settings.require_email_verification,
         status="ACTIVE",
     )
     session.add(account)

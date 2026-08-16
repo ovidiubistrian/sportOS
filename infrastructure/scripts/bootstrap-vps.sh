@@ -213,6 +213,11 @@ EMAIL_FROM_NAME=TeamSport360
 # Keycloak emails a confirmation link before an account may sign in. Turn this
 # on once SMTP above works — before that it locks every new supporter out.
 KEYCLOAK_VERIFY_EMAIL=false
+# And the application's own half of the same decision: whether a club has to
+# answer a verification email before it can sign in. Both go back to true with
+# the first working mailbox — until then a new club is created verified,
+# because a pending action nobody can deliver is an account nobody can use.
+REQUIRE_EMAIL_VERIFICATION=false
 
 # Optional integrations, off until a key exists.
 API_FOOTBALL_KEY=

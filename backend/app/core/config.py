@@ -69,6 +69,17 @@ class Settings(BaseSettings):
     registration_client_secret: SecretStr = SecretStr("dev-only-registration-secret")
     # The client the verification link returns to.
     registration_redirect_client: str = "admin-web"
+    # Whether a new club has to answer a verification email before it can sign
+    # in. On by default: without it, anyone can register a club under an
+    # address they do not control, and the club's own name is the thing being
+    # claimed.
+    #
+    # It is a separate switch rather than "off when SMTP is unset", because an
+    # instance whose mail quietly breaks must not quietly stop verifying — the
+    # symptom would be new accounts working better than before. Turn it off
+    # deliberately, while standing a platform up, and turn it back on with the
+    # first working mailbox.
+    require_email_verification: bool = True
     # The public client a club's supporters sign in through. Named here because
     # every verified club domain has to be added to its redirect list.
     supporter_client_id: str = "supporter-web"
