@@ -256,7 +256,11 @@ function Feature({
             {tiles.map((player) => (
               <li
                 key={player.id}
-                className="relative aspect-square overflow-hidden rounded-md"
+                // Portrait, not square. A club photographs its players standing
+                // up, and a square crop of a standing person keeps the shirt
+                // and loses the face — which is the one part anybody is
+                // looking for. 3:4 is what those photographs already are.
+                className="relative aspect-[3/4] overflow-hidden rounded-md"
                 style={{ background: "color-mix(in srgb, var(--brand) 14%, transparent)" }}
               >
                 {player.photo_url ? (

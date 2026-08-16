@@ -247,6 +247,15 @@ export function Dialog({
             "fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2",
             "rounded-xl border border-border bg-surface-raised shadow-xl",
             "data-[state=open]:animate-scale-in",
+            // A dialog taller than the window used to run off the bottom of it,
+            // taking the footer — and every Save button — with it. Nothing
+            // scrolled, because the dialog was as tall as its content and the
+            // page behind it was locked. So somebody filled in a form they
+            // could not submit, which reads as the form being broken.
+            //
+            // Bounded to the viewport, laid out as a column: the header and
+            // footer hold their place and the middle scrolls.
+            "flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden",
             widths[size],
           )}
         >
@@ -269,10 +278,13 @@ export function Dialog({
             </DialogPrimitive.Close>
           </header>
 
-          {children && <div className="px-5 py-4">{children}</div>}
+          {/* The only part that scrolls. `min-h-0` because a flex child will
+              otherwise refuse to shrink below its content and push the footer
+              out again — the failure this whole change exists to fix. */}
+          {children && <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>}
 
           {footer && (
-            <footer className="flex items-center justify-end gap-2 border-t border-border bg-bg-subtle px-5 py-3">
+            <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-bg-subtle px-5 py-3">
               {footer}
             </footer>
           )}
