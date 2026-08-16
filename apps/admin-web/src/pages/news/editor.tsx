@@ -3,6 +3,7 @@ import type {
   Block,
   ContentDetail,
   ContentStatus,
+  MediaAsset,
   TranslationDetail,
 } from "@footbola/api-client";
 import {
@@ -59,6 +60,30 @@ interface Draft {
 }
 
 const EMPTY_DRAFT: Draft = { title: "", excerpt: "", blocks: [] };
+
+/** `TranslationInput.excerpt` in app/cms/schemas.py. */
+const EXCERPT_MAX = 600;
+
+/**
+ * The label on the field the server refused, as a catalogue key.
+ *
+ * Both spellings of each path: saving a translation puts the field at the top
+ * of the body, creating an article nests it under `translation`. A path with
+ * no label falls back to the path itself — worse than a label, much better
+ * than "something is wrong".
+ */
+function fieldLabelKey(field: string): "articleTitle" | "summary" | null {
+  switch (field) {
+    case "title":
+    case "translation.title":
+      return "articleTitle";
+    case "excerpt":
+    case "translation.excerpt":
+      return "summary";
+    default:
+      return null;
+  }
+}
 
 function toDraft(translation: TranslationDetail | undefined): Draft {
   if (!translation) return EMPTY_DRAFT;
@@ -143,6 +168,9 @@ export function NewsEditorPage() {
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [dirty, setDirty] = useState(false);
   const [scheduledFor, setScheduledFor] = useState("");
+  // Only until the article exists. From then on the saved item is the truth
+  // and the cover is edited straight against it.
+  const [newCover, setNewCover] = useState<MediaAsset | null>(null);
 
   const query = useContent(isNew ? null : (itemId ?? null));
   const assistant = useAssistant();
@@ -187,6 +215,7 @@ export function NewsEditorPage() {
         {
           club_id: clubId,
           article_type: articleType,
+          cover_media_id: newCover?.id ?? null,
           translation: {
             locale,
             title: draft.title,
@@ -282,10 +311,30 @@ export function NewsEditorPage() {
         }
       />
 
+      {/* The server names the fields it refused; showing only `message` left
+          "The submitted data is not valid." on screen with no way to find out
+          which one. The field paths differ between saving a translation and
+          creating an article — `excerpt` in one, `translation.excerpt` in the
+          other — so both spellings map to the label actually on the field. */}
       {saveError && (
-        <p className="text-sm text-danger" role="alert">
-          {saveError.message}
-        </p>
+        <div className="text-sm text-danger" role="alert">
+          <p>{saveError.message}</p>
+          {Object.entries(saveError.fieldErrors).length > 0 && (
+            <ul className="mt-1 list-disc space-y-0.5 pl-5">
+              {Object.entries(saveError.fieldErrors).map(([field, message]) => {
+                const labelKey = fieldLabelKey(field);
+                return (
+                  <li key={field}>
+                    <span className="font-medium">
+                      {labelKey ? t("news", labelKey) : field}
+                    </span>
+                    : {message}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       )}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -359,20 +408,36 @@ null
               )}
             </Field>
 
+            {/* The limit is shown, and only once it is close enough to matter.
+                It is the server's limit either way, and a summary pasted from
+                the article body goes past it easily — being refused on save,
+                after writing the whole piece, is the worst moment to find out
+                and the error did not even say which field. */}
             <Field
               label={t("news", "summary")}
               htmlFor="article-excerpt"
               help={t("news", "summaryHint")}
             >
               {(props) => (
-                <Textarea
-                  {...props}
-                  rows={2}
-                  value={draft.excerpt}
-                  disabled={!canWrite}
-                  placeholder={t("news", "summaryPlaceholder")}
-                  onChange={(event) => update({ excerpt: event.target.value })}
-                />
+                <>
+                  <Textarea
+                    {...props}
+                    rows={2}
+                    value={draft.excerpt}
+                    disabled={!canWrite}
+                    maxLength={EXCERPT_MAX}
+                    placeholder={t("news", "summaryPlaceholder")}
+                    onChange={(event) => update({ excerpt: event.target.value })}
+                  />
+                  {draft.excerpt.length > EXCERPT_MAX * 0.75 && (
+                    <p
+                      className="mt-1 text-right text-xs text-text-tertiary"
+                      data-numeric
+                    >
+                      {draft.excerpt.length} / {EXCERPT_MAX}
+                    </p>
+                  )}
+                </>
               )}
             </Field>
           </Card>
@@ -385,16 +450,30 @@ null
         </div>
 
         <div className="space-y-4">
-          {/* A new article has no id yet, so there is nothing for an image to
-              attach to. The field used to be absent entirely, which reads as
-              "this product cannot do covers" rather than "not yet" — so it is
-              shown, explained and disabled until the first save. */}
+          {/* The picture is chosen before the first save as well as after.
+              It used to be deferred — the field was shown, explained and
+              disabled until the article existed — on the reasoning that a new
+              article has no id for an image to attach to. But the image does
+              not attach to the article: it is uploaded to the club's media
+              library, which exists already, and the article merely names it.
+              So the id is held here and sent with the create. Writing a piece
+              and picking its photograph is one job, and being told to come
+              back for the second half of it is the kind of small refusal that
+              gets a club posting to Facebook instead. */}
           {isNew && canWrite && (
             <Card className="p-4">
-              <p className="text-xs font-medium text-text">{t("news", "cover")}</p>
-              <p className="mt-1 text-xs text-text-secondary">
-                {t("news", "coverAfterSave")}
-              </p>
+              <ImageField
+                purpose="ARTICLE_IMAGE"
+                label={t("news", "cover")}
+                help={t("news", "coverHint")}
+                value={newCover?.url ?? null}
+                onChange={(asset) => {
+                  setNewCover(asset);
+                  // Otherwise choosing a picture and nothing else leaves the
+                  // editor claiming there is nothing to save.
+                  setDirty(true);
+                }}
+              />
             </Card>
           )}
 

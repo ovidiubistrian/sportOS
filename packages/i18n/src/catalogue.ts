@@ -565,7 +565,6 @@ export const en = {
   news: {
     cover: "Cover image",
     coverHint: "Shown in the news carousel on the front page and on the article.",
-    coverAfterSave: "Save the article once and the cover picker appears here.",
     eyebrow: "Newsroom",
     title: "News",
     description: "Articles for the club website, in every language you publish.",

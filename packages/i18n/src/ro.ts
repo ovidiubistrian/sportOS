@@ -561,7 +561,6 @@ export const ro: Catalogue = {
   news: {
     cover: "Imagine principală",
     coverHint: "Apare în caruselul de știri de pe prima pagină și pe articol.",
-    coverAfterSave: "Salvează o dată articolul și apare aici de unde alegi poza.",
     eyebrow: "Redacție",
     title: "Știri",
     description: "Articolele de pe site-ul clubului, în fiecare limbă în care publici.",
