@@ -20,14 +20,22 @@
 	email {$ACME_EMAIL}
 
 	on_demand_tls {
+		# `interval` and `burst` used to rate-limit issuance here. Caddy removed
+		# them: the ask endpoint is the rate limit, because it is the only thing
+		# that knows whether a hostname is worth a certificate at all. Ours
+		# answers from the club domains table, so an unknown host costs one
+		# cheap 404 and never reaches Let's Encrypt.
 		ask http://api:8000/api/v1/public/tls-check
-		interval 2m
-		burst 5
 	}
 }
 
 (common) {
 	encode zstd gzip
+
+	# X-Forwarded-Host, -Proto and -For are set by `reverse_proxy` itself, and
+	# Caddy warns on every start if you say so again. Worth knowing, because
+	# which club a request belongs to is decided entirely by X-Forwarded-Host —
+	# it looks like nothing sets it, and something does.
 
 	header {
 		# HSTS is deliberately not preloaded: a club's own domain is served by
@@ -55,10 +63,7 @@
 	# the admin application, which is a static bundle in production.
 	@marketing path / /pricing /pricing/* /product/* /_next/* /favicon.ico
 	handle @marketing {
-		reverse_proxy public-web:3000 {
-			header_up X-Forwarded-Host {host}
-			header_up X-Forwarded-Proto {scheme}
-		}
+		reverse_proxy public-web:3000
 	}
 
 	handle {
@@ -70,18 +75,12 @@
 
 api.{$PLATFORM_DOMAIN} {
 	import common
-	reverse_proxy api:8000 {
-		header_up X-Forwarded-Host {host}
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy api:8000
 }
 
 auth.{$PLATFORM_DOMAIN} {
 	import common
-	reverse_proxy keycloak:8080 {
-		header_up X-Forwarded-Host {host}
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy keycloak:8080
 }
 
 files.{$PLATFORM_DOMAIN} {
@@ -100,10 +99,7 @@ files.{$PLATFORM_DOMAIN} {
 	tls {
 		on_demand
 	}
-	reverse_proxy public-web:3000 {
-		header_up X-Forwarded-Host {host}
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy public-web:3000
 }
 
 :443 {
@@ -111,8 +107,5 @@ files.{$PLATFORM_DOMAIN} {
 	tls {
 		on_demand
 	}
-	reverse_proxy public-web:3000 {
-		header_up X-Forwarded-Host {host}
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy public-web:3000
 }

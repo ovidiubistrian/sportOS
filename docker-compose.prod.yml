@@ -125,7 +125,11 @@ services:
 
   outbox-relay:
     <<: *api-image
-    command: ["python", "-m", "app.events.relay"]
+    # `app.events.relay` is the library; `app.events.runner` is the process.
+    # Running the library imports it and exits 0, which under `unless-stopped`
+    # is an infinite restart loop that never delivers an event and never says
+    # anything about it.
+    command: ["python", "-m", "app.events.runner"]
 
   feed-scheduler:
     <<: *api-image
