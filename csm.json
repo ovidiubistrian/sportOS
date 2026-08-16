@@ -1,0 +1,5248 @@
+{
+  "format": 1,
+  "club": {
+    "slug": "csm-resita",
+    "display_name": "CSM Reșița"
+  },
+  "categories": [],
+  "news": [
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "ANNOUNCEMENT",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.269997+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Program nou la casieria stadionului",
+          "slug": "program-nou-la-casieria-stadionului",
+          "excerpt": "Casieria este deschisă de marți până sâmbătă, între 10:00 și 18:00.",
+          "body": [
+            {
+              "text": "Începând cu această săptămână, casieria stadionului are program nou. Biletele rămân disponibile și online.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Casieria este deschisă de marți până sâmbătă, între 10:00 și 18:00.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "INTERVIEW",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.279300+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "„Obiectivul rămâne același, etapă cu etapă”",
+          "slug": "obiectivul-ramane-acelasi-etapa-cu-etapa",
+          "excerpt": "Interviu cu antrenorul principal înaintea returului.",
+          "body": [
+            {
+              "text": "Am discutat despre pregătirea de iarnă, despre transferuri și despre ce înseamnă returul pentru un lot atât de tânăr.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Interviu cu antrenorul principal înaintea returului.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "MATCH_REPORT",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.286494+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Trei puncte muncite la Slatina",
+          "slug": "trei-puncte-muncite-la-slatina",
+          "excerpt": "Echipa a controlat repriza a doua și a închis meciul în ultimul sfert de oră.",
+          "body": [
+            {
+              "text": "Am deschis scorul în minutul 58 și am punctat din nou aproape de final. O deplasare grea, încheiată cu toate cele trei puncte.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Echipa a controlat repriza a doua și a închis meciul în ultimul sfert de oră.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "ACADEMY",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.294227+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Trei juniori promovați la prima echipă",
+          "slug": "trei-juniori-promovati-la-prima-echipa",
+          "excerpt": "U19 dă trei nume lotului de seniori pentru returul de campionat.",
+          "body": [
+            {
+              "text": "Antrenorul principal a anunțat promovarea a trei jucători din grupa U19, care vor face parte din lotul de seniori începând cu etapa a 15-a.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "U19 dă trei nume lotului de seniori pentru returul de campionat.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "DEPARTURE",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.300717+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Mulțumim, Marius Bălan",
+          "slug": "multumim-marius-balan",
+          "excerpt": "După șase sezoane și 187 de meciuri, căpitanul pleacă la finalul contractului.",
+          "body": [
+            {
+              "text": "Marius Bălan închide un capitol de șase ani la club. A fost căpitan în ultimele trei sezoane și a promovat cu echipa în 2022. Îi mulțumim pentru tot și îi dorim numai bine.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "După șase sezoane și 187 de meciuri, căpitanul pleacă la finalul contractului.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "SIGNING",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.307556+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Ștefan Trifu revine acasă",
+          "slug": "stefan-trifu-revine-acasa",
+          "excerpt": "Mijlocașul crescut de academia clubului se întoarce după doi ani și jumătate.",
+          "body": [
+            {
+              "text": "Ștefan Trifu a jucat la CSM Reșița între 2016 și 2023, apoi a plecat în Liga 1. Revine cu numărul 20 pe tricou.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Mijlocașul crescut de academia clubului se întoarce după doi ani și jumătate.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "SIGNING",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-15T06:35:42.313871+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Andrei Popescu semnează pe doi ani",
+          "slug": "andrei-popescu-semneaza-pe-doi-ani",
+          "excerpt": "Portarul de 24 de ani vine de la CSM Slatina și semnează până în vara lui 2028.",
+          "body": [
+            {
+              "text": "Andrei Popescu a semnat luni dimineață, la baza sportivă din Valea Domanului, un contract valabil pe două sezoane. Portarul a strâns 61 de meciuri în Liga 2 în ultimele trei stagiuni.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Portarul de 24 de ani vine de la CSM Slatina și semnează până în vara lui 2028.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "MATCH_REPORT",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-14T14:09:40.532223+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": "01a000f8-e9fe-7bf1-8783-da7f6d731cae",
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Victorie pe Valea Domanului",
+          "slug": "victorie-pe-valea-domanului",
+          "excerpt": "Echipa a controlat repriza a doua și a închis meciul în ultimul sfert de oră.",
+          "body": [
+            {
+              "text": "Echipa a controlat repriza a doua și a închis meciul în ultimul sfert de oră.",
+              "type": "paragraph"
+            },
+            {
+              "text": "Ce s-a schimbat după pauză",
+              "type": "heading",
+              "level": 2
+            },
+            {
+              "text": "Presingul mai avansat a produs recuperări în treimea adversă, iar tribuna a împins echipa până la final.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Echipa a controlat repriza a doua și a închis meciul în ultimul sfert de oră.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "ANNOUNCEMENT",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-14T14:09:40.484621+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Acțiune lăudabilă a CSM Reșița în pragul sărbătorilor",
+          "slug": "actiune-laudabila-a-csm-resita-in-pragul-sarbatorilor",
+          "excerpt": "Jucătorii și staff-ul clubului au dus daruri copiilor din Reșița, într-o acțiune devenită tradiție înainte de sărbători.",
+          "body": [
+            {
+              "text": "Jucătorii și staff-ul clubului au dus daruri copiilor din Reșița, într-o acțiune devenită tradiție înainte de sărbători.",
+              "type": "paragraph"
+            },
+            {
+              "text": "Clubul mulțumește tuturor celor care au sprijinit inițiativa.",
+              "type": "paragraph"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Jucătorii și staff-ul clubului au dus daruri copiilor din Reșița, într-o acțiune devenită tradiție înainte de sărbători.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "ACADEMY",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-14T14:09:40.495522+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Bucurie și zâmbete la CSM Reșița alături de copiii de la Grădinița Semenic",
+          "slug": "bucurie-si-zambete-la-csm-resita-alaturi-de-copiii-de-la-gradinita-semenic",
+          "excerpt": "Cei mici de la Grădinița Semenic au petrecut o dimineață pe stadion, alături de jucătorii echipei.",
+          "body": [
+            {
+              "text": "Cei mici de la Grădinița Semenic au petrecut o dimineață pe stadion, alături de jucătorii echipei.",
+              "type": "paragraph"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Antrenament demonstrativ cu grupele mici",
+                "Vizită în vestiar și pe teren",
+                "Fotografii cu echipa"
+              ],
+              "ordered": false
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Cei mici de la Grădinița Semenic au petrecut o dimineață pe stadion, alături de jucătorii echipei.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "ANNOUNCEMENT",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-14T14:09:40.507582+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Fotbaliștii de la CSM Reșița, vizită de suflet la Centrul de Persoane Vârstnice",
+          "slug": "fotbalistii-de-la-csm-resita-vizita-de-suflet-la-centrul-de-persoane-varstnice",
+          "excerpt": "Delegația clubului a petrecut o după-amiază la Centrul de Persoane Vârstnice din oraș.",
+          "body": [
+            {
+              "text": "Delegația clubului a petrecut o după-amiază la Centrul de Persoane Vârstnice din oraș.",
+              "type": "paragraph"
+            },
+            {
+              "text": "Ne-am simțit ca acasă. Revenim cu drag.",
+              "type": "quote",
+              "attribution": "Căpitanul echipei"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Delegația clubului a petrecut o după-amiază la Centrul de Persoane Vârstnice din oraș.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    },
+    {
+      "category_id": null,
+      "kind": "ARTICLE",
+      "article_type": "SIGNING",
+      "status": "PUBLISHED",
+      "published_at": "2026-08-14T14:09:40.520290+00:00",
+      "scheduled_for": null,
+      "is_pinned": false,
+      "cover_media_id": null,
+      "author_person_id": null,
+      "created_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4",
+      "category": null,
+      "translations": [
+        {
+          "content_item_id": null,
+          "locale": "ro",
+          "title": "Un nou nume în lotul de seniori",
+          "slug": "un-nou-nume-in-lotul-de-seniori",
+          "excerpt": "Mijlocașul se alătură lotului pentru returul de campionat.",
+          "body": [
+            {
+              "text": "Mijlocașul se alătură lotului pentru returul de campionat.",
+              "type": "paragraph"
+            },
+            {
+              "text": "Roșu și negru înseamnă ceva în orașul ăsta. Vreau să simt asta pe teren.",
+              "type": "quote",
+              "attribution": "Noul jucător"
+            }
+          ],
+          "seo_title": null,
+          "seo_description": "Mijlocașul se alătură lotului pentru returul de campionat.",
+          "status": "DRAFT",
+          "translated_by": "01a0009b-66b4-7c91-8b9a-e98a3bc5a5f4"
+        }
+      ]
+    }
+  ],
+  "squad": [
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Ionescu",
+        "display_name": "Alexandru Ionescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 3,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Sergiu",
+        "last_name": "Munteanu",
+        "display_name": "Sergiu Munteanu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 36,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Marius",
+        "last_name": "Ionescu",
+        "display_name": "Marius Ionescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 34,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Gabriel",
+        "last_name": "Grozav",
+        "display_name": "Gabriel Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 27,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Iulian",
+        "last_name": "Damian",
+        "display_name": "Iulian Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 38,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ștefan",
+        "last_name": "Trifu",
+        "display_name": "Ștefan Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 20,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Bălan",
+        "display_name": "Florin Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 16,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Octavian",
+        "last_name": "Radu",
+        "display_name": "Octavian Radu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 11,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Andrei",
+        "last_name": "Barbu",
+        "display_name": "Andrei Barbu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 37,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Tudor",
+        "last_name": "Damian",
+        "display_name": "Tudor Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 31,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Dumitru",
+        "display_name": "Bogdan Dumitru",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 35,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Bălan",
+        "display_name": "Robert Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 33,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ștefan",
+        "last_name": "Grozav",
+        "display_name": "Ștefan Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 22,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Vlad",
+        "last_name": "Constantin",
+        "display_name": "Vlad Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 2,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Nicolae",
+        "last_name": "Munteanu",
+        "display_name": "Nicolae Munteanu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 8,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Andrei",
+        "last_name": "Popescu",
+        "display_name": "Andrei Popescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 14,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Marius",
+        "last_name": "Bălan",
+        "display_name": "Marius Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 19,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Tudor",
+        "last_name": "Grozav",
+        "display_name": "Tudor Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 21,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Iulian",
+        "last_name": "Barbu",
+        "display_name": "Iulian Barbu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 13,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Iancu",
+        "display_name": "Robert Iancu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 5,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Damian",
+        "display_name": "Florin Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 24,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Gabriel",
+        "last_name": "Constantin",
+        "display_name": "Gabriel Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 1,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Sergiu",
+        "last_name": "Trifu",
+        "display_name": "Sergiu Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 36,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Georgescu",
+        "display_name": "Bogdan Georgescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 37,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Mihai",
+        "last_name": "Trifu",
+        "display_name": "Mihai Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 39,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Darius",
+        "last_name": "Bălan",
+        "display_name": "Darius Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 4,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ștefan",
+        "last_name": "Jurca",
+        "display_name": "Ștefan Jurca",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 6,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Rareș",
+        "last_name": "Bălan",
+        "display_name": "Rareș Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 11,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Dumitru",
+        "display_name": "Alexandru Dumitru",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 10,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Rareș",
+        "last_name": "Enache",
+        "display_name": "Rareș Enache",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 35,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Vlad",
+        "last_name": "Damian",
+        "display_name": "Vlad Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 26,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Iulian",
+        "last_name": "Dumitru",
+        "display_name": "Iulian Dumitru",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 28,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Fodor",
+        "display_name": "Alexandru Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 5,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Marin",
+        "display_name": "Alexandru Marin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 12,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ștefan",
+        "last_name": "Stoica",
+        "display_name": "Ștefan Stoica",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 22,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Marin",
+        "display_name": "Alexandru Marin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 15,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Iulian",
+        "last_name": "Enache",
+        "display_name": "Iulian Enache",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 32,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Enache",
+        "display_name": "Florin Enache",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 14,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Rareș",
+        "last_name": "Marin",
+        "display_name": "Rareș Marin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 33,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U19",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Constantin",
+        "display_name": "Robert Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 13,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Darius",
+        "last_name": "Grozav",
+        "display_name": "Darius Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 32,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Paul",
+        "last_name": "Cîrstea",
+        "display_name": "Paul Cîrstea",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 39,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Radu",
+        "last_name": "Constantin",
+        "display_name": "Radu Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 18,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ionuț",
+        "last_name": "Cîrstea",
+        "display_name": "Ionuț Cîrstea",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 29,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Denis",
+        "last_name": "Jurca",
+        "display_name": "Denis Jurca",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 14,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Constantin",
+        "display_name": "Bogdan Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 37,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Jurca",
+        "display_name": "Robert Jurca",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 19,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Rareș",
+        "last_name": "Popescu",
+        "display_name": "Rareș Popescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 7,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Grozav",
+        "display_name": "Florin Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 11,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Tudor",
+        "last_name": "Constantin",
+        "display_name": "Tudor Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 34,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Sergiu",
+        "last_name": "Herța",
+        "display_name": "Sergiu Herța",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 21,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Grozav",
+        "display_name": "Florin Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 4,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Octavian",
+        "last_name": "Ionescu",
+        "display_name": "Octavian Ionescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 35,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Vlad",
+        "last_name": "Radu",
+        "display_name": "Vlad Radu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 12,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Octavian",
+        "last_name": "Bălan",
+        "display_name": "Octavian Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 6,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Paul",
+        "last_name": "Ionescu",
+        "display_name": "Paul Ionescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 10,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Fodor",
+        "display_name": "Robert Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 28,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Darius",
+        "last_name": "Trifu",
+        "display_name": "Darius Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 37,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Darius",
+        "last_name": "Stoica",
+        "display_name": "Darius Stoica",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 4,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Denis",
+        "last_name": "Trifu",
+        "display_name": "Denis Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 32,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Sergiu",
+        "last_name": "Bălan",
+        "display_name": "Sergiu Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 15,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Mihai",
+        "last_name": "Trifu",
+        "display_name": "Mihai Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 31,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Constantin",
+        "display_name": "Robert Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 3,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Marin",
+        "display_name": "Florin Marin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 36,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Tudor",
+        "last_name": "Fodor",
+        "display_name": "Tudor Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 20,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Gabriel",
+        "last_name": "Constantin",
+        "display_name": "Gabriel Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 15,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Octavian",
+        "last_name": "Iancu",
+        "display_name": "Octavian Iancu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 9,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Jurca",
+        "display_name": "Florin Jurca",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 14,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Iulian",
+        "last_name": "Herța",
+        "display_name": "Iulian Herța",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 19,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Marius",
+        "last_name": "Fodor",
+        "display_name": "Marius Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 2,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Nicolae",
+        "last_name": "Enache",
+        "display_name": "Nicolae Enache",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 23,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Gabriel",
+        "last_name": "Dumitru",
+        "display_name": "Gabriel Dumitru",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 18,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Cristian",
+        "last_name": "Barbu",
+        "display_name": "Cristian Barbu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 14,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Cristian",
+        "last_name": "Constantin",
+        "display_name": "Cristian Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 15,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ștefan",
+        "last_name": "Cîrstea",
+        "display_name": "Ștefan Cîrstea",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 17,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Andrei",
+        "last_name": "Munteanu",
+        "display_name": "Andrei Munteanu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 6,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Paul",
+        "last_name": "Dumitru",
+        "display_name": "Paul Dumitru",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 22,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Radu",
+        "last_name": "Fodor",
+        "display_name": "Radu Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 21,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Fodor",
+        "display_name": "Bogdan Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 8,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ionuț",
+        "last_name": "Georgescu",
+        "display_name": "Ionuț Georgescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 16,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Barbu",
+        "display_name": "Alexandru Barbu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 36,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Octavian",
+        "last_name": "Grozav",
+        "display_name": "Octavian Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 2,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Paul",
+        "last_name": "Bălan",
+        "display_name": "Paul Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 15,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Gabriel",
+        "last_name": "Bălan",
+        "display_name": "Gabriel Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 1,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U17",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Octavian",
+        "last_name": "Damian",
+        "display_name": "Octavian Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 34,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Robert",
+        "last_name": "Marin",
+        "display_name": "Robert Marin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 5,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ionuț",
+        "last_name": "Cîrstea",
+        "display_name": "Ionuț Cîrstea",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 30,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Rareș",
+        "last_name": "Bălan",
+        "display_name": "Rareș Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 29,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Tudor",
+        "last_name": "Munteanu",
+        "display_name": "Tudor Munteanu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 3,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Tudor",
+        "last_name": "Munteanu",
+        "display_name": "Tudor Munteanu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 21,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ștefan",
+        "last_name": "Radu",
+        "display_name": "Ștefan Radu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 38,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Denis",
+        "last_name": "Constantin",
+        "display_name": "Denis Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 16,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Cătălin",
+        "last_name": "Popescu",
+        "display_name": "Cătălin Popescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 26,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U15",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Nicolae",
+        "last_name": "Bălan",
+        "display_name": "Nicolae Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 12,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Damian",
+        "display_name": "Bogdan Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "ST",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 35,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Iulian",
+        "last_name": "Damian",
+        "display_name": "Iulian Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 28,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Cătălin",
+        "last_name": "Popescu",
+        "display_name": "Cătălin Popescu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 25,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Damian",
+        "display_name": "Bogdan Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 39,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Gabriel",
+        "last_name": "Enache",
+        "display_name": "Gabriel Enache",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "CB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 29,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Ionuț",
+        "last_name": "Damian",
+        "display_name": "Ionuț Damian",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 32,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Marin",
+        "display_name": "Bogdan Marin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 21,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Denis",
+        "last_name": "Trifu",
+        "display_name": "Denis Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 18,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U13",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Vlad",
+        "last_name": "Enache",
+        "display_name": "Vlad Enache",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 30,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Marius",
+        "last_name": "Grozav",
+        "display_name": "Marius Grozav",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 3,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Constantin",
+        "display_name": "Bogdan Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 37,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Andrei",
+        "last_name": "Constantin",
+        "display_name": "Andrei Constantin",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 23,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Bălan",
+        "display_name": "Alexandru Bălan",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "LB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 31,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Florin",
+        "last_name": "Fodor",
+        "display_name": "Florin Fodor",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RW",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 20,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Paul",
+        "last_name": "Stoica",
+        "display_name": "Paul Stoica",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "DM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 2,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Darius",
+        "last_name": "Trifu",
+        "display_name": "Darius Trifu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "AM",
+        "secondary_positions": [],
+        "preferred_foot": "RIGHT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 19,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Bogdan",
+        "last_name": "Stoica",
+        "display_name": "Bogdan Stoica",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "RB",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 26,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "U11",
+          "season": "2025/26"
+        }
+      ]
+    },
+    {
+      "person": {
+        "user_id": null,
+        "first_name": "Alexandru",
+        "last_name": "Barbu",
+        "display_name": "Alexandru Barbu",
+        "birth_date": null,
+        "nationality": [],
+        "email": null,
+        "phone": null,
+        "preferred_locale": null,
+        "source": "STAFF_ENTRY",
+        "anonymized_at": null
+      },
+      "role_flags": [
+        "PLAYER"
+      ],
+      "player": {
+        "person_id": null,
+        "status": "REGISTERED",
+        "primary_position": "GK",
+        "secondary_positions": [],
+        "preferred_foot": "LEFT",
+        "federation_id": null,
+        "photo_media_id": null,
+        "joined_club_on": "2026-08-14",
+        "left_club_on": null
+      },
+      "registrations": [
+        {
+          "player_id": null,
+          "team_id": null,
+          "season_id": null,
+          "shirt_number": 1,
+          "kind": "PERMANENT",
+          "registered_on": "2026-08-14",
+          "ended_on": null,
+          "ended_reason": null,
+          "team": "SEN",
+          "season": "2025/26"
+        }
+      ]
+    }
+  ],
+  "notes": {
+    "photos_not_exported": 2,
+    "media": "Pictures are not carried. Re-upload them in the target."
+  }
+}

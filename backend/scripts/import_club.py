@@ -201,21 +201,39 @@ async def run(payload: dict[str, Any], slug: str, dry: bool) -> Report:
             )
         }
 
-        existing_people = {
-            (person.first_name, person.last_name, person.birth_date)
-            for person in await session.scalars(
-                select(Person).where(Person.tenant_id == club.tenant_id)
+        # Only people we can actually recognise again. A name alone is not an
+        # identity: among a hundred players two will share one, and with no
+        # date of birth recorded the second would be silently dropped as a
+        # duplicate of the first. So a person counts as already here only when
+        # something distinguishing matches — a birth date, or the federation
+        # id, which is exactly what a federation id is for.
+        existing_people: set[tuple[str, str, Any]] = set()
+        for person in await session.scalars(
+            select(Person).where(Person.tenant_id == club.tenant_id)
+        ):
+            if person.birth_date is not None:
+                existing_people.add((person.first_name, person.last_name, person.birth_date))
+
+        registered_ids = {
+            player.federation_id
+            for player in await session.scalars(
+                select(Player).where(
+                    Player.club_id == club.id, Player.federation_id.isnot(None)
+                )
             )
         }
 
         for entry in payload.get("squad", []):
             person_row = entry["person"]
-            identity = (
-                person_row["first_name"],
-                person_row["last_name"],
-                _typed("birth_date", person_row.get("birth_date")),
+            born = _typed("birth_date", person_row.get("birth_date"))
+            identity = (person_row["first_name"], person_row["last_name"], born)
+            federation_id = entry["player"].get("federation_id")
+
+            already = (born is not None and identity in existing_people) or (
+                federation_id is not None and federation_id in registered_ids
             )
-            if identity in existing_people:
+            if already:
+                report.note(f"already here: {person_row['display_name']}")
                 report.did("players skipped")
                 continue
 
@@ -226,7 +244,10 @@ async def run(payload: dict[str, Any], slug: str, dry: bool) -> Report:
             )
             session.add(person)
             await session.flush()
-            existing_people.add(identity)
+            if born is not None:
+                existing_people.add(identity)
+            if federation_id is not None:
+                registered_ids.add(federation_id)
 
             for kind in entry.get("role_flags") or ["PLAYER"]:
                 session.add(
