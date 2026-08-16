@@ -41,3 +41,33 @@ ARG APP_DIR=apps/admin-web
 COPY --from=build /repo/${APP_DIR}/dist /usr/share/nginx/html
 COPY infrastructure/docker/node/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
+
+
+# The public site: a Node server, not static files. Every club's website is
+# rendered by this one process and told apart by the Host header, so it cannot
+# be pre-rendered to a bucket.
+FROM base AS next-build
+
+COPY . .
+RUN --mount=type=cache,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm --filter "./apps/public-web" build
+
+
+FROM node:22-slim AS next
+
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# Standalone output carries the exact dependencies the server traced, and
+# nothing else. `public` and `.next/static` are not in it and must come along.
+COPY --from=next-build /repo/apps/public-web/.next/standalone ./
+COPY --from=next-build /repo/apps/public-web/.next/static ./apps/public-web/.next/static
+COPY --from=next-build /repo/apps/public-web/public ./apps/public-web/public
+
+RUN useradd --uid 10001 --no-create-home appuser && chown -R appuser /app
+USER appuser
+
+EXPOSE 3000
+CMD ["node", "apps/public-web/server.js"]

@@ -1,0 +1,166 @@
+{
+  "_comment": "A template, not a realm. infrastructure/scripts/first-boot.sh substitutes the placeholders from .env and writes generated/realm-prod.json, which is what Keycloak imports. Mounting this file directly would import literal placeholders as client secrets.",
+  "realm": "football-os",
+  "enabled": true,
+  "displayName": "TeamSport360",
+  "sslRequired": "all",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "failureFactor": 10,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 3600,
+  "ssoSessionMaxLifespan": 36000,
+  "clients": [
+    {
+      "clientId": "admin-web",
+      "name": "Admin Web",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://${PLATFORM_DOMAIN}",
+      "baseUrl": "/",
+      "redirectUris": ["https://${PLATFORM_DOMAIN}/*"],
+      "webOrigins": ["https://${PLATFORM_DOMAIN}"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://${PLATFORM_DOMAIN}/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "football-os-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "football-os-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "super-admin",
+      "name": "Platform Super Admin",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://${PLATFORM_DOMAIN}",
+      "redirectUris": ["https://${PLATFORM_DOMAIN}/*"],
+      "webOrigins": ["https://${PLATFORM_DOMAIN}"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://${PLATFORM_DOMAIN}/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "football-os-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "football-os-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "footbola-registration",
+      "name": "Registration (service account)",
+      "description": "Creates accounts during sign-up and invites staff. Confidential, service account only, and holds exactly one realm-management role: manage-users.",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "secret": "${REGISTRATION_CLIENT_SECRET}",
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "supporter-web",
+      "name": "Supporter sign-in",
+      "description": "One client for every club website. Keycloak does not accept a wildcard in the host part of a redirect URI, so each club's hostname is added here by the API the moment the domain is verified — see app/tenants/domain_service.py.",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "",
+      "baseUrl": "/",
+      "redirectUris": ["https://${PLATFORM_DOMAIN}/*"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://${PLATFORM_DOMAIN}/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "football-os-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "football-os-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "footbola-domains",
+      "name": "Club domain registration",
+      "description": "Adds a verified club domain to the supporter client's redirect list. Holds manage-clients and nothing else.",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "${DOMAINS_CLIENT_SECRET}",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "attributes": {}
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-footbola-registration",
+      "enabled": true,
+      "serviceAccountClientId": "footbola-registration",
+      "clientRoles": { "realm-management": ["manage-users"] }
+    },
+    {
+      "username": "service-account-footbola-domains",
+      "enabled": true,
+      "serviceAccountClientId": "footbola-domains",
+      "clientRoles": { "realm-management": ["view-clients", "manage-clients"] }
+    }
+  ],
+  "verifyEmail": ${KEYCLOAK_VERIFY_EMAIL},
+  "smtpServer": {
+    "host": "${SMTP_HOST}",
+    "port": "${SMTP_PORT}",
+    "from": "${EMAIL_FROM_ADDRESS}",
+    "fromDisplayName": "${EMAIL_FROM_NAME}",
+    "ssl": "false",
+    "starttls": "${SMTP_USE_TLS}",
+    "auth": "${SMTP_AUTH}",
+    "user": "${SMTP_USERNAME}",
+    "password": "${SMTP_PASSWORD}"
+  },
+  "clientScopeMappings": {},
+  "registrationEmailAsUsername": true,
+  "rememberMe": true
+}

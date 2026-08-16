@@ -1,0 +1,72 @@
+name: CI
+
+# Every push and every pull request. The suite talks to a real PostgreSQL, a
+# real Redis and a real Keycloak — the same reason the tests were written that
+# way locally: a suite that mocks the database cannot prove tenant isolation,
+# which is the property most worth proving.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the stack
+        run: |
+          cp infrastructure/environments/.env.example .env
+          docker compose up -d --wait postgres redis keycloak minio mailpit
+          docker compose up init
+
+      - name: Lint
+        run: docker compose run --rm --no-deps api .venv/bin/ruff check app tests scripts
+
+      - name: Format check
+        run: docker compose run --rm --no-deps api .venv/bin/ruff format --check app
+
+      - name: Tests
+        run: |
+          docker compose up -d --wait api
+          docker compose exec -T api .venv/bin/pytest -q
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: docker compose logs --tail 120 api keycloak postgres
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Every package, so a change to the shared catalogue cannot break an app
+      # that nobody thought to check.
+      - name: Typecheck
+        run: |
+          for pkg in @footbola/i18n @footbola/ui @footbola/api-client \
+                     @footbola/admin-web @footbola/public-web; do
+            echo "--- $pkg"
+            pnpm --filter "$pkg" exec tsc --noEmit
+          done
+
+      - name: Build
+        run: |
+          pnpm --filter @footbola/admin-web build
+          pnpm --filter @footbola/public-web build

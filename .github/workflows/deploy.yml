@@ -1,0 +1,149 @@
+name: Deploy
+
+# Runs only after CI passes on main, and can be started by hand for a rollback
+# — `image_tag` accepts any previously built SHA.
+#
+# The shape is: build once, push to the registry, then tell the server to pull.
+# Nothing is built on the VPS. A 4GB server cannot compile a Next application
+# and serve traffic at the same time, and a deploy that builds is a deploy that
+# can fail with the site half-updated.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (a commit SHA, or 'latest')"
+        default: latest
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/${{ github.repository }}
+
+jobs:
+  build:
+    # A green CI run, or a deliberate hand-started deploy. Never a failed one.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tagged with the commit as well as `latest`, because rolling back to
+      # "the one before" needs a name that still means something next month.
+      - name: API image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          target: prod
+          push: true
+          tags: |
+            ${{ env.IMAGE_BASE }}/api:${{ github.sha }}
+            ${{ env.IMAGE_BASE }}/api:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Public site image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./infrastructure/docker/node/Dockerfile
+          target: next
+          push: true
+          tags: |
+            ${{ env.IMAGE_BASE }}/public-web:${{ github.sha }}
+            ${{ env.IMAGE_BASE }}/public-web:latest
+          cache-from: type=gha,scope=public-web
+          cache-to: type=gha,mode=max,scope=public-web
+
+      - name: Admin bundle image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./infrastructure/docker/node/Dockerfile
+          target: prod
+          build-args: APP_DIR=apps/admin-web
+          push: true
+          tags: |
+            ${{ env.IMAGE_BASE }}/admin-web:${{ github.sha }}
+            ${{ env.IMAGE_BASE }}/admin-web:latest
+          cache-from: type=gha,scope=admin-web
+          cache-to: type=gha,mode=max,scope=admin-web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    # The server logs in to the registry with this run's token, so it needs to
+    # be allowed to read packages. Without it the pull fails on a private repo.
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Ship it
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /opt/teamsport360
+
+            export IMAGE_TAG="${{ github.event.inputs.image_tag || github.sha }}"
+            export GITHUB_REPOSITORY="${{ github.repository }}"
+
+            git fetch --quiet origin main
+            git checkout --quiet -B main origin/main
+
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.prod.yml pull --quiet
+
+            # A dump before every deploy. Cheap at this size, and the only
+            # thing that makes a bad migration recoverable rather than
+            # catastrophic. Skipped when PostgreSQL is not running, which is
+            # true exactly once: before first-boot.sh has ever been run.
+            if docker compose -f docker-compose.prod.yml exec -T postgres \
+                 pg_isready -U postgres -d footbola >/dev/null 2>&1; then
+              docker compose -f docker-compose.prod.yml exec -T postgres \
+                pg_dump -U postgres footbola | gzip > "backups/pre-deploy-$(date +%F-%H%M).sql.gz"
+            else
+              echo "postgres not running — skipping the pre-deploy dump"
+            fi
+
+            # Migrations are an explicit step and run before the new code, so
+            # the old code never meets a schema it does not know. Additive
+            # migrations only — see docs/DEPLOY.md.
+            docker compose -f docker-compose.prod.yml run --rm api \
+              .venv/bin/alembic upgrade head
+
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml run --rm admin-dist
+
+            docker image prune -f --filter "until=168h"
+
+            # Prove it answers before calling the deploy done.
+            sleep 8
+            curl -fsS --max-time 10 https://api.${{ secrets.PLATFORM_DOMAIN }}/health >/dev/null
+            curl -fsS --max-time 10 https://${{ secrets.PLATFORM_DOMAIN }}/ >/dev/null
+            echo "deployed ${IMAGE_TAG}"

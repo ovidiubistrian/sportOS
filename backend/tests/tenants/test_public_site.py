@@ -236,3 +236,35 @@ class TestBrandingApi:
             f"/api/v1/clubs/{demo['club_id']}/branding", headers=as_user("other_owner")
         )
         assert response.status_code == 404
+
+
+class TestTheCertificateGate:
+    """What the proxy asks before obtaining a certificate for a hostname.
+
+    Club domains are created while the server runs, so certificates cannot be
+    listed in configuration and are issued on demand. This endpoint is the only
+    thing standing between that and a stranger pointing a DNS record at the
+    server to have their domain served by us — or simply to burn through the
+    certificate authority's rate limit on our account.
+    """
+
+    async def test_a_club_domain_is_allowed(self, client: httpx.AsyncClient) -> None:
+        response = await client.get(
+            "/api/v1/public/tls-check", params={"domain": "fcexample.localhost"}
+        )
+        assert response.status_code == 204
+
+    async def test_a_domain_nobody_owns_here_is_refused(
+        self, client: httpx.AsyncClient
+    ) -> None:
+        response = await client.get(
+            "/api/v1/public/tls-check", params={"domain": "not-our-domain.example.com"}
+        )
+        assert response.status_code == 404
+
+    async def test_the_answer_is_never_cached(self, client: httpx.AsyncClient) -> None:
+        """A club whose domain was removed must stop being certifiable at once."""
+        response = await client.get(
+            "/api/v1/public/tls-check", params={"domain": "fcexample.localhost"}
+        )
+        assert response.headers["cache-control"] == "no-store"

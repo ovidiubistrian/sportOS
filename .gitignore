@@ -35,3 +35,8 @@ test-results/
 # larger than GitHub will accept. It belongs in the Docker volume the compose
 # file mounts at /app/data — fetch it with scripts/fetch_geoip.py.
 backend/data/
+
+# Rendered from realm-prod.json.template by first-boot.sh: contains the
+# production client secrets.
+infrastructure/docker/keycloak/generated/*
+!infrastructure/docker/keycloak/generated/.gitkeep

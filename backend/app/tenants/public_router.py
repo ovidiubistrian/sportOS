@@ -481,6 +481,33 @@ async def team_squad(
         ]
 
 
+@router.get(
+    "/tls-check",
+    include_in_schema=False,
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="May a certificate be issued for this hostname?",
+)
+async def tls_check(
+    domain: Annotated[str, Query(max_length=253)],
+    response: Response,
+) -> None:
+    """The gate in front of automatic certificate issuance.
+
+    Every club has its own hostname, and clubs are created while the server is
+    running — so certificates cannot be baked into configuration. The proxy is
+    configured to obtain one on demand, and asks this endpoint first.
+
+    Without that gate anybody could point a DNS record at the server and make
+    it request certificates on their behalf, which is both a way to exhaust the
+    certificate authority's rate limit and a way to have a stranger's domain
+    served by us. The answer is simply "is this a hostname we know", which is
+    the same question the public site already resolves on every request.
+    """
+    response.headers["Cache-Control"] = "no-store"
+    if await resolve_host(domain.strip().lower()) is None:
+        raise NotFound("Unknown domain.")
+
+
 @router.get("/health", include_in_schema=False, status_code=status.HTTP_200_OK)
 async def public_health() -> dict[str, str]:
     return {"status": "ok"}

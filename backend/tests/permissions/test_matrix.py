@@ -217,6 +217,10 @@ EXEMPT = {
     ("DELETE", "/api/v1/products/{product_id}"),
     ("GET", "/api/v1/orders"),
     ("POST", "/api/v1/orders/{order_id}/status"),
+    # Asked by the proxy before it will obtain a certificate for a hostname.
+    # Unauthenticated by necessity — the proxy has no session — and it answers
+    # only "is this a domain you know". Covered in tests/tenants/.
+    ("GET", "/api/v1/public/tls-check"),
     # Unauthenticated and host-scoped, like the rest of /public.
     ("POST", "/api/v1/public/newsletter"),
     # The analytics beacon. Unauthenticated by necessity — it is called by every
