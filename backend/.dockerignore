@@ -1,0 +1,22 @@
+# The API image builds with `./backend` as its context, so the root
+# .dockerignore does not apply here.
+#
+# `.venv` matters most: the image sets UV_PROJECT_ENVIRONMENT=/app/.venv with
+# WORKDIR /app, so a developer's local virtualenv would land exactly on top of
+# the one the image just built — a Linux image running macOS binaries.
+
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# 124 MB of MaxMind data, mounted as a volume at runtime rather than shipped.
+data
+
+.env
+.env.*
+.DS_Store
+*.log

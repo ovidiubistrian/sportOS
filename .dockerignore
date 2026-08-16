@@ -1,0 +1,46 @@
+# What must never enter a build context.
+#
+# The first reason is correctness: `node_modules` holds compiled native
+# binaries for whichever machine installed them. Copied from a developer's Mac
+# into a Linux image, `pnpm install` then considers the tree satisfied and the
+# build fails looking for `lightningcss.linux-arm64-gnu.node`. CI never hits
+# this — a fresh checkout has no `node_modules` — which is exactly what makes
+# it the kind of bug that only ever appears on someone's laptop.
+#
+# The second is size. The context is uploaded to the builder before anything
+# runs, and `.git` plus `node_modules` is most of a gigabyte of it.
+
+node_modules
+**/node_modules
+
+.git
+.gitignore
+
+# Build output, rebuilt inside the image.
+.next
+**/.next
+dist
+**/dist
+**/*.tsbuildinfo
+.turbo
+**/.turbo
+
+# Python, in case the root context ever sees it.
+.venv
+**/.venv
+__pycache__
+**/__pycache__
+*.pyc
+
+# Secrets and local state. None of this belongs in a layer.
+.env
+.env.*
+!.env.example
+backups
+**/generated/realm-prod.json
+
+# Third-party data fetched at runtime, 124 MB of it.
+backend/data
+
+.DS_Store
+*.log
