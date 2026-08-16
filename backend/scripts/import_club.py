@@ -101,6 +101,140 @@ class Report:
             print("\nDRY RUN — nothing was written.")
 
 
+async def link_registrations(payload: dict[str, Any], slug: str, dry: bool) -> Report:
+    """Attach squads to players who are already here.
+
+    The repair for an import run before the teams existed: the people landed,
+    every registration was skipped, and running the import again would not fix
+    it — it would add a second hundred players, because a person with no date
+    of birth cannot be recognised as one we already have.
+
+    Players are matched by display name within the club, which is safe here in
+    a way it is not for creation: we are attaching a squad to somebody who
+    demonstrably exists, and a name that matches two people is reported rather
+    than guessed at.
+    """
+    report = Report(dry)
+
+    async with platform_session(reason=f"link registrations {slug}") as session:
+        club = await session.scalar(select(Club).where(Club.slug == slug))
+        if club is None:
+            sys.exit(f"No club with slug {slug!r} in this database.")
+
+        teams = {
+            team.code: team.id
+            for team in await session.scalars(select(Team).where(Team.club_id == club.id))
+        }
+        seasons = {
+            season.name: season.id
+            for season in await session.scalars(select(Season).where(Season.club_id == club.id))
+        }
+        if not teams or not seasons:
+            sys.exit(
+                "This club has no teams or no seasons yet. Create them first — "
+                "a registration needs both, and the codes have to match the export."
+            )
+
+        # display name -> the players who have it, oldest first.
+        #
+        # Thirty of a hundred names are shared in a squad this size, so
+        # refusing every repeat would leave a third of the club without a team.
+        # They are paired by order instead: the import created them in file
+        # order, so the second "Alexandru Marin" in the file is the second one
+        # in the database. That holds because this repairs an import that has
+        # just happened; where the count does not match, the extras are left
+        # alone rather than assigned to whoever is nearest.
+        candidates: dict[str, list[Any]] = {}
+        rows = await session.execute(
+            select(Person.display_name, Player.id)
+            .join(Player, Player.person_id == Person.id)
+            .where(Player.club_id == club.id)
+            .order_by(Player.created_at, Player.id)
+        )
+        for display_name, player_id in rows:
+            candidates.setdefault(display_name, []).append(player_id)
+
+        seen: dict[str, int] = {}
+
+        worn = {
+            (registration.team_id, registration.season_id, registration.shirt_number)
+            for registration in await session.scalars(
+                select(PlayerRegistration).where(
+                    PlayerRegistration.tenant_id == club.tenant_id,
+                    PlayerRegistration.ended_on.is_(None),
+                )
+            )
+        }
+        registered = {
+            (registration.player_id, registration.team_id, registration.season_id)
+            for registration in await session.scalars(
+                select(PlayerRegistration).where(PlayerRegistration.tenant_id == club.tenant_id)
+            )
+        }
+
+        for entry in payload.get("squad", []):
+            name = entry["person"]["display_name"]
+            position = seen.get(name, 0)
+            seen[name] = position + 1
+            here = candidates.get(name, [])
+            if position >= len(here):
+                report.note(
+                    f"{name}: not in this club"
+                    if not here
+                    else f"{name}: the file has more of this name than the club does"
+                )
+                report.did("players not found")
+                continue
+            player_id = here[position]
+            if len(here) > 1:
+                report.did("shared names paired by order")
+
+            for registration in entry.get("registrations", []):
+                team_id = teams.get(registration.get("team") or "")
+                season_id = seasons.get(registration.get("season") or "")
+                if team_id is None or season_id is None:
+                    missing = []
+                    if team_id is None:
+                        missing.append(f"team {registration.get('team')!r}")
+                    if season_id is None:
+                        missing.append(f"season {registration.get('season')!r}")
+                    report.note(f"{name}: no {' and no '.join(missing)}")
+                    report.did("registrations skipped")
+                    continue
+                if (player_id, team_id, season_id) in registered:
+                    report.did("registrations already here")
+                    continue
+
+                shirt = registration.get("shirt_number")
+                if shirt is not None and (team_id, season_id, shirt) in worn:
+                    report.note(f"{name}: number {shirt} already worn, registered without one")
+                    registration = {**registration, "shirt_number": None}
+                    report.did("shirt numbers dropped")
+                elif shirt is not None:
+                    worn.add((team_id, season_id, shirt))
+
+                session.add(
+                    PlayerRegistration(
+                        id=new_id(),
+                        tenant_id=club.tenant_id,
+                        **_fields(
+                            registration,
+                            PlayerRegistration,
+                            player_id=player_id,
+                            team_id=team_id,
+                            season_id=season_id,
+                        ),
+                    )
+                )
+                registered.add((player_id, team_id, season_id))
+                report.did("registrations created")
+
+        if dry:
+            await session.rollback()
+
+    return report
+
+
 async def run(payload: dict[str, Any], slug: str, dry: bool) -> Report:
     report = Report(dry)
 
@@ -316,6 +450,11 @@ async def main() -> int:
     parser.add_argument("--file", required=True, type=Path)
     parser.add_argument("--slug", required=True, help="the club's slug in THIS database")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--registrations-only",
+        action="store_true",
+        help="attach squads to players already here, creating nobody",
+    )
     args = parser.parse_args()
 
     payload = json.loads(args.file.read_text())
@@ -325,7 +464,11 @@ async def main() -> int:
     print(f"from  {payload['club']['display_name']} ({payload['club']['slug']})")
     print(f"into  {args.slug}\n")
 
-    report = await run(payload, args.slug, args.dry_run)
+    report = await (
+        link_registrations(payload, args.slug, args.dry_run)
+        if args.registrations_only
+        else run(payload, args.slug, args.dry_run)
+    )
     report.print()
 
     if payload["notes"]["photos_not_exported"]:
