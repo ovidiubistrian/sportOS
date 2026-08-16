@@ -9,13 +9,24 @@ is possible.
 
 from __future__ import annotations
 
+import io
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from uuid import uuid4
 
 import httpx
 import pytest
+from PIL import Image
 
 pytestmark = pytest.mark.cms
+
+
+def png(width: int = 240, height: int = 240) -> bytes:
+    """A real image, because the uploader inspects the bytes and not the name."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (width, height), (31, 75, 153)).save(buffer, format="PNG")
+    return buffer.getvalue()
+
 
 RO_BODY = [
     {"type": "paragraph", "text": "Clubul anunță transferul lui Andrei Pop de la FC Vecin."},
@@ -184,3 +195,76 @@ class TestAccess:
             assert public.status_code == 404, "an unpublished draft must not be readable"
         finally:
             await client.delete(f"/api/v1/content/{item['id']}", headers=as_user("owner"))
+
+
+class TestCoverAtCreation:
+    """The picture is chosen while the article is written, not after it exists.
+
+    The editor used to defer the cover until the first save, on the reasoning
+    that a new article has no id for an image to attach to. It does not need
+    one: the image is uploaded to the club's media library, and the article
+    only names it. `POST /content` has always accepted `cover_media_id` — what
+    it did not do was check it, which the update path had done all along.
+    """
+
+    async def test_an_article_is_created_with_its_cover(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        uploaded = await client.post(
+            "/api/v1/media",
+            headers=as_user("owner"),
+            data={
+                "club_id": demo["club_id"],
+                "purpose": "ARTICLE_IMAGE",
+                "alt_text": "Andrei Pop semnează",
+            },
+            files={"file": ("signing.png", png(), "image/png")},
+        )
+        assert uploaded.status_code == 201, uploaded.text
+        asset = uploaded.json()
+
+        payload = _article(demo["club_id"], "G") | {"cover_media_id": asset["id"]}
+        created = await client.post("/api/v1/content", headers=as_user("owner"), json=payload)
+        assert created.status_code == 201, created.text
+        item = created.json()
+        try:
+            assert item["cover_media_id"] == asset["id"]
+            # The URL too: the id round-tripping proves it was stored, and the
+            # URL proves the article can actually show the picture.
+            assert item["cover_url"]
+        finally:
+            await client.delete(f"/api/v1/content/{item['id']}", headers=as_user("owner"))
+            await client.delete(f"/api/v1/media/{asset['id']}", headers=as_user("owner"))
+
+    async def test_a_cover_that_does_not_exist_is_refused(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        """Refused outright rather than stored and silently rendering nothing."""
+        payload = _article(demo["club_id"], "H") | {"cover_media_id": str(uuid4())}
+        created = await client.post("/api/v1/content", headers=as_user("owner"), json=payload)
+        assert created.status_code == 404, created.text
+
+    async def test_another_tenants_picture_is_not_a_cover(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        """The id is real, and still refused: it belongs to somebody else."""
+        theirs = (await client.get("/api/v1/me", headers=as_user("other_owner"))).json()
+        their_club = theirs["clubs"][0]["id"]
+
+        uploaded = await client.post(
+            "/api/v1/media",
+            headers=as_user("other_owner"),
+            data={"club_id": their_club, "purpose": "ARTICLE_IMAGE"},
+            files={"file": ("theirs.png", png(), "image/png")},
+        )
+        assert uploaded.status_code == 201, uploaded.text
+        asset = uploaded.json()
+
+        try:
+            payload = _article(demo["club_id"], "I") | {"cover_media_id": asset["id"]}
+            created = await client.post(
+                "/api/v1/content", headers=as_user("owner"), json=payload
+            )
+            assert created.status_code == 404, created.text
+        finally:
+            await client.delete(f"/api/v1/media/{asset['id']}", headers=as_user("other_owner"))

@@ -157,6 +157,21 @@ async def _detail(db: Db, service: ContentService, item: ContentItem) -> Content
     )
 
 
+async def _require_media(db: Db, ctx: RequestContext, media_id: UUID) -> None:
+    """The picture has to exist, and has to be this tenant's.
+
+    Shared by create and update because a cover set at either moment is the
+    same claim. It was only checked on update, so an article created with a
+    cover that did not exist kept the id and rendered no picture — a broken
+    page with nothing anywhere saying why.
+    """
+    asset = await db.scalar(
+        select(MediaAsset).where(MediaAsset.id == media_id, MediaAsset.tenant_id == ctx.tenant)
+    )
+    if asset is None:
+        raise NotFound(object_type="media_asset", object_id=str(media_id))
+
+
 class ContentItemUpdate(BaseModel):
     """Item-level fields — the ones that are not per-language."""
 
@@ -185,14 +200,7 @@ async def update_content(
 
     changes = payload.model_dump(exclude_unset=True)
     if changes.get("cover_media_id") is not None:
-        asset = await db.scalar(
-            select(MediaAsset).where(
-                MediaAsset.id == changes["cover_media_id"],
-                MediaAsset.tenant_id == ctx.tenant,
-            )
-        )
-        if asset is None:
-            raise NotFound(object_type="media_asset", object_id=str(changes["cover_media_id"]))
+        await _require_media(db, ctx, changes["cover_media_id"])
 
     before = {field: getattr(item, field) for field in changes}
     for field, value in changes.items():
@@ -232,6 +240,9 @@ async def create_content(
     db: Db,
     ctx: Annotated[RequestContext, Depends(Requires(WRITE, feature=CMS))],
 ) -> ContentDetail:
+    if payload.cover_media_id is not None:
+        await _require_media(db, ctx, payload.cover_media_id)
+
     service = ContentService(db)
     item = await service.create(
         ctx,

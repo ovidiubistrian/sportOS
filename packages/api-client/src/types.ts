@@ -324,6 +324,9 @@ export interface ContentFilters {
 export interface ContentCreate {
   club_id: string;
   article_type: ArticleType;
+  /** Optional at creation: the image is uploaded to the club's library, which
+   *  does not need the article to exist yet. */
+  cover_media_id?: string | null;
   translation: {
     locale: string;
     title: string;
