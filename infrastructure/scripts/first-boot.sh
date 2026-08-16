@@ -28,10 +28,17 @@ if [[ ! -f .env ]]; then
 fi
 set -a; . ./.env; set +a
 
-# Repairs an .env written before bootstrap-vps.sh learned to lowercase this.
 # A registry path must be lowercase, and the repository is `sportOS`; compose
-# interpolates the value straight into the image name.
-export GITHUB_REPOSITORY="$(printf '%s' "${GITHUB_REPOSITORY:-}" | tr '[:upper:]' '[:lower:]')"
+# interpolates this straight into the image name. Rewritten in the file rather
+# than only in this shell: any `docker compose` command typed by hand reads
+# .env directly, and would fail on the uppercase value long after this script
+# had appeared to fix it.
+lowered="$(printf '%s' "${GITHUB_REPOSITORY:-}" | tr '[:upper:]' '[:lower:]')"
+if [[ "$lowered" != "${GITHUB_REPOSITORY:-}" ]]; then
+  sed -i "s#^GITHUB_REPOSITORY=.*#GITHUB_REPOSITORY=${lowered}#" .env
+  export GITHUB_REPOSITORY="$lowered"
+  printf '  .env: lowercased GITHUB_REPOSITORY to %s\n' "$lowered"
+fi
 
 step() { printf '\n\033[1;34m▸ %s\033[0m\n' "$1"; }
 
