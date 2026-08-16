@@ -230,9 +230,7 @@ async def list_products(
     ctx: Annotated[RequestContext, Depends(Requires(READ, feature=SHOP))],
     include_inactive: Annotated[bool, Query()] = True,
 ) -> list[ProductOut]:
-    stmt = select(Product).where(
-        Product.tenant_id == ctx.tenant, Product.club_id == club_id
-    )
+    stmt = select(Product).where(Product.tenant_id == ctx.tenant, Product.club_id == club_id)
     if not include_inactive:
         stmt = stmt.where(Product.is_active.is_(True))
     products = list(await db.scalars(stmt.order_by(Product.sort_order, Product.name)))

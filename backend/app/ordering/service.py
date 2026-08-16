@@ -96,9 +96,7 @@ class OrderingService:
         scarves — the client sends what the basket should contain, not a delta.
         """
         if quantity < 0 or quantity > MAX_QUANTITY:
-            raise ValidationFailed(
-                f"Choose between 1 and {MAX_QUANTITY}.", field="quantity"
-            )
+            raise ValidationFailed(f"Choose between 1 and {MAX_QUANTITY}.", field="quantity")
 
         existing = await self.session.scalar(
             select(CartLine).where(
@@ -170,8 +168,7 @@ class OrderingService:
             raise ValidationFailed("Your basket is empty.", field="cart")
 
         requests = [
-            LineRequest(line.line_type, line.reference_id, line.quantity)
-            for line in lines
+            LineRequest(line.line_type, line.reference_id, line.quantity) for line in lines
         ]
         priced = [
             await handler_for(request.line_type).price(
@@ -237,9 +234,7 @@ class OrderingService:
     async def cancel(self, order: Order) -> None:
         """Cancel an order and put everything back on the shelf."""
         if order.status == "COLLECTED":
-            raise ValidationFailed(
-                "This order has already been collected.", field="status"
-            )
+            raise ValidationFailed("This order has already been collected.", field="status")
         if order.status == "CANCELLED":
             return
 

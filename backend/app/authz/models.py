@@ -51,9 +51,7 @@ class Role(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
             unique=True,
             postgresql_nulls_not_distinct=True,
         ),
-        CheckConstraint(
-            "scope_level IN " + str(SCOPE_LEVELS), name="role_scope_level_valid"
-        ),
+        CheckConstraint("scope_level IN " + str(SCOPE_LEVELS), name="role_scope_level_valid"),
     )
 
     tenant_id: Mapped[UUID | None] = mapped_column(

@@ -154,8 +154,7 @@ async def cleanup_published(older_than_days: int = 7) -> int:
     async with platform_session(reason="outbox cleanup", routine=True) as session:
         result = await session.execute(
             text(
-                "DELETE FROM outbox_event "
-                "WHERE status = 'PUBLISHED' AND published_at < :cutoff"
+                "DELETE FROM outbox_event WHERE status = 'PUBLISHED' AND published_at < :cutoff"
             ),
             {"cutoff": cutoff},
         )

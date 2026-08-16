@@ -435,9 +435,7 @@ class TeamStaffChanges(BaseModel):
 
 
 async def _team_or_404(db: Db, ctx: RequestContext, team_id: UUID) -> Team:
-    team = await db.scalar(
-        select(Team).where(Team.id == team_id, Team.tenant_id == ctx.tenant)
-    )
+    team = await db.scalar(select(Team).where(Team.id == team_id, Team.tenant_id == ctx.tenant))
     if team is None:
         raise NotFound(object_type="team", object_id=str(team_id))
     return team
@@ -493,9 +491,7 @@ async def add_team_staff(
 
     if payload.person_id is not None:
         person = await db.scalar(
-            select(Person).where(
-                Person.id == payload.person_id, Person.tenant_id == ctx.tenant
-            )
+            select(Person).where(Person.id == payload.person_id, Person.tenant_id == ctx.tenant)
         )
         if person is None:
             raise NotFound(object_type="person", object_id=str(payload.person_id))

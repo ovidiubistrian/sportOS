@@ -83,9 +83,7 @@ class CartLine(Base, UUIDPrimaryKey, Timestamped, TenantScoped):
             name="fk_cart_line_cart",
             ondelete="CASCADE",
         ),
-        UniqueConstraint(
-            "cart_id", "line_type", "reference_id", name="uq_cart_line_reference"
-        ),
+        UniqueConstraint("cart_id", "line_type", "reference_id", name="uq_cart_line_reference"),
         CheckConstraint("line_type IN " + str(LINE_TYPES), name="cart_line_type_valid"),
         CheckConstraint("quantity > 0", name="cart_line_quantity_positive"),
     )

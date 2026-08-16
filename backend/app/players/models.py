@@ -64,9 +64,7 @@ class Player(Base, UUIDPrimaryKey, Timestamped, TenantScoped):
 
     status: Mapped[str] = mapped_column(String(16), default="REGISTERED")
     primary_position: Mapped[str | None] = mapped_column(String(12))
-    secondary_positions: Mapped[list[str]] = mapped_column(
-        ARRAY(String(12)), default=list
-    )
+    secondary_positions: Mapped[list[str]] = mapped_column(ARRAY(String(12)), default=list)
     preferred_foot: Mapped[str | None] = mapped_column(String(8))
 
     federation_id: Mapped[str | None] = mapped_column(String(64))

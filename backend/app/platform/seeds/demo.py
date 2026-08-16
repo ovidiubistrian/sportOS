@@ -46,6 +46,9 @@ log = structlog.get_logger("seed.demo")
 # reproducible. Not for cryptographic use.
 RNG = random.Random(20260813)
 
+# Word lists, not code. One entry per line would be 60 lines of scrolling for
+# something whose only property is "twenty plausible Romanian names".
+# fmt: off
 FIRST_NAMES_RO = [
     "Andrei", "Mihai", "Ștefan", "Cristian", "Vlad", "Alexandru", "Ionuț",
     "Robert", "Darius", "Rareș", "Gabriel", "Sebastian", "Denis", "Marius",
@@ -56,6 +59,7 @@ LAST_NAMES_RO = [
     "Constantin", "Radu", "Munteanu", "Stoica", "Diaconu", "Barbu", "Nistor",
     "Șerban", "Crăciun", "Ardelean", "Lungu", "Oprea", "Vasilescu", "Ciobanu",
 ]
+# fmt: on
 POSITIONS = ["GK", "RB", "CB", "CB", "LB", "DM", "CM", "CM", "AM", "RW", "LW", "ST"]
 FEET = ["RIGHT", "RIGHT", "RIGHT", "LEFT", "BOTH"]
 
@@ -68,11 +72,14 @@ KEYCLOAK_USERS = {
     "platform@footbola.test": ("0192a000-0000-7000-8000-000000000005", "Platform", "Operator"),
 }
 
+# (code, age group, squad size) — a table, read across as much as down.
+# fmt: off
 ACADEMY_SQUADS = [
     ("U19", "U19", 24), ("U17", "U17", 26), ("U16", "U16", 24), ("U15", "U15", 22),
     ("U14", "U14", 24), ("U13", "U13", 26), ("U12", "U12", 28), ("U11", "U11", 26),
     ("U10", "U10", 24), ("U9", "U9", 22),
 ]
+# fmt: on
 
 
 async def seed_demo() -> None:
@@ -218,16 +225,28 @@ async def _seed_fc_example(session, users: dict[str, UserAccount]) -> Tenant:
     ]
     for name, code, gender, age_group, level, academy, _ in senior_specs:
         team = Team(
-            tenant_id=tenant.id, club_id=club.id, name=name, code=code,
-            gender=gender, age_group=age_group, level=level, is_academy=academy,
+            tenant_id=tenant.id,
+            club_id=club.id,
+            name=name,
+            code=code,
+            gender=gender,
+            age_group=age_group,
+            level=level,
+            is_academy=academy,
         )
         session.add(team)
         teams[code] = team
 
     for name, code, _ in ACADEMY_SQUADS:
         team = Team(
-            tenant_id=tenant.id, club_id=club.id, name=name, code=code,
-            gender="MALE", age_group=code, level="YOUTH", is_academy=True,
+            tenant_id=tenant.id,
+            club_id=club.id,
+            name=name,
+            code=code,
+            gender="MALE",
+            age_group=code,
+            level="YOUTH",
+            is_academy=True,
         )
         session.add(team)
         teams[code] = team
@@ -237,19 +256,24 @@ async def _seed_fc_example(session, users: dict[str, UserAccount]) -> Tenant:
     squads = [(c, s) for _n, c, _g, _a, _l, _ac, s in senior_specs]
     squads += [(code, size) for _name, code, size in ACADEMY_SQUADS]
     for code, size in squads:
-        total += await _seed_squad(
-            session, tenant, club, season, teams[code], code, size
-        )
+        total += await _seed_squad(session, tenant, club, season, teams[code], code, size)
 
     # Staff logins, at three different scopes — the point of the demo.
     await _grant(session, users["owner@fcexample.test"], "TENANT_OWNER", tenant_id=tenant.id)
     await _grant(
-        session, users["academy@fcexample.test"], "ACADEMY_DIRECTOR",
-        tenant_id=tenant.id, club_id=club.id,
+        session,
+        users["academy@fcexample.test"],
+        "ACADEMY_DIRECTOR",
+        tenant_id=tenant.id,
+        club_id=club.id,
     )
     await _grant(
-        session, users["coach.u15@fcexample.test"], "COACH",
-        tenant_id=tenant.id, club_id=club.id, team_id=teams["U15"].id,
+        session,
+        users["coach.u15@fcexample.test"],
+        "COACH",
+        tenant_id=tenant.id,
+        club_id=club.id,
+        team_id=teams["U15"].id,
     )
 
     articles = await _seed_articles(session, tenant, club)
@@ -284,9 +308,7 @@ async def _seed_squad(
             first_name=first,
             last_name=last,
             display_name=f"{first} {last}",
-            birth_date=datetime(
-                birth_year, RNG.randint(1, 12), RNG.randint(1, 28), tzinfo=UTC
-            ),
+            birth_date=datetime(birth_year, RNG.randint(1, 12), RNG.randint(1, 28), tzinfo=UTC),
             nationality=["RO"],
             source="DEMO",
         )
@@ -305,9 +327,7 @@ async def _seed_squad(
         )
         session.add(player)
         session.add(
-            PersonRoleFlag(
-                tenant_id=tenant.id, person_id=person.id, role_kind="PLAYER"
-            )
+            PersonRoleFlag(tenant_id=tenant.id, person_id=person.id, role_kind="PLAYER")
         )
         await session.flush()
 
@@ -387,13 +407,23 @@ async def _seed_northern(session, users: dict[str, UserAccount]) -> Tenant:
     )
 
     season = Season(
-        tenant_id=tenant.id, club_id=club.id, name="2025/26",
-        start_date=date(2025, 7, 1), end_date=date(2026, 6, 30), is_current=True,
+        tenant_id=tenant.id,
+        club_id=club.id,
+        name="2025/26",
+        start_date=date(2025, 7, 1),
+        end_date=date(2026, 6, 30),
+        is_current=True,
     )
     session.add(season)
     team = Team(
-        tenant_id=tenant.id, club_id=club.id, name="U15", code="U15",
-        gender="MALE", age_group="U15", level="YOUTH", is_academy=True,
+        tenant_id=tenant.id,
+        club_id=club.id,
+        name="U15",
+        code="U15",
+        gender="MALE",
+        age_group="U15",
+        level="YOUTH",
+        is_academy=True,
     )
     session.add(team)
     await session.flush()
@@ -406,6 +436,11 @@ async def _seed_northern(session, users: dict[str, UserAccount]) -> Tenant:
 
 # Multilingual on purpose: the second article exists only in Romanian, so the
 # locale-fallback path is exercised by the demo rather than only by a test.
+#
+# One block per line, over the line limit, because these are paragraphs of
+# newspaper copy in three languages. Broken across lines by the formatter, the
+# structure of an article disappears into two hundred lines of punctuation.
+# fmt: off
 DEMO_ARTICLES: list[dict] = [
     {
         "category": "match-report",
@@ -530,6 +565,7 @@ DEMO_ARTICLES: list[dict] = [
         },
     },
 ]
+# fmt: on
 
 
 async def _seed_articles(session, tenant: Tenant, club: Club) -> int:

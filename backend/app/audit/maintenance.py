@@ -28,14 +28,10 @@ def _month_start(when: date) -> date:
 
 
 def _next_month(when: date) -> date:
-    return (
-        date(when.year + 1, 1, 1) if when.month == 12 else date(when.year, when.month + 1, 1)
-    )
+    return date(when.year + 1, 1, 1) if when.month == 12 else date(when.year, when.month + 1, 1)
 
 
-def months_to_create(
-    months_ahead: int = MONTHS_AHEAD, today: date | None = None
-) -> list[date]:
+def months_to_create(months_ahead: int = MONTHS_AHEAD, today: date | None = None) -> list[date]:
     """The current month plus `months_ahead` following months."""
     start = _month_start(today or datetime.now(UTC).date())
     months = []
@@ -62,9 +58,7 @@ def partition_statements(
 
 async def ensure_audit_partitions(months_ahead: int = MONTHS_AHEAD) -> list[str]:
     created: list[str] = []
-    async with platform_session(
-        reason="audit partition maintenance", routine=True
-    ) as session:
+    async with platform_session(reason="audit partition maintenance", routine=True) as session:
         for month in months_to_create(months_ahead):
             name = await session.scalar(
                 text("SELECT create_audit_partition(:month)"), {"month": month}

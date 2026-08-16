@@ -85,9 +85,7 @@ async def handler_transaction(
     started = datetime.now(UTC)
     async with tenant_session(event.tenant_id) as session:
         if not await claim(session, handler_name, event.id):
-            log.debug(
-                "event_already_processed", handler=handler_name, event_id=str(event.id)
-            )
+            log.debug("event_already_processed", handler=handler_name, event_id=str(event.id))
             yield None
             return
 

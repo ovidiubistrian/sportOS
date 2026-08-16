@@ -23,9 +23,7 @@ from app.core.errors import Conflict, DomainError
 log = structlog.get_logger(__name__)
 
 
-def _body(
-    code: str, message: str, details: dict[str, Any] | None = None
-) -> dict[str, Any]:
+def _body(code: str, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
     return {
         "code": code,
         "message": message,
@@ -93,22 +91,16 @@ def register_exception_handlers(app: FastAPI) -> None:
         }
         return JSONResponse(
             status_code=exc.status_code,
-            content=_body(
-                codes.get(exc.status_code, "HTTP_ERROR"), str(exc.detail)
-            ),
+            content=_body(codes.get(exc.status_code, "HTTP_ERROR"), str(exc.detail)),
             headers=getattr(exc, "headers", None),
         )
 
     @app.exception_handler(Exception)
     async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
-        log.exception(
-            "unhandled_exception", path=request.url.path, method=request.method
-        )
+        log.exception("unhandled_exception", path=request.url.path, method=request.method)
         message = (
             f"{type(exc).__name__}: {exc}"
             if not settings.is_production
             else "Something went wrong."
         )
-        return JSONResponse(
-            status_code=500, content=_body("INTERNAL_ERROR", message)
-        )
+        return JSONResponse(status_code=500, content=_body("INTERNAL_ERROR", message))

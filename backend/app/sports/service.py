@@ -50,7 +50,5 @@ async def sports_in_club(session: AsyncSession, club_id: UUID) -> list[str]:
     Used to decide whether the club is worth showing a sport chooser at all: a
     club with one sport should never be asked which one, on any screen.
     """
-    rows = await session.scalars(
-        select(Team.sport).where(Team.club_id == club_id).distinct()
-    )
+    rows = await session.scalars(select(Team.sport).where(Team.club_id == club_id).distinct())
     return sorted({row for row in rows if row})

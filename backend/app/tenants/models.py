@@ -42,7 +42,6 @@ class Tenant(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
         String(24), default="FOOTBALL", server_default="FOOTBALL"
     )
 
-
     status: Mapped[str] = mapped_column(String(16), default="PENDING")
     suspended_reason: Mapped[str | None] = mapped_column(Text)
 

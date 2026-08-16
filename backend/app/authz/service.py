@@ -39,9 +39,7 @@ class PermissionResolver:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def resolve(
-        self, user_id: UUID, tenant_id: UUID | None
-    ) -> EffectivePermissions:
+    async def resolve(self, user_id: UUID, tenant_id: UUID | None) -> EffectivePermissions:
         version = await cache.get_int(_version_key(user_id), default=1)
         key = _grants_key(user_id, tenant_id, version)
 
@@ -53,9 +51,7 @@ class PermissionResolver:
         await cache.set_json(key, _serialise(effective), ttl=60)
         return effective
 
-    async def _load(
-        self, user_id: UUID, tenant_id: UUID | None
-    ) -> EffectivePermissions:
+    async def _load(self, user_id: UUID, tenant_id: UUID | None) -> EffectivePermissions:
         now = func.now()
         stmt = (
             select(

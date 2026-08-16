@@ -94,9 +94,7 @@ async def record_access(
                     actor_kind="PLATFORM"
                     if principal and principal.is_platform_user
                     else "USER",
-                    impersonated_by_user_id=principal.impersonated_by
-                    if principal
-                    else None,
+                    impersonated_by_user_id=principal.impersonated_by if principal else None,
                     action=action,
                     object_type=object_type,
                     object_id=object_id,

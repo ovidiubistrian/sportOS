@@ -59,9 +59,7 @@ async def attach(
     because the identity provider hiccuped would be the worse outcome. The
     backfill script exists precisely to repair that afterwards.
     """
-    taken = await session.scalar(
-        select(ClubDomain).where(ClubDomain.hostname == hostname)
-    )
+    taken = await session.scalar(select(ClubDomain).where(ClubDomain.hostname == hostname))
     if taken is not None:
         return None
 

@@ -161,9 +161,7 @@ class TestSendIn(BaseModel):
 
 
 async def _club(db: Db, ctx: RequestContext, club_id: UUID) -> Club:
-    club = await db.scalar(
-        select(Club).where(Club.id == club_id, Club.tenant_id == ctx.tenant)
-    )
+    club = await db.scalar(select(Club).where(Club.id == club_id, Club.tenant_id == ctx.tenant))
     if club is None:
         raise NotFound(object_type="club", object_id=str(club_id))
     return club
@@ -277,9 +275,7 @@ async def preview(
         raise NotFound(object_type="email_template", object_id=str(template_id))
 
     club = await _club(db, ctx, template.club_id)
-    branding = await db.scalar(
-        select(ClubBranding).where(ClubBranding.club_id == club.id)
-    )
+    branding = await db.scalar(select(ClubBranding).where(ClubBranding.club_id == club.id))
     site = await _site_url(db, club)
     html, text = service.render(
         template=template,
@@ -366,9 +362,7 @@ async def send_test(
     ctx: Annotated[RequestContext, Depends(Requires(WRITE))],
 ) -> None:
     campaign = await db.scalar(
-        select(Campaign).where(
-            Campaign.id == campaign_id, Campaign.tenant_id == ctx.tenant
-        )
+        select(Campaign).where(Campaign.id == campaign_id, Campaign.tenant_id == ctx.tenant)
     )
     if campaign is None:
         raise NotFound(object_type="campaign", object_id=str(campaign_id))
@@ -429,9 +423,7 @@ async def send_campaign(
         db, club_id=club.id, pool=campaign.audience, locale=campaign.locale
     )
     if not people:
-        raise ValidationFailed(
-            "Nobody has agreed to hear from the club yet.", field="audience"
-        )
+        raise ValidationFailed("Nobody has agreed to hear from the club yet.", field="audience")
 
     # The recipient list is written in its own transaction, which commits
     # before a single message leaves. It cannot be the request's transaction:

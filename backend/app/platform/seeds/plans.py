@@ -26,6 +26,10 @@ F = Feature
 # key -> (name, tier, sort, {feature: enabled | limit}, {currency: (month, year)})
 PlanSpec = tuple[str, str, int, dict[Feature, bool | int | None], dict[str, tuple[int, int]]]
 
+# The price list. Features are grouped on shared lines — what is switched on,
+# then the numeric limits — so the difference between two plans can be read by
+# comparing blocks rather than by scrolling through ninety single-entry lines.
+# fmt: off
 PLANS: dict[str, PlanSpec] = {
     "STARTER": (
         "Starter",
@@ -90,6 +94,7 @@ PLANS: dict[str, PlanSpec] = {
         {},  # priced per contract
     ),
 }
+# fmt: on
 
 
 async def seed_plans() -> None:

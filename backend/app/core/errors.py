@@ -19,9 +19,7 @@ class DomainError(Exception):
     status: int = 500
     default_message: str = "Something went wrong."
 
-    def __init__(
-        self, message: str | None = None, **details: Any
-    ) -> None:
+    def __init__(self, message: str | None = None, **details: Any) -> None:
         self.message = message or self.default_message
         self.details: dict[str, Any] = details
         super().__init__(self.message)

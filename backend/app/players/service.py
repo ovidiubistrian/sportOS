@@ -66,9 +66,7 @@ class PlayerService:
         await self._attach_photos([detail], [row[0]])
         return detail
 
-    async def _attach_photos(
-        self, items: list[Any], players: list[Player]
-    ) -> None:
+    async def _attach_photos(self, items: list[Any], players: list[Player]) -> None:
         """Resolve squad photographs for a page of players, in one query.
 
         Resolved at read time rather than stored, so an image the club deletes

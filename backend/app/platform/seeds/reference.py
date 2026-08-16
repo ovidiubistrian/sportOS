@@ -32,9 +32,7 @@ log = structlog.get_logger("seed.reference")
 
 async def seed_reference_data() -> None:
     async with platform_session(reason="seed reference data", routine=True) as session:
-        existing = {
-            row.key: row for row in await session.scalars(select(PermissionRecord))
-        }
+        existing = {row.key: row for row in await session.scalars(select(PermissionRecord))}
         catalogue_keys = {p.key for p in CATALOGUE}
 
         for permission in CATALOGUE:

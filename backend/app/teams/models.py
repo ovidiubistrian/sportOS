@@ -86,7 +86,6 @@ class Team(Base, UUIDPrimaryKey, Timestamped, TenantScoped):
     )
 
 
-
 # The people on the touchline. Ordered as a club would introduce them, which is
 # also the order they are shown in.
 TEAM_STAFF_ROLES = (

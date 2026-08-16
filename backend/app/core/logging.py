@@ -23,7 +23,9 @@ from app.core.context import current_request_id, current_tenant_id_optional
 
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 
-# Field names whose values are never logged, whatever they contain.
+# Field names whose values are never logged, whatever they contain. Grouped by
+# kind — credentials, then payment, then clinical — so a gap is visible.
+# fmt: off
 _FORBIDDEN_KEYS = frozenset(
     {
         "password", "secret", "token", "access_token", "refresh_token",
@@ -31,6 +33,7 @@ _FORBIDDEN_KEYS = frozenset(
         "iban", "diagnosis", "medical_note",
     }
 )
+# fmt: on
 
 
 def _hash(value: str) -> str:

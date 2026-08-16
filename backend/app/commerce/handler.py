@@ -36,9 +36,7 @@ class ProductLineHandler:
         if row is None:
             # Withdrawn between browsing and checkout, or simply not this
             # club's. Either way the buyer needs a sentence, not a 500.
-            raise ValidationFailed(
-                "That item is no longer in the shop.", field="reference_id"
-            )
+            raise ValidationFailed("That item is no longer in the shop.", field="reference_id")
         variant, product = row
         if not product.is_active:
             raise ValidationFailed(

@@ -53,9 +53,7 @@ class UUIDPrimaryKey:
 class Timestamped:
     @declared_attr.directive
     def created_at(cls) -> Mapped[datetime]:  # noqa: N805
-        return mapped_column(
-            DateTime(timezone=True), server_default=func.now(), nullable=False
-        )
+        return mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     @declared_attr.directive
     def updated_at(cls) -> Mapped[datetime]:  # noqa: N805

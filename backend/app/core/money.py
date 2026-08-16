@@ -15,12 +15,17 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Final, Self
 
 # Only currencies whose exponent is not 2. Everything else defaults to 2.
+# Kept as a table — grouped by exponent, one row per line — because that is how
+# it is checked against ISO 4217, and one entry per line would be 24 lines of
+# noise for something read as a whole or not at all.
+# fmt: off
 _EXPONENTS: Final[dict[str, int]] = {
     "BIF": 0, "CLP": 0, "DJF": 0, "GNF": 0, "ISK": 0, "JPY": 0, "KMF": 0,
     "KRW": 0, "PYG": 0, "RWF": 0, "UGX": 0, "UYI": 0, "VND": 0, "VUV": 0,
     "XAF": 0, "XOF": 0, "XPF": 0,
     "BHD": 3, "IQD": 3, "JOD": 3, "KWD": 3, "LYD": 3, "OMR": 3, "TND": 3,
 }
+# fmt: on
 
 BASIS_POINTS: Final = 10_000
 
@@ -75,9 +80,7 @@ class Money:
 
     def _check(self, other: Money) -> None:
         if self.currency != other.currency:
-            raise CurrencyMismatch(
-                f"cannot combine {self.currency} with {other.currency}"
-            )
+            raise CurrencyMismatch(f"cannot combine {self.currency} with {other.currency}")
 
     def __add__(self, other: Money) -> Money:
         self._check(other)

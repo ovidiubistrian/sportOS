@@ -39,9 +39,7 @@ class DomainEvent:
 
     def __post_init__(self) -> None:
         if not self.event_type or not self.aggregate_type:
-            raise TypeError(
-                f"{type(self).__name__} must define event_type and aggregate_type"
-            )
+            raise TypeError(f"{type(self).__name__} must define event_type and aggregate_type")
 
     @classmethod
     def of(cls, aggregate_id: UUID, tenant_id: UUID | None = None, **payload: Any) -> Self:

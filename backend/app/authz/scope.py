@@ -60,9 +60,7 @@ class Scope:
 
     @classmethod
     def team(cls, tenant_id: UUID, club_id: UUID | None, team_id: UUID) -> Scope:
-        return cls(
-            ScopeLevel.TEAM, tenant_id=tenant_id, club_id=club_id, team_id=team_id
-        )
+        return cls(ScopeLevel.TEAM, tenant_id=tenant_id, club_id=club_id, team_id=team_id)
 
     @classmethod
     def narrowest(

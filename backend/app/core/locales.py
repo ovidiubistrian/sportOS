@@ -73,7 +73,5 @@ def validate(codes: list[str], *, field: str = "supported_locales") -> list[str]
             seen.append(cleaned)
 
     if not seen:
-        raise ValidationFailed(
-            "A tenant must publish in at least one language.", field=field
-        )
+        raise ValidationFailed("A tenant must publish in at least one language.", field=field)
     return seen

@@ -347,9 +347,7 @@ async def list_plans(ctx: Annotated[RequestContext, Depends(READ)]) -> list[Plan
                         enabled=f.enabled,
                         limit_value=f.limit_value,
                     )
-                    for f in sorted(
-                        features.get(version.id, []), key=lambda f: f.feature_key
-                    )
+                    for f in sorted(features.get(version.id, []), key=lambda f: f.feature_key)
                 ],
             )
             for plan, version in latest.values()
@@ -558,9 +556,7 @@ async def stop_impersonating(
 # --- competition curation ---------------------------------------------------
 
 
-@router.get(
-    "/competitions", response_model=list[CompetitionOut], summary="Curate competitions"
-)
+@router.get("/competitions", response_model=list[CompetitionOut], summary="Curate competitions")
 async def list_all_competitions(
     ctx: Annotated[RequestContext, Depends(READ)],
 ) -> list[CompetitionOut]:
