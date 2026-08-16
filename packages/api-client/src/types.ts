@@ -604,7 +604,7 @@ export interface ProviderCatalogue {
 /** How a club's results feed is set up, and whether it has ever run. */
 export interface FeedSettings {
   club_id: string;
-  mode: "AUTO" | "MANUAL";
+  mode: "FEED" | "MANUAL";
   provider_team_id: string | null;
   provider_team_name: string | null;
   season_year: number | null;
@@ -621,7 +621,7 @@ export interface FeedSettings {
 }
 
 export interface FeedUpdate {
-  mode?: "AUTO" | "MANUAL";
+  mode?: "FEED" | "MANUAL";
   provider_team_id?: string | null;
   provider_team_name?: string | null;
   season_year?: number | null;

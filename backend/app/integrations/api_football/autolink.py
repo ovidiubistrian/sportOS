@@ -202,7 +202,7 @@ async def try_link(
         feed = ClubFeed(tenant_id=tenant_id, club_id=club_id, provider="API_FOOTBALL")
         session.add(feed)
 
-    feed.mode = "AUTO"
+    feed.mode = "FEED"
     feed.provider_team_id = provider_id
     feed.provider_team_name = team.get("name")
     feed.season_year = year
@@ -235,7 +235,7 @@ def stale(feed: ClubFeed | None) -> bool:
     from "connected and working", which look the same from the database and
     very different to somebody who has just pressed a button.
     """
-    return feed is not None and feed.mode == "AUTO" and feed.last_fixtures_at is None
+    return feed is not None and feed.mode == "FEED" and feed.last_fixtures_at is None
 
 
 def since(moment: datetime | None) -> str | None:

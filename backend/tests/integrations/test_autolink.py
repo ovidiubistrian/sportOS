@@ -8,9 +8,13 @@ cases are all the ones where nothing should be connected.
 
 from __future__ import annotations
 
+import pathlib
+import re
+
 import pytest
 
 from app.integrations.api_football.autolink import fold, season_year
+from app.integrations.models import FEED_MODES
 
 pytestmark = pytest.mark.integrations
 
@@ -56,6 +60,23 @@ class TestFoldingANameToWhatTwoCataloguesAgreeOn:
 
     def test_folding_is_stable(self) -> None:
         assert fold(fold("CSM Reșița")) == fold("CSM Reșița")
+
+
+def test_the_mode_the_linker_writes_is_one_the_database_allows() -> None:
+    """`mode` is a CHECK constraint, and a wrong value fails at the flush.
+
+    It was `AUTO` for a while, which is not one of them: the API rejected it as
+    invalid input, and had it got past that the insert would have failed inside
+    a request that was otherwise succeeding. Reading the constant is worth more
+    than remembering the string.
+    """
+    source = (
+        pathlib.Path(__file__).resolve().parents[2]
+        / "app/integrations/api_football/autolink.py"
+    ).read_text()
+    written = re.findall(r'feed\.mode = "([A-Z_]+)"', source)
+    assert written, "the linker no longer sets a mode — has it moved?"
+    assert set(written) <= set(FEED_MODES), f"{written} is not among {FEED_MODES}"
 
 
 class TestReadingTheSeasonYear:

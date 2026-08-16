@@ -52,7 +52,7 @@ export function ResultsFeed({ clubId, country }: { clubId: string; country: stri
     if (!team || !league?.season) return;
     update.mutate(
       {
-        mode: "AUTO",
+        mode: "FEED",
         provider_team_id: team.id,
         provider_team_name: team.name,
         season_year: league.season,
