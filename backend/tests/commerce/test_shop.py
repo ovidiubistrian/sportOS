@@ -236,9 +236,7 @@ class TestTheShopWindow:
         """No club parameter anywhere — the domain decides whose shop this is."""
         ours = (await client.get(f"{BASE}/public/shop", headers=HOST)).json()
         theirs = (
-            await client.get(
-                f"{BASE}/public/shop", headers={"X-Forwarded-Host": OTHER_HOST}
-            )
+            await client.get(f"{BASE}/public/shop", headers={"X-Forwarded-Host": OTHER_HOST})
         ).json()
         assert product["id"] in {row["id"] for row in ours}
         assert product["id"] not in {row["id"] for row in theirs}

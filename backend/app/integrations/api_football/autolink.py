@@ -38,6 +38,22 @@ from app.integrations.models import ClubFeed
 
 log = structlog.get_logger(__name__)
 
+# The provider names countries in English. Only the ones the platform serves —
+# an unknown code means the country cannot be used as evidence, which is no
+# worse than before it was considered.
+COUNTRY_NAMES = {
+    "RO": "Romania",
+    "MD": "Moldova",
+    "GB": "England",
+    "DE": "Germany",
+    "FR": "France",
+    "ES": "Spain",
+    "IT": "Italy",
+    "NL": "Netherlands",
+    "PT": "Portugal",
+    "PL": "Poland",
+}
+
 # Words a club's legal name carries and a provider's catalogue usually does
 # not, or the other way round. Dropped from both sides before comparing, so
 # "AFC Example" and "Example FC" agree.
@@ -69,7 +85,10 @@ def fold(name: str) -> str:
     decomposed = unicodedata.normalize("NFKD", name or "")
     ascii_only = "".join(c for c in decomposed if not unicodedata.combining(c))
     words = re.split(r"[^a-z0-9]+", ascii_only.lower())
-    kept = [word for word in words if word and word not in _NOISE]
+    # Single letters go too. `F.C. Voluntari` splits into `f`, `c`,
+    # `voluntari`, and a lone letter is never the part of a name that
+    # distinguishes one club from another.
+    kept = [word for word in words if len(word) > 1 and word not in _NOISE]
     return " ".join(kept)
 
 
@@ -96,6 +115,7 @@ async def try_link(
     club_id: UUID,
     club_name: str,
     season_name: str,
+    country_code: str | None = None,
 ) -> LinkResult:
     """Look for this club in the provider's catalogue, and link it if certain.
 
@@ -126,11 +146,32 @@ async def try_link(
         log.exception("autolink_search_failed", club_id=str(club_id))
         return LinkResult(False, "The results feed could not be reached.")
 
-    candidates = [
+    named = [
         row["team"]
         for row in rows
         if row.get("team") and fold(row["team"].get("name") or "") == wanted
     ]
+
+    # A name alone is one fact, and clubs share names across borders: there is
+    # a "Dinamo" in half of Europe. The country is a second fact, free in the
+    # same response, and it is what makes a single remaining candidate mean
+    # something rather than merely being the only one we happened to see.
+    country = COUNTRY_NAMES.get((country_code or "").upper())
+    candidates = (
+        [team for team in named if (team.get("country") or "").lower() == country.lower()]
+        if country
+        else named
+    )
+    if named and not candidates:
+        log.info(
+            "autolink_wrong_country",
+            club_id=str(club_id),
+            expected=country,
+            found=[team.get("country") for team in named],
+        )
+        return LinkResult(
+            False, f"The only club with this name in the feed is not in {country}."
+        )
 
     if not candidates:
         return LinkResult(

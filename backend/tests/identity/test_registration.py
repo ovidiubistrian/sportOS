@@ -367,8 +367,7 @@ async def test_a_new_club_gets_an_address_it_can_be_reached_on(
                 "DELETE FROM club_domain WHERE tenant_id IN "
                 "(SELECT id FROM tenant WHERE slug = :s)",
                 "DELETE FROM club WHERE slug = :s",
-                "DELETE FROM person WHERE tenant_id IN "
-                "(SELECT id FROM tenant WHERE slug = :s)",
+                "DELETE FROM person WHERE tenant_id IN (SELECT id FROM tenant WHERE slug = :s)",
                 "DELETE FROM tenant_subscription WHERE tenant_id IN "
                 "(SELECT id FROM tenant WHERE slug = :s)",
                 "DELETE FROM user_account WHERE email = :e",

@@ -334,6 +334,7 @@ async def join_competition(
         club_id=payload.club_id,
         club_name=(club.display_name if club is not None else directory.name),
         season_name=season.name,
+        country_code=(club.country_code if club is not None else None),
     )
     return JoinedCompetition(
         competition=CompetitionOut.model_validate(competition),
