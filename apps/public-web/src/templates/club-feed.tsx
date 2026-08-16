@@ -120,6 +120,10 @@ export function ClubFeed({
                     src={article.cover_url}
                     alt=""
                     loading="lazy"
+                    // The card is taller than it is wide, so a landscape
+                    // photograph loses its sides here — the focal point decides
+                    // which sides.
+                    style={{ objectPosition: article.cover_focus ?? undefined }}
                     className="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.05]"
                   />
                 ) : (

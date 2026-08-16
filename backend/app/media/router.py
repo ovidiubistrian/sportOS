@@ -14,7 +14,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 
 from app.api.deps import Db, Requires
@@ -43,6 +43,8 @@ class MediaOut(BaseModel):
     content_type: str
     alt_text: str | None
     original_filename: str | None
+    focal_x: float
+    focal_y: float
 
     @classmethod
     def of(cls, asset: MediaAsset) -> MediaOut:
@@ -57,11 +59,24 @@ class MediaOut(BaseModel):
             content_type=asset.content_type,
             alt_text=asset.alt_text,
             original_filename=asset.original_filename,
+            focal_x=asset.focal_x,
+            focal_y=asset.focal_y,
         )
 
 
-class AltTextUpdate(BaseModel):
-    alt_text: str = Field(min_length=1, max_length=300)
+class MediaUpdate(BaseModel):
+    """Both fields optional, and both distinguish "unset" from "cleared".
+
+    The alt text and the focal point are edited from different controls in the
+    same panel, and neither should have to send the other's current value back
+    just to change its own.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    alt_text: str | None = Field(default=None, min_length=1, max_length=300)
+    focal_x: float | None = Field(default=None, ge=0, le=1)
+    focal_y: float | None = Field(default=None, ge=0, le=1)
 
 
 @router.get("", response_model=list[MediaOut], summary="Images for a club")
@@ -151,19 +166,35 @@ async def upload(
     return MediaOut.of(asset)
 
 
-@router.patch("/{asset_id}", response_model=MediaOut, summary="Set alt text")
-async def set_alt_text(
+@router.patch("/{asset_id}", response_model=MediaOut, summary="Describe or re-centre an image")
+async def update_media(
     asset_id: UUID,
-    payload: AltTextUpdate,
+    payload: MediaUpdate,
     db: Db,
     ctx: Annotated[RequestContext, Depends(Requires(WRITE))],
 ) -> MediaOut:
+    """The description and the focal point: the two things about an image that
+    the person who uploaded it knows and the server cannot work out."""
     asset = await db.scalar(
         select(MediaAsset).where(MediaAsset.id == asset_id, MediaAsset.tenant_id == ctx.tenant)
     )
     if asset is None:
         raise NotFound(object_type="media_asset", object_id=str(asset_id))
-    asset.alt_text = payload.alt_text.strip()
+
+    changes = payload.model_dump(exclude_unset=True)
+    if "alt_text" in changes and changes["alt_text"] is not None:
+        asset.alt_text = changes["alt_text"].strip()
+    # Both or neither: half a focal point is the centre on one axis and the
+    # club's choice on the other, which is not a thing anybody means.
+    if changes.get("focal_x") is not None and changes.get("focal_y") is not None:
+        asset.focal_x = changes["focal_x"]
+        asset.focal_y = changes["focal_y"]
+    elif ("focal_x" in changes) != ("focal_y" in changes):
+        raise ValidationFailed(
+            "A focal point needs both coordinates.",
+            field="focal_x" if "focal_y" not in changes else "focal_y",
+        )
+
     await db.flush()
     return MediaOut.of(asset)
 

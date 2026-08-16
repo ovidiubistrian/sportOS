@@ -30,6 +30,10 @@ export interface Branding {
   crest_alt: string | null;
   hero_url: string | null;
   hero_alt: string | null;
+  /** A CSS `object-position`, or null when the picture is centred. Every frame
+   *  crops around it, so one photograph survives a wide desktop band and a
+   *  nearly square one on a phone. */
+  hero_focus: string | null;
   announcement: string | null;
   tickets_url: string | null;
   tickets_label: string | null;
@@ -92,6 +96,8 @@ export interface ArticleSummary {
   published_at: string | null;
   is_pinned: boolean;
   cover_url: string | null;
+  /** A CSS `object-position`, or null when the picture is centred. */
+  cover_focus: string | null;
   article_type: string;
 }
 

@@ -3,6 +3,7 @@ import {
   useDeleteMedia,
   useMedia,
   useSetAltText,
+  useSetFocalPoint,
   useUploadMedia,
   type MediaAsset,
   type MediaPurpose,
@@ -18,7 +19,7 @@ import {
   useToast,
 } from "@footbola/ui";
 import { AlertTriangle, ImagePlus, Trash2, Upload } from "lucide-react";
-import { useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 
 import { useI18n } from "../../app/locale";
 import { useSession } from "../../app/session";
@@ -108,6 +109,107 @@ function Preview({
   );
 }
 
+/**
+ * Choosing what must survive the crop.
+ *
+ * The site renders one image into frames of very different shapes — a hero
+ * nearly 3:1 on a desktop and nearly square on a phone, a card taller than it
+ * is wide — and each crops around this point. The picture is therefore shown
+ * whole rather than cropped: a cropped preview would hide exactly the part
+ * being decided about.
+ *
+ * `object-contain` letterboxes, so the painted image is smaller than the box it
+ * sits in and a click cannot be measured against that box — the bars would
+ * count as picture. The drawn rectangle is worked out from the image's own
+ * dimensions instead, which is the same sum the browser did, and both the click
+ * and the marker use it.
+ */
+function FocalPicker({
+  asset,
+  editable,
+  label,
+  onPick,
+}: {
+  asset: MediaAsset;
+  editable: boolean;
+  label: string;
+  onPick: (x: number, y: number) => void;
+}) {
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  const drawn = () => {
+    const image = imageRef.current;
+    if (!image || !image.naturalWidth || !image.naturalHeight) return null;
+    const box = image.getBoundingClientRect();
+    const scale = Math.min(
+      box.width / image.naturalWidth,
+      box.height / image.naturalHeight,
+    );
+    const width = image.naturalWidth * scale;
+    const height = image.naturalHeight * scale;
+    return {
+      left: box.left + (box.width - width) / 2,
+      top: box.top + (box.height - height) / 2,
+      width,
+      height,
+      // Relative to the box, for placing the marker.
+      insetX: (box.width - width) / 2,
+      insetY: (box.height - height) / 2,
+      boxWidth: box.width,
+      boxHeight: box.height,
+    };
+  };
+
+  // Re-measured on load and on resize, so the marker follows the picture rather
+  // than drifting off it when the panel changes width.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const remeasure = () => setTick((n) => n + 1);
+    window.addEventListener("resize", remeasure);
+    return () => window.removeEventListener("resize", remeasure);
+  }, []);
+
+  const area = drawn();
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      disabled={!editable}
+      onClick={(event) => {
+        const rect = drawn();
+        if (!rect) return;
+        // Clamped: a click in the letterboxed margin, or a hair off the edge,
+        // becomes the nearest point on the picture. The server refuses
+        // anything outside nought to one.
+        onPick(
+          Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)),
+          Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height)),
+        );
+      }}
+      className="relative block h-full w-full cursor-crosshair disabled:cursor-default"
+    >
+      <img
+        ref={imageRef}
+        src={asset.url}
+        alt={asset.alt_text ?? ""}
+        onLoad={() => setTick((n) => n + 1)}
+        className="h-full w-full object-contain"
+      />
+      {editable && area && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_2px_rgb(0_0_0/0.45)]"
+          style={{
+            left: area.insetX + asset.focal_x * area.width,
+            top: area.insetY + asset.focal_y * area.height,
+          }}
+        />
+      )}
+    </button>
+  );
+}
+
 export function ImageField({
   purpose,
   label,
@@ -132,6 +234,7 @@ export function ImageField({
   const upload = useUploadMedia();
   const remove = useDeleteMedia();
   const setAlt = useSetAltText();
+  const setFocus = useSetFocalPoint();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -184,10 +287,19 @@ export function ImageField({
           style={{ aspectRatio: aspect }}
         >
           {selected ? (
-            <img
-              src={selected.url}
-              alt={selected.alt_text ?? ""}
-              className="max-h-full max-w-full object-contain"
+            <FocalPicker
+              asset={selected}
+              editable={editable}
+              label={t("site", "focalPointHint")}
+              onPick={(x, y) =>
+                setFocus.mutate(
+                  { assetId: selected.id, x, y },
+                  {
+                    onError: (error: ApiError) =>
+                      toast.error(t("site", "couldNotSave"), error.message),
+                  },
+                )
+              }
             />
           ) : (
             <span className="flex flex-col items-center gap-1.5 text-text-tertiary">
@@ -196,6 +308,15 @@ export function ImageField({
             </span>
           )}
         </div>
+
+        {selected && editable && (
+          // Said out loud: a crosshair cursor is not a discoverable instruction,
+          // and a club that never learns this exists gets the centre crop it
+          // was getting before.
+          <p className="border-t border-border px-2.5 pt-2 text-xs text-text-tertiary">
+            {t("site", "focalPointHint")}
+          </p>
+        )}
 
         {selected && (
           <div className="flex flex-wrap items-center gap-2 border-t border-border p-2.5">

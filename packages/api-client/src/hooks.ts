@@ -457,6 +457,29 @@ export function useSetAltText(): UseMutationResult<
   });
 }
 
+/**
+ * Where the picture is, so every frame crops around the same point.
+ *
+ * Separate from the alt text because they are set from different controls and
+ * neither should have to send the other's current value back. Both coordinates
+ * always go together — the server refuses half a focal point.
+ */
+export function useSetFocalPoint(): UseMutationResult<
+  MediaAsset,
+  ApiError,
+  { assetId: string; x: number; y: number }
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ assetId, x, y }) =>
+      api.patch<MediaAsset>(`/api/v1/media/${assetId}`, { focal_x: x, focal_y: y }),
+    onSuccess: (asset) => {
+      void queryClient.invalidateQueries({ queryKey: ["media", asset.club_id] });
+    },
+  });
+}
+
 export function useDeleteMedia(): UseMutationResult<
   void,
   ApiError,

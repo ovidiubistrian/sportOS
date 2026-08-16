@@ -60,6 +60,7 @@ export default async function ShopPage() {
               src={site.branding.hero_url}
               alt=""
               className="absolute inset-0 -z-10 h-full w-full object-cover"
+              style={{ objectPosition: site.branding.hero_focus ?? undefined }}
             />
             <span
               aria-hidden

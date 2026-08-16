@@ -71,6 +71,8 @@ class BrandingOut(BaseModel):
     crest_alt: str | None = None
     hero_url: str | None = None
     hero_alt: str | None = None
+    # A CSS `object-position`, or null when the picture is centred.
+    hero_focus: str | None = None
     announcement: str | None = None
     tickets_url: str | None = None
     tickets_label: str | None = None
@@ -192,6 +194,23 @@ def _asset_alt(images: dict[UUID, MediaAsset], asset_id: UUID | None) -> str | N
     return asset.alt_text if asset else None
 
 
+def _asset_focus(images: dict[UUID, MediaAsset], asset_id: UUID | None) -> str | None:
+    """The focal point as a CSS `object-position`, ready to use.
+
+    Sent as the finished string rather than two numbers because every consumer
+    would otherwise write the same multiplication, and a hero that is nearly
+    3:1 on a desktop and nearly square on a phone is exactly where an
+    off-by-one in that sum would be hardest to spot.
+
+    `None` at dead centre, which is the CSS default: no reason to put a
+    declaration on every image to say "unchanged".
+    """
+    asset = images.get(asset_id) if asset_id else None
+    if asset is None or (asset.focal_x == 0.5 and asset.focal_y == 0.5):
+        return None
+    return f"{asset.focal_x * 100:g}% {asset.focal_y * 100:g}%"
+
+
 async def _route_or_404(host: str | None) -> SiteRoute:
     route = await resolve_host(host)
     if route is None:
@@ -297,6 +316,7 @@ async def get_site(
             crest_alt=_asset_alt(images, branding.crest_media_id if branding else None),
             hero_url=_asset_url(images, branding.hero_media_id if branding else None),
             hero_alt=_asset_alt(images, branding.hero_media_id if branding else None),
+            hero_focus=_asset_focus(images, branding.hero_media_id if branding else None),
             announcement=(
                 branding.announcement_text
                 if branding and branding.announcement_is_active
@@ -594,6 +614,7 @@ async def list_news(
                     published_at=item.published_at,
                     is_pinned=item.is_pinned,
                     cover_url=_asset_url(covers, item.cover_media_id),
+                    cover_focus=_asset_focus(covers, item.cover_media_id),
                     article_type=item.article_type,
                 )
             )
@@ -649,6 +670,18 @@ async def get_article(
         if chosen is None:
             raise NotFound("No such article.")
 
+        # The whole asset, not just its URL: the focal point comes off it too.
+        cover: dict[UUID, MediaAsset] = (
+            {
+                asset.id: asset
+                for asset in await session.scalars(
+                    select(MediaAsset).where(MediaAsset.id == item.cover_media_id)
+                )
+            }
+            if item.cover_media_id
+            else {}
+        )
+
         return PublicArticle(
             id=item.id,
             slug=chosen.slug,
@@ -661,19 +694,8 @@ async def get_article(
             published_at=item.published_at,
             is_pinned=item.is_pinned,
             article_type=item.article_type,
-            cover_url=(
-                _asset_url(
-                    {
-                        asset.id: asset
-                        for asset in await session.scalars(
-                            select(MediaAsset).where(MediaAsset.id == item.cover_media_id)
-                        )
-                    },
-                    item.cover_media_id,
-                )
-                if item.cover_media_id
-                else None
-            ),
+            cover_url=_asset_url(cover, item.cover_media_id),
+            cover_focus=_asset_focus(cover, item.cover_media_id),
             served_locale_fallback=bool(locale and chosen.locale != locale),
         )
 

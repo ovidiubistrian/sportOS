@@ -684,6 +684,7 @@ export const en = {
     saved: "Design saved",
     savedHint: "The club website updates within a few seconds.",
     couldNotSave: "Could not save",
+    focalPointHint: "Click the part that must stay in shot",
     primary: "Primary",
     primaryHint: "Buttons, active navigation, links and focus rings.",
     secondary: "Secondary",

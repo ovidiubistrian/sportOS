@@ -144,3 +144,105 @@ class TestUploadRoute:
             assert probe.status_code == 404
         finally:
             await client.delete(f"/api/v1/media/{asset_id}", headers=as_user("owner"))
+
+
+class TestFocalPoint:
+    """Where the picture is, so every frame crops around the same point.
+
+    One image is rendered into frames of very different shapes — a hero nearly
+    3:1 on a desktop and nearly square on a phone, a card taller than it is
+    wide. `object-fit: cover` crops from the centre, so a stadium photograph
+    that read perfectly on a desktop came out as a hillside on a phone. The
+    centre was only ever a guess; this is the club correcting it.
+    """
+
+    async def test_an_upload_starts_centred(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        """Which is what every frame did before this existed."""
+        created = await client.post(
+            "/api/v1/media",
+            headers=as_user("owner"),
+            data={"club_id": demo["club_id"], "purpose": "HERO"},
+            files={"file": ("hero.png", png(), "image/png")},
+        )
+        asset = created.json()
+        try:
+            assert asset["focal_x"] == 0.5
+            assert asset["focal_y"] == 0.5
+        finally:
+            await client.delete(f"/api/v1/media/{asset['id']}", headers=as_user("owner"))
+
+    async def test_the_club_can_move_it(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        created = await client.post(
+            "/api/v1/media",
+            headers=as_user("owner"),
+            data={"club_id": demo["club_id"], "purpose": "HERO"},
+            files={"file": ("hero.png", png(), "image/png")},
+        )
+        asset_id = created.json()["id"]
+        try:
+            moved = await client.patch(
+                f"/api/v1/media/{asset_id}",
+                headers=as_user("owner"),
+                json={"focal_x": 0.25, "focal_y": 0.8},
+            )
+            assert moved.status_code == 200, moved.text
+            assert moved.json()["focal_x"] == 0.25
+            assert moved.json()["focal_y"] == 0.8
+
+            # The description is set from a different control and must survive
+            # a move — neither should have to send the other's value back.
+            described = await client.patch(
+                f"/api/v1/media/{asset_id}",
+                headers=as_user("owner"),
+                json={"alt_text": "The Mircea Chivu stand"},
+            )
+            assert described.json()["alt_text"] == "The Mircea Chivu stand"
+            assert described.json()["focal_x"] == 0.25
+
+        finally:
+            await client.delete(f"/api/v1/media/{asset_id}", headers=as_user("owner"))
+
+    async def test_a_point_outside_the_picture_is_refused(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        created = await client.post(
+            "/api/v1/media",
+            headers=as_user("owner"),
+            data={"club_id": demo["club_id"], "purpose": "HERO"},
+            files={"file": ("hero.png", png(), "image/png")},
+        )
+        asset_id = created.json()["id"]
+        try:
+            outside = ({"focal_x": 1.4, "focal_y": 0.5}, {"focal_x": -0.1, "focal_y": 0.5})
+            for payload in outside:
+                response = await client.patch(
+                    f"/api/v1/media/{asset_id}", headers=as_user("owner"), json=payload
+                )
+                assert response.status_code == 422, response.text
+        finally:
+            await client.delete(f"/api/v1/media/{asset_id}", headers=as_user("owner"))
+
+    async def test_half_a_focal_point_is_refused(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        """One axis moved and the other left at the centre is not a thing
+        anybody means, and silently centring the missing one would move the
+        picture somewhere the club did not ask for."""
+        created = await client.post(
+            "/api/v1/media",
+            headers=as_user("owner"),
+            data={"club_id": demo["club_id"], "purpose": "HERO"},
+            files={"file": ("hero.png", png(), "image/png")},
+        )
+        asset_id = created.json()["id"]
+        try:
+            response = await client.patch(
+                f"/api/v1/media/{asset_id}", headers=as_user("owner"), json={"focal_x": 0.3}
+            )
+            assert response.status_code == 422, response.text
+        finally:
+            await client.delete(f"/api/v1/media/{asset_id}", headers=as_user("owner"))

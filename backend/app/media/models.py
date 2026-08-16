@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, ForeignKeyConstraint, Index, Integer, String
+from sqlalchemy import CheckConstraint, Float, ForeignKeyConstraint, Index, Integer, String
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -46,6 +46,10 @@ class MediaAsset(Base, UUIDPrimaryKey, Timestamped, TenantScoped):
         CheckConstraint("purpose IN " + str(MEDIA_PURPOSES), name="media_purpose_valid"),
         CheckConstraint("visibility IN ('public', 'private')", name="media_visibility_valid"),
         CheckConstraint("width > 0 AND height > 0", name="media_dimensions_positive"),
+        CheckConstraint(
+            "focal_x >= 0 AND focal_x <= 1 AND focal_y >= 0 AND focal_y <= 1",
+            name="media_focal_in_range",
+        ),
         Index("uq_media_storage_key", "storage_key", unique=True),
         Index("ix_media_club_purpose", "tenant_id", "club_id", "purpose"),
     )
@@ -66,5 +70,18 @@ class MediaAsset(Base, UUIDPrimaryKey, Timestamped, TenantScoped):
     # Required for anything that appears on the public site. An image with no
     # alt text is invisible to a screen reader and to search.
     alt_text: Mapped[str | None] = mapped_column(String(300))
+
+    # Where the picture actually is, as a fraction of its own width and height.
+    #
+    # One image is rendered into frames of very different shapes — a hero that
+    # is nearly 3:1 on a desktop and nearly square on a phone, a card taller
+    # than it is wide — and `object-fit: cover` crops from the centre, so the
+    # same photograph loses its sides on one screen and its sky on another. The
+    # centre is a guess; this is the club saying what must survive the crop.
+    #
+    # Defaults to the centre, which is what every frame did before and is right
+    # often enough that most uploads never need touching.
+    focal_x: Mapped[float] = mapped_column(Float, default=0.5, server_default="0.5")
+    focal_y: Mapped[float] = mapped_column(Float, default=0.5, server_default="0.5")
 
     uploaded_by: Mapped[UUID | None] = mapped_column(PgUUID(as_uuid=True))

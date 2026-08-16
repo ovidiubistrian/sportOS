@@ -25,6 +25,7 @@ export function OpeningHero({ site }: { site: Site }) {
             src={image}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: site.branding.hero_focus ?? undefined }}
             // The page's largest paint, and there is nothing above it.
             loading="eager"
           />

@@ -413,6 +413,11 @@ export interface MediaAsset {
   alt_text: string | null;
   /** A label so an editor recognises their own upload. Never part of the URL. */
   original_filename: string | null;
+  /** Where the picture actually is, as a fraction of its own width and height.
+   *  0.5/0.5 is the centre, which is what every frame cropped to before this
+   *  existed. */
+  focal_x: number;
+  focal_y: number;
 }
 
 

@@ -115,6 +115,11 @@ class PublicArticleSummary(BaseModel):
     is_pinned: bool
     category: str | None = None
     cover_url: str | None = None
+    # A CSS `object-position`, or null when the picture is centred. The same
+    # cover is rendered into a card taller than it is wide and, on the article,
+    # into a wide band; without this both crop from the middle and one of them
+    # is wrong.
+    cover_focus: str | None = None
     # SIGNING, DEPARTURE, MATCH_REPORT… The club feed badges by this, so a
     # supporter can tell a transfer from a match report before reading either.
     article_type: str = "ANNOUNCEMENT"

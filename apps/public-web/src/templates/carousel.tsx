@@ -91,6 +91,12 @@ export function NewsCarousel({
             src={site.branding.hero_url}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
+            // This band is nearly 3:1 on a desktop and nearly square on a
+            // phone, so the same photograph loses its sky on one and its sides
+            // on the other. The focal point is where the club said the picture
+            // actually is; without one this falls back to the centre, which is
+            // what it always did.
+            style={{ objectPosition: site.branding.hero_focus ?? undefined }}
             // The page's largest paint, and there is nothing above it.
             loading="eager"
             fetchPriority="high"

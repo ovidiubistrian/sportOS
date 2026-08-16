@@ -680,6 +680,7 @@ export const ro: Catalogue = {
     saved: "Design salvat",
     savedHint: "Site-ul clubului se actualizează în câteva secunde.",
     couldNotSave: "N-am putut salva",
+    focalPointHint: "Dă clic pe partea care trebuie să rămână în cadru",
     primary: "Principală",
     primaryHint: "Butoane, navigație activă, linkuri și inelul de focus.",
     secondary: "Secundară",

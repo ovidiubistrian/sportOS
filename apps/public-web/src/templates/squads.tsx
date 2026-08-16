@@ -69,6 +69,7 @@ function Hero({
             src={site.branding.hero_url}
             alt={site.branding.hero_alt ?? ""}
             className="absolute inset-0 -z-10 h-full w-full object-cover"
+            style={{ objectPosition: site.branding.hero_focus ?? undefined }}
           />
           {/* Two layers, not one: the club chose the photograph, so the scrim
               darkens where the words sit and lets the picture be a picture
