@@ -52,7 +52,16 @@ CATALOGUE: tuple[Permission, ...] = (
     _p("players.player.read", "players", "View players", (T, C, G)),
     _p("players.player.create", "players", "Register a player", (T, C, G)),
     _p("players.player.update", "players", "Edit a player", (T, C, G)),
-    _p("players.player.delete", "players", "Remove a player", (T, C), sensitive=True),
+    # Not step-up. Deleting a player destroys a record and is audited, but it
+    # takes nothing out of the building and gains nobody any privilege — and
+    # `players.player.update`, which is not sensitive, already marks a player
+    # DEPARTED and removes them from the club's website. A control that guards
+    # one route to an outcome and leaves the other open is not protecting the
+    # outcome; it is only making the honest route harder.
+    #
+    # It stayed sensitive long enough for a club administrator with no second
+    # factor to be signed out of the product for trying to tidy up an import.
+    _p("players.player.delete", "players", "Remove a player", (T, C)),
     _p("players.document.read", "players", "View player documents", (T, C, G)),
     _p("players.document.manage", "players", "Upload player documents", (T, C, G)),
     # --- staff ------------------------------------------------------------

@@ -146,7 +146,12 @@ def test_every_sensitive_permission_is_declared() -> None:
     sensitive = {p.key for p in CATALOGUE if p.is_sensitive}
     expected = {
         "people.person.export",
-        "players.player.delete",
+        # `players.player.delete` was here. It came off deliberately: it takes
+        # nothing out of the building and gains nobody any privilege, and
+        # `players.player.update` already achieves the visible outcome — a
+        # player marked DEPARTED disappears from the club's website — without
+        # any second factor at all. Guarding one route and leaving the other
+        # open protected nothing and signed real administrators out.
         "medical.record.read",
         "medical.record.write",
         "authz.role.manage",
