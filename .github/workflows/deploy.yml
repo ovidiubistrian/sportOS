@@ -89,7 +89,14 @@ jobs:
           context: .
           file: ./infrastructure/docker/node/Dockerfile
           target: prod
-          build-args: APP_DIR=apps/admin-web
+          # Baked in, not configured at run time: Vite resolves these while
+          # building, so the bundle has to be built for the domain it will be
+          # served from.
+          build-args: |
+            APP_DIR=apps/admin-web
+            VITE_API_URL=https://api.${{ secrets.PLATFORM_DOMAIN }}
+            VITE_OIDC_ISSUER=https://auth.${{ secrets.PLATFORM_DOMAIN }}/realms/football-os
+            VITE_OIDC_CLIENT_ID=admin-web
           push: true
           tags: |
             ghcr.io/${{ steps.names.outputs.repo }}/admin-web:${{ github.sha }}

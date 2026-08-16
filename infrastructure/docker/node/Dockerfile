@@ -31,6 +31,22 @@ FROM base AS build
 COPY . .
 RUN --mount=type=cache,target=/pnpm/store pnpm install --frozen-lockfile
 ARG APP_DIR=apps/admin-web
+
+# Vite substitutes `import.meta.env.*` at build time, so the admin bundle
+# carries the addresses it was built with and cannot be told them later. Unset,
+# `VITE_API_URL` compiles to `undefined` and every request the admin makes
+# fails — silently, as an empty dropdown or a sign-in button that does nothing,
+# because a missing base URL is not an error the browser reports usefully.
+#
+# The defaults are the development ones, so a bare `docker build` still
+# produces something that works against the local stack.
+ARG VITE_API_URL=http://api.footbola.localhost
+ARG VITE_OIDC_ISSUER=http://auth.footbola.localhost/realms/football-os
+ARG VITE_OIDC_CLIENT_ID=admin-web
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_OIDC_ISSUER=$VITE_OIDC_ISSUER \
+    VITE_OIDC_CLIENT_ID=$VITE_OIDC_CLIENT_ID
+
 RUN pnpm --filter "./${APP_DIR}" build
 
 
