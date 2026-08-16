@@ -33,6 +33,7 @@ from app.core.errors import Conflict, NotFound, ValidationFailed
 from app.events.base import MatchScheduleChanged
 from app.events.publisher import publish
 from app.identity.registration import slugify
+from app.integrations.api_football import autolink
 from app.tenants.models import Club
 
 router = APIRouter(tags=["competitions"])
@@ -51,6 +52,19 @@ class CompetitionOut(BaseModel):
     format: str
     scope: str
     tier: int | None
+
+
+class JoinedCompetition(BaseModel):
+    """What entering a competition did, including to the results feed.
+
+    The feed is reported rather than silent because "connected" and "this
+    division is not covered" ask completely different things of the club next,
+    and it should not have to go looking to find out which one happened.
+    """
+
+    competition: CompetitionOut
+    feed_connected: bool
+    feed_message: str
 
 
 class ClubRef(BaseModel):
@@ -243,7 +257,7 @@ async def list_competitions(
 
 @router.post(
     "/competitions/join",
-    response_model=CompetitionOut,
+    response_model=JoinedCompetition,
     status_code=status.HTTP_201_CREATED,
     summary="Enter a competition for a season",
 )
@@ -251,7 +265,7 @@ async def join_competition(
     payload: JoinCompetition,
     db: Db,
     ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
-) -> CompetitionOut:
+) -> JoinedCompetition:
     competition = await db.get(Competition, payload.competition_id)
     if competition is None:
         raise NotFound(object_type="competition", object_id=str(payload.competition_id))
@@ -310,7 +324,22 @@ async def join_competition(
         after={"competition": competition.key, "season": season.name},
     )
     await db.flush()
-    return CompetitionOut.model_validate(competition)
+
+    # Entering a league is the only thing the club is asked. Whether the
+    # provider covers that league, and whether this club can be identified in
+    # it without guessing, is our problem — and both answers are fine.
+    link = await autolink.try_link(
+        db,
+        tenant_id=ctx.tenant,
+        club_id=payload.club_id,
+        club_name=(club.display_name if club is not None else directory.name),
+        season_name=season.name,
+    )
+    return JoinedCompetition(
+        competition=CompetitionOut.model_validate(competition),
+        feed_connected=link.linked,
+        feed_message=link.reason,
+    )
 
 
 @router.get(
