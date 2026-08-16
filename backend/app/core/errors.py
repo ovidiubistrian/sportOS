@@ -87,6 +87,26 @@ class TenantSuspended(DomainError):
     default_message = "This account is suspended."
 
 
+class StorageUnavailable(DomainError):
+    """Object storage refused, and it is not the uploader's fault.
+
+    A missing bucket, a key without write permission, a region that does not
+    match the signature. All of them are configuration, all of them affect
+    every upload rather than this one, and none of them are anything the person
+    holding the photograph can do about — so they read as "the club's storage
+    is not set up", not as "your file is wrong".
+
+    502 rather than 500: the failure is in something we depend on, and the
+    distinction is what stops an operator reading the log as an application
+    bug.
+    """
+
+    code, status = "STORAGE_UNAVAILABLE", 502
+    default_message = (
+        "The club's file storage is not reachable. An administrator has been told."
+    )
+
+
 # --- Entitlements ----------------------------------------------------------
 
 

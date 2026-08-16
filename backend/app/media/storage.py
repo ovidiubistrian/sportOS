@@ -30,8 +30,10 @@ from urllib.parse import quote
 import aioboto3
 import structlog
 from aiobotocore.config import AioConfig
+from botocore.exceptions import BotoCoreError, ClientError
 
 from app.core.config import settings
+from app.core.errors import StorageUnavailable
 
 log = structlog.get_logger(__name__)
 
@@ -53,6 +55,13 @@ async def _client() -> AsyncIterator[Any]:
         signature_version="s3v4",
         s3={"addressing_style": settings.s3_addressing_style},
         retries={"max_attempts": 3, "mode": "standard"},
+        # Seconds, not the default minute apiece. A misconfigured bucket
+        # answers immediately, but an endpoint that does not resolve does not
+        # answer at all — and the club is left watching a spinner for over a
+        # minute before being told "something went wrong". Fail while they are
+        # still looking at the screen.
+        connect_timeout=5,
+        read_timeout=20,
     )
     async with _session.client(
         "s3",
@@ -66,6 +75,49 @@ async def _client() -> AsyncIterator[Any]:
         config=config,
     ) as client:
         yield client
+
+
+@asynccontextmanager
+async def _translated(operation: str, key: str) -> AsyncIterator[None]:
+    """Turn a storage failure into something an operator can act on.
+
+    Uncaught, a missing bucket reaches the browser as an opaque 500 and the
+    reason is thirty lines into a traceback. The three that actually happen —
+    `NoSuchBucket`, `AccessDenied`, `SignatureDoesNotMatch` — are all
+    configuration, and all say plainly what is wrong once you can see the code.
+    """
+    try:
+        yield
+    except ClientError as exc:
+        code = exc.response.get("Error", {}).get("Code", "Unknown")
+        log.error(
+            "media_storage_failed",
+            operation=operation,
+            key=key,
+            code=code,
+            bucket=settings.s3_bucket,
+            endpoint=settings.s3_endpoint_url,
+            region=settings.s3_region,
+        )
+        raise StorageUnavailable(
+            {
+                "NoSuchBucket": f"The bucket {settings.s3_bucket!r} does not exist.",
+                "AccessDenied": "The storage key is not allowed to write here.",
+                "SignatureDoesNotMatch": (
+                    "Storage rejected the signature — usually the wrong region."
+                ),
+            }.get(code, f"Storage refused the request ({code}).")
+        ) from exc
+    except BotoCoreError as exc:
+        # Connection, DNS, timeout: no HTTP response at all, so no error code.
+        log.error(
+            "media_storage_unreachable",
+            operation=operation,
+            key=key,
+            endpoint=settings.s3_endpoint_url,
+            error=str(exc),
+        )
+        raise StorageUnavailable("File storage did not respond.") from exc
 
 
 def object_key(
@@ -97,7 +149,7 @@ async def put(
     upload is a new key. That is what lets it be cached for a year without a
     stale crest ever surviving a change.
     """
-    async with _client() as client:
+    async with _client() as client, _translated("put", key):
         await client.put_object(
             Bucket=settings.s3_bucket,
             Key=key,
@@ -109,7 +161,7 @@ async def put(
 
 
 async def delete(key: str) -> None:
-    async with _client() as client:
+    async with _client() as client, _translated("delete", key):
         await client.delete_object(Bucket=settings.s3_bucket, Key=key)
     log.info("media_deleted", key=key)
 
