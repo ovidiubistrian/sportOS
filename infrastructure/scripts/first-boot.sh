@@ -81,7 +81,12 @@ with open(f"{kc}/generated/realm-prod.json", "w") as fh:
     json.dump(realm, fh, indent=2)
 print(f"  rendered for {os.environ['PLATFORM_DOMAIN']}")
 PY
-  chmod 600 "${KC_DIR}/generated/realm-prod.json"
+  # Readable by the container, and by nobody else. Keycloak runs as uid 1000
+  # inside the image; 0600 owned by root — which is what this script usually
+  # runs as — means the import fails with nothing but "Failed to run import"
+  # and the server restarts for ever.
+  chown 1000:0 "${KC_DIR}/generated/realm-prod.json"
+  chmod 640 "${KC_DIR}/generated/realm-prod.json"
 fi
 
 # --- 2. the databases -------------------------------------------------------
