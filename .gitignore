@@ -47,3 +47,9 @@ infrastructure/docker/keycloak/generated/*
 *.swo
 *~
 .*.sw?
+
+# Club exports written by scripts/export_club.py. They hold names, dates of
+# birth and squad records — somebody's club, not source code.
+*.club.json
+csm.json
+exports/
