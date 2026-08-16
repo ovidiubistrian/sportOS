@@ -147,6 +147,30 @@ for _ in $(seq 1 60); do
   sleep 2
 done
 
+step "Retiring the realm file"
+# The realm now lives in Keycloak's database, and the file has done its one
+# job. It is moved aside rather than left in place because the server starts
+# with `--import-realm` on every boot, and the import strategy it reports is
+# OVERWRITE_EXISTING: a routine restart could replace the realm with this file
+# and take every staff and supporter account of every club with it.
+#
+# Whether Keycloak would in fact skip an existing realm is not worth finding
+# out on a production database. An empty import directory cannot.
+for _ in $(seq 1 90); do
+  if $COMPOSE exec -T keycloak /opt/keycloak/bin/kcadm.sh get realms/football-os \
+      --server http://localhost:8080 --realm master \
+      --user "${KEYCLOAK_ADMIN_USERNAME}" --password "${KEYCLOAK_ADMIN_PASSWORD}" \
+      >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+if [[ -f "${KC_DIR}/generated/realm-prod.json" ]]; then
+  mv "${KC_DIR}/generated/realm-prod.json" "${KC_DIR}/generated/realm-prod.json.imported"
+  echo "  moved aside; restarts no longer re-import"
+  echo "  to rebuild a realm from scratch, move it back and restart keycloak"
+fi
+
 step "Registering club domains with Keycloak"
 # A no-op on a fresh install; matters when this is a rebuild and clubs exist.
 $COMPOSE run --rm api .venv/bin/python scripts/sync_domains.py || \
