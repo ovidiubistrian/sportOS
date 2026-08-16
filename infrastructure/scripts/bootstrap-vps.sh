@@ -192,6 +192,18 @@ OIDC_ISSUER=http://keycloak:8080/realms/football-os
 OIDC_PUBLIC_ISSUER=https://auth.${PLATFORM_DOMAIN}/realms/football-os
 OIDC_AUDIENCE=football-os-api
 
+# The suffix every club's website hangs off: a club with slug `x` is reachable
+# at x.${PLATFORM_DOMAIN}. Left at its development default, a club signing up
+# here would be given the address `x.localhost` — written into its domain
+# record and registered with Keycloak, so wrong in three places at once.
+PUBLIC_SITE_DOMAIN=${PLATFORM_DOMAIN}
+
+# Browsers refuse a cross-origin response the API has not named. The admin is
+# served from the platform host and calls api.<platform host>, which is a
+# different origin, so without this every request from the admin is blocked —
+# silently, as far as the person using it is concerned.
+CORS_ORIGINS=https://${PLATFORM_DOMAIN},https://www.${PLATFORM_DOMAIN}
+
 S3_ACCESS_KEY=${S3_KEY}
 S3_SECRET_KEY=${S3_SECRET}
 S3_BUCKET=teamsport360
