@@ -161,15 +161,29 @@ class Settings(BaseSettings):
     email_from_name: str = "TeamSport360"
     email_from_address: str = "no-reply@footbola.local"
 
+    # Blank for Amazon S3 itself, where boto resolves the regional endpoint
+    # from `s3_region`. Set for everything else — MinIO, OpenStack/Ceph,
+    # Cloudflare R2 — which is most of what a European club or council is
+    # actually allowed to use.
     s3_endpoint_url: str = "http://minio:9000"
     s3_access_key: str = "dev_minio_access"
     s3_secret_key: SecretStr = SecretStr("dev_minio_secret_key")
     s3_bucket: str = "footbola-dev"
     s3_region: str = "us-east-1"
-    # Where a browser reaches the bucket. Separate from the endpoint the
-    # API uses, because in development the API talks to `minio:9000` on the
-    # Docker network while the browser needs a host it can actually resolve.
-    s3_public_url: str = "http://files.footbola.localhost"
+    # `path` puts the bucket in the URL path (`host/bucket/key`) and `virtual`
+    # in the hostname (`bucket.host/key`). MinIO and most OpenStack gateways
+    # need path; Amazon and R2 want virtual. `auto` lets boto decide, which it
+    # does correctly for Amazon and inconsistently for everyone else — so this
+    # is worth stating rather than discovering through 400s.
+    s3_addressing_style: Literal["auto", "path", "virtual"] = "path"
+    # Where a *browser* reaches an object: the base a storage key hangs
+    # directly off, bucket included where the provider expects it in the path.
+    #
+    # Separate from the endpoint above, and not derived from it. In
+    # development the API talks to `minio:9000` on the Docker network while the
+    # browser needs a host it can resolve; in production this is often a CDN
+    # domain in front of the bucket, with no bucket in the URL at all.
+    s3_public_url: str = "http://files.footbola.localhost/footbola-dev"
 
     # Where a visit came from. An optional MaxMind-format database — DB-IP's
     # free City Lite works and needs no account. Absent, geography is simply

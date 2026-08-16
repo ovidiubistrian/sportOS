@@ -29,6 +29,7 @@ from urllib.parse import quote
 
 import aioboto3
 import structlog
+from aiobotocore.config import AioConfig
 
 from app.core.config import settings
 
@@ -45,12 +46,24 @@ _session = aioboto3.Session()
 
 @asynccontextmanager
 async def _client() -> AsyncIterator[Any]:
+    config = AioConfig(
+        # SigV4 explicitly: some S3-compatible gateways still advertise SigV2
+        # and negotiate down to it, and a presigned URL signed the old way is
+        # rejected by anything modern in front of them.
+        signature_version="s3v4",
+        s3={"addressing_style": settings.s3_addressing_style},
+        retries={"max_attempts": 3, "mode": "standard"},
+    )
     async with _session.client(
         "s3",
-        endpoint_url=settings.s3_endpoint_url,
+        # `or None` matters: an empty endpoint has to become *absent*, not an
+        # empty string, or boto tries to reach "" instead of resolving Amazon's
+        # regional endpoint.
+        endpoint_url=settings.s3_endpoint_url or None,
         aws_access_key_id=settings.s3_access_key,
         aws_secret_access_key=settings.s3_secret_key.get_secret_value(),
         region_name=settings.s3_region,
+        config=config,
     ) as client:
         yield client
 
@@ -119,9 +132,16 @@ async def signed_url(key: str, *, expires_seconds: int = 300) -> str:
 
 
 def public_url(key: str) -> str:
-    """The stable, unsigned URL for public site media."""
-    base = settings.s3_public_url.rstrip("/")
-    return f"{base}/{settings.s3_bucket}/{quote(key)}"
+    """The stable, unsigned URL for public site media.
+
+    `S3_PUBLIC_URL` is the base a key hangs directly off — bucket included
+    where the provider expects it in the path. This used to append the bucket
+    itself, which is right for exactly one of the three shapes in use:
+    path-style (`host/bucket/key`, MinIO and most OpenStack gateways),
+    virtual-hosted (`bucket.host/key`, Amazon and R2), and a CDN domain in
+    front of either, where the bucket does not appear at all.
+    """
+    return f"{settings.s3_public_url.rstrip('/')}/{quote(key)}"
 
 
 async def ensure_bucket() -> None:
