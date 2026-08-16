@@ -25,7 +25,6 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BASE: ghcr.io/${{ github.repository }}
 
 jobs:
   build:
@@ -36,8 +35,18 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      repo: ${{ steps.names.outputs.repo }}
     steps:
       - uses: actions/checkout@v4
+
+      # `github.repository` is `ovidiubistrian/sportOS`, and a registry path
+      # must be lowercase. The expression language has no way to say so, hence
+      # a step. The deploy job reuses this, because the server pulls by the
+      # same name.
+      - name: Registry name
+        id: names
+        run: echo "repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -56,8 +65,8 @@ jobs:
           target: prod
           push: true
           tags: |
-            ${{ env.IMAGE_BASE }}/api:${{ github.sha }}
-            ${{ env.IMAGE_BASE }}/api:latest
+            ghcr.io/${{ steps.names.outputs.repo }}/api:${{ github.sha }}
+            ghcr.io/${{ steps.names.outputs.repo }}/api:latest
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
 
@@ -69,8 +78,8 @@ jobs:
           target: next
           push: true
           tags: |
-            ${{ env.IMAGE_BASE }}/public-web:${{ github.sha }}
-            ${{ env.IMAGE_BASE }}/public-web:latest
+            ghcr.io/${{ steps.names.outputs.repo }}/public-web:${{ github.sha }}
+            ghcr.io/${{ steps.names.outputs.repo }}/public-web:latest
           cache-from: type=gha,scope=public-web
           cache-to: type=gha,mode=max,scope=public-web
 
@@ -83,8 +92,8 @@ jobs:
           build-args: APP_DIR=apps/admin-web
           push: true
           tags: |
-            ${{ env.IMAGE_BASE }}/admin-web:${{ github.sha }}
-            ${{ env.IMAGE_BASE }}/admin-web:latest
+            ghcr.io/${{ steps.names.outputs.repo }}/admin-web:${{ github.sha }}
+            ghcr.io/${{ steps.names.outputs.repo }}/admin-web:latest
           cache-from: type=gha,scope=admin-web
           cache-to: type=gha,mode=max,scope=admin-web
 
@@ -111,7 +120,10 @@ jobs:
             cd /opt/teamsport360
 
             export IMAGE_TAG="${{ github.event.inputs.image_tag || github.sha }}"
-            export GITHUB_REPOSITORY="${{ github.repository }}"
+            # Lowercased in the build job. docker-compose.prod.yml interpolates
+            # this straight into the image name, so the case has to match what
+            # was actually pushed.
+            export GITHUB_REPOSITORY="${{ needs.build.outputs.repo }}"
 
             git fetch --quiet origin main
             git checkout --quiet -B main origin/main
