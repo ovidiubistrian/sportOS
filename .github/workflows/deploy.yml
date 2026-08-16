@@ -114,7 +114,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script_stop: true
+          # No `script_stop`: the action dropped it, and the script opens with
+          # `set -euo pipefail`, which is the same promise made where it can be
+          # read next to the commands it governs.
           script: |
             set -euo pipefail
             cd /opt/teamsport360
