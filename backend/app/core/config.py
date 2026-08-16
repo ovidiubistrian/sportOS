@@ -8,10 +8,10 @@ variable fails at startup rather than silently running with a dev value.
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, SecretStr, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -24,7 +24,12 @@ class Settings(BaseSettings):
     secret_key: SecretStr = SecretStr("dev-only-secret-not-for-any-other-use")
 
     api_prefix: str = "/api/v1"
-    cors_origins: list[str] = Field(
+    # `NoDecode`, because pydantic-settings parses a list-typed field from the
+    # environment as JSON *before* any validator runs. A comma-separated value
+    # — the obvious thing to write, and what the validator below exists to
+    # accept — makes the whole application fail to start, which reads as the
+    # API being down rather than as a malformed setting.
+    cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
             # The platform host serves both the marketing site and the admin
             # application, so it is the origin every authenticated call now
@@ -97,7 +102,8 @@ class Settings(BaseSettings):
     # tenant membership and reaches only the supporter's own account routes —
     # the permission checks decide that, not this list, which exists to reject
     # tokens minted for something else entirely.
-    oidc_allowed_clients: list[str] = Field(
+    # `NoDecode` for the same reason as `cors_origins` above.
+    oidc_allowed_clients: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
             "admin-web",
             "super-admin",
@@ -177,9 +183,27 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", "oidc_allowed_clients", mode="before")
     @classmethod
     def _split_csv(cls, value: object) -> object:
-        if isinstance(value, str):
-            return [item.strip() for item in value.split(",") if item.strip()]
-        return value
+        """A comma-separated list, or a JSON array.
+
+        Both, because both are things people write in a `.env` and neither is
+        wrong. JSON is what pydantic-settings used to insist on, so it exists
+        in files already; commas are what anyone writes who has not read that
+        far. Guessing between them costs one `startswith`.
+        """
+        if not isinstance(value, str):
+            return value
+        text = value.strip()
+        if text.startswith("["):
+            import json
+
+            try:
+                return json.loads(text)
+            except ValueError:
+                # Fall through: a malformed array is more likely a stray
+                # bracket than a JSON document, and the comma split gives a
+                # better error than a JSON parser's.
+                pass
+        return [item.strip() for item in text.split(",") if item.strip()]
 
     @property
     def is_production(self) -> bool:
