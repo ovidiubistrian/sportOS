@@ -33,6 +33,7 @@ import { CalendarDays, Plus, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { useI18n } from "../../app/locale";
+import { ResultsFeed } from "./results-feed";
 import { useSession } from "../../app/session";
 import { OpponentPicker } from "./opponent-picker";
 
@@ -636,7 +637,7 @@ function FixtureRow({
 /* --- the page -------------------------------------------------------------- */
 
 export function MatchesPage() {
-  const { club, can } = useSession();
+  const { me, club, can } = useSession();
   const { t, formatNumber } = useI18n();
   const canManage = can("teams.team.manage");
 
@@ -715,6 +716,11 @@ export function MatchesPage() {
         />
       ) : (
         <>
+          {/* Where results come from, above the fixtures they fill in. A club
+              that has just entered a league is one step from never typing a
+              fixture again, and that step should be the next thing it sees. */}
+          {canManage && <ResultsFeed clubId={club.id} country={me.active_tenant?.country_code ?? "RO"} />}
+
           <Section
             title={t("matches", "competitions")}
             description={t("matches", "competitionsHint")}

@@ -101,7 +101,19 @@ class Report:
             print("\nDRY RUN — nothing was written.")
 
 
-async def link_registrations(payload: dict[str, Any], slug: str, dry: bool) -> Report:
+def _season_of(registration: dict[str, Any], override: str | None) -> str:
+    """Which season a registration belongs to in the target.
+
+    Overridable because a squad exported in one season is usually imported in
+    the next — the file says 2025/26 and the club is now playing 2026/27, and
+    inventing last season purely to satisfy a foreign key helps nobody.
+    """
+    return override or (registration.get("season") or "")
+
+
+async def link_registrations(
+    payload: dict[str, Any], slug: str, dry: bool, season_override: str | None = None
+) -> Report:
     """Attach squads to players who are already here.
 
     The repair for an import run before the teams existed: the people landed,
@@ -191,13 +203,14 @@ async def link_registrations(payload: dict[str, Any], slug: str, dry: bool) -> R
 
             for registration in entry.get("registrations", []):
                 team_id = teams.get(registration.get("team") or "")
-                season_id = seasons.get(registration.get("season") or "")
+                wanted_season = _season_of(registration, season_override)
+                season_id = seasons.get(wanted_season)
                 if team_id is None or season_id is None:
                     missing = []
                     if team_id is None:
                         missing.append(f"team {registration.get('team')!r}")
                     if season_id is None:
-                        missing.append(f"season {registration.get('season')!r}")
+                        missing.append(f"season {wanted_season!r}")
                     report.note(f"{name}: no {' and no '.join(missing)}")
                     report.did("registrations skipped")
                     continue
@@ -235,7 +248,9 @@ async def link_registrations(payload: dict[str, Any], slug: str, dry: bool) -> R
     return report
 
 
-async def run(payload: dict[str, Any], slug: str, dry: bool) -> Report:
+async def run(
+    payload: dict[str, Any], slug: str, dry: bool, season_override: str | None = None
+) -> Report:
     report = Report(dry)
 
     async with platform_session(reason=f"import club {slug}") as session:
@@ -402,13 +417,14 @@ async def run(payload: dict[str, Any], slug: str, dry: bool) -> Report:
 
             for registration in entry.get("registrations", []):
                 team_id = teams.get(registration.get("team") or "")
-                season_id = seasons.get(registration.get("season") or "")
+                wanted_season = _season_of(registration, season_override)
+                season_id = seasons.get(wanted_season)
                 if team_id is None or season_id is None:
                     missing = []
                     if team_id is None:
                         missing.append(f"team {registration.get('team')!r}")
                     if season_id is None:
-                        missing.append(f"season {registration.get('season')!r}")
+                        missing.append(f"season {wanted_season!r}")
                     report.note(f"{person.display_name}: no {' and no '.join(missing)}")
                     report.did("registrations skipped")
                     continue
@@ -451,6 +467,10 @@ async def main() -> int:
     parser.add_argument("--slug", required=True, help="the club's slug in THIS database")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
+        "--season",
+        help="put every registration in this season instead of the one in the file",
+    )
+    parser.add_argument(
         "--registrations-only",
         action="store_true",
         help="attach squads to players already here, creating nobody",
@@ -465,9 +485,9 @@ async def main() -> int:
     print(f"into  {args.slug}\n")
 
     report = await (
-        link_registrations(payload, args.slug, args.dry_run)
+        link_registrations(payload, args.slug, args.dry_run, args.season)
         if args.registrations_only
-        else run(payload, args.slug, args.dry_run)
+        else run(payload, args.slug, args.dry_run, args.season)
     )
     report.print()
 

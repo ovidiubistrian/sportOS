@@ -29,6 +29,8 @@ export interface TenantSummary {
   /** Every language this tenant publishes in. */
   supported_locales: string[];
   default_currency: string;
+  /** Which country's divisions to ask the results provider for. */
+  country_code: string;
   timezone: string;
   status: "PENDING" | "ACTIVE" | "SUSPENDED" | "CLOSED";
   is_demo: boolean;
@@ -562,6 +564,75 @@ export interface JoinCompetitionInput {
   season_name: string;
   start_date: string;
   end_date: string;
+}
+
+/**
+ * What entering a competition did — including to the results feed.
+ *
+ * The feed is reported rather than silent because "connected" and "this
+ * division is not covered" ask completely different things of the club next,
+ * and it should not have to go looking to find out which happened.
+ */
+export interface JoinedCompetition {
+  competition: Competition;
+  feed_connected: boolean;
+  feed_message: string;
+}
+
+/** One division the provider covers, as a club would recognise it. */
+export interface ProviderLeague {
+  id: string;
+  name: string;
+  country: string | null;
+  logo: string | null;
+  tier: number | null;
+  /** The season the provider currently holds — what to ask for next. */
+  season: number | null;
+}
+
+/**
+ * `available: false` covers the two cases a club must tell apart without
+ * reading an error: no provider key on the platform, and no coverage for the
+ * country. Both mean the same next step, and neither is a fault.
+ */
+export interface ProviderCatalogue {
+  available: boolean;
+  reason: string | null;
+  leagues: ProviderLeague[];
+}
+
+/** How a club's results feed is set up, and whether it has ever run. */
+export interface FeedSettings {
+  club_id: string;
+  mode: "AUTO" | "MANUAL";
+  provider_team_id: string | null;
+  provider_team_name: string | null;
+  season_year: number | null;
+  sync_fixtures: boolean;
+  sync_standings: boolean;
+  sync_live: boolean;
+  live_interval_minutes: number;
+  fixtures_interval_hours: number;
+  last_fixtures_at: string | null;
+  last_live_at: string | null;
+  last_error: string | null;
+  /** False where the platform has no provider key at all. */
+  provider_available: boolean;
+}
+
+export interface FeedUpdate {
+  mode?: "AUTO" | "MANUAL";
+  provider_team_id?: string | null;
+  provider_team_name?: string | null;
+  season_year?: number | null;
+}
+
+export interface ProviderTeam {
+  id: string;
+  name: string;
+  country: string | null;
+  logo: string | null;
+  founded: number | null;
 }
 
 export interface MatchCreate {

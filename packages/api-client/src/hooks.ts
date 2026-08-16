@@ -18,6 +18,9 @@ import type {
   CompetitionEntry,
   DirectoryClub,
   JoinCompetitionInput,
+  FeedSettings,
+  FeedUpdate,
+  JoinedCompetition,
   Match,
   MatchCreate,
   MatchUpdate,
@@ -40,6 +43,8 @@ import type {
   PlayerFilters,
   PlayerSummary,
   PlatformCompetition,
+  ProviderCatalogue,
+  ProviderTeam,
   PlatformPlan,
   PlatformTenant,
   PlayerUpdate,
@@ -482,6 +487,80 @@ export function usePlatformLocales(): UseQueryResult<PlatformLocale[], ApiError>
   });
 }
 
+/** How this club's results feed is set up. */
+export function useFeed(clubId: string): UseQueryResult<FeedSettings, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["feed", "settings", clubId],
+    queryFn: () => api.get<FeedSettings>(`/api/v1/clubs/${clubId}/feed`),
+    enabled: Boolean(clubId),
+  });
+}
+
+/** Point the feed at a club in the provider's catalogue, or turn it off. */
+export function useUpdateFeed(
+  clubId: string,
+): UseMutationResult<FeedSettings, ApiError, FeedUpdate> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input) => api.put<FeedSettings>(`/api/v1/clubs/${clubId}/feed`, input),
+    onSuccess: (settings) => {
+      queryClient.setQueryData(["feed", "settings", clubId], settings);
+    },
+  });
+}
+
+/** Fetch now rather than waiting for the scheduler's next turn. */
+export function useSyncFeed(clubId: string): UseMutationResult<unknown, ApiError, void> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<unknown>(`/api/v1/clubs/${clubId}/feed/sync`, {}),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["feed", "settings", clubId] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.competitions.all });
+    },
+  });
+}
+
+/**
+ * The divisions the results provider covers in a country.
+ *
+ * Cached hard: this is a third party's catalogue, it changes a few times a
+ * year, and every call spends from an allowance shared by every club on the
+ * platform.
+ */
+export function useProviderLeagues(
+  country: string,
+  enabled = true,
+): UseQueryResult<ProviderCatalogue, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["feed", "leagues", country],
+    queryFn: () => api.get<ProviderCatalogue>("/api/v1/feed/leagues", { country }),
+    staleTime: 60 * 60 * 1000,
+    enabled,
+  });
+}
+
+/** Everyone in one division that season, for the club to point at itself. */
+export function useProviderLeagueTeams(
+  leagueId: string,
+  season: number | null,
+): UseQueryResult<ProviderTeam[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["feed", "leagues", leagueId, "teams", season],
+    queryFn: () =>
+      api.get<ProviderTeam[]>(`/api/v1/feed/leagues/${leagueId}/teams`, {
+        season: season ?? undefined,
+      }),
+    staleTime: 60 * 60 * 1000,
+    enabled: Boolean(leagueId && season),
+  });
+}
+
 export function useSlugCheck(name: string): UseQueryResult<SlugCheck, ApiError> {
   const api = useApi();
   return useQuery({
@@ -526,14 +605,14 @@ export function useCompetitionEntries(
 }
 
 export function useJoinCompetition(): UseMutationResult<
-  Competition,
+  JoinedCompetition,
   ApiError,
   JoinCompetitionInput
 > {
   const api = useApi();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input) => api.post<Competition>("/api/v1/competitions/join", input),
+    mutationFn: (input) => api.post<JoinedCompetition>("/api/v1/competitions/join", input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.competitions.all });
     },

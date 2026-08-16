@@ -40,6 +40,10 @@ class TenantSummary(BaseModel):
     # The newsroom needs to know which languages an article can exist in.
     supported_locales: list[str] = []
     default_currency: str
+    # Which country's divisions to ask the results provider for. The club's
+    # own column would do, but the tenant already travels with the session and
+    # a tenant does not span borders.
+    country_code: str
     timezone: str
     status: str
     is_demo: bool
