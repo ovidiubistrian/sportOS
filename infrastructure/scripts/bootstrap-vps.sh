@@ -43,6 +43,10 @@ fi
 
 APP_DIR=/opt/teamsport360
 DEPLOY_USER=deploy
+# A registry path must be lowercase, and the repository is `sportOS`. Written
+# uppercase into .env, docker compose interpolates it straight into the image
+# name and every pull is rejected before it starts.
+REPO_LOWER="$(printf '%s' "$REPO" | tr '[:upper:]' '[:lower:]')"
 CI_KEY=/root/.ssh/teamsport360_ci        # GitHub → this server
 SERVER_KEY_DIR="/home/${DEPLOY_USER}/.ssh"  # this server → GitHub
 
@@ -163,7 +167,7 @@ APP_ENV=production
 LOG_LEVEL=INFO
 PLATFORM_DOMAIN=${PLATFORM_DOMAIN}
 ACME_EMAIL=${ACME_EMAIL}
-GITHUB_REPOSITORY=${REPO}
+GITHUB_REPOSITORY=${REPO_LOWER}
 IMAGE_TAG=latest
 
 SECRET_KEY=${APP_SECRET}

@@ -28,6 +28,11 @@ if [[ ! -f .env ]]; then
 fi
 set -a; . ./.env; set +a
 
+# Repairs an .env written before bootstrap-vps.sh learned to lowercase this.
+# A registry path must be lowercase, and the repository is `sportOS`; compose
+# interpolates the value straight into the image name.
+export GITHUB_REPOSITORY="$(printf '%s' "${GITHUB_REPOSITORY:-}" | tr '[:upper:]' '[:lower:]')"
+
 step() { printf '\n\033[1;34m▸ %s\033[0m\n' "$1"; }
 
 # --- 1. the realm -----------------------------------------------------------
@@ -76,7 +81,11 @@ fi
 
 step "PostgreSQL and Redis"
 $COMPOSE up -d postgres redis
-until $COMPOSE exec -T postgres pg_isready -U postgres -d footbola >/dev/null 2>&1; do
+# A real query, not `pg_isready`. The postgres image runs a temporary server on
+# a local socket while it initialises, then restarts it: `pg_isready` answers
+# during that window and the next command finds no server at all.
+until $COMPOSE exec -T postgres psql -U postgres -d footbola -tAc "SELECT 1" \
+    >/dev/null 2>&1; do
   sleep 1
 done
 echo "  up"
