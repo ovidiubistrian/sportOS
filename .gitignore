@@ -40,3 +40,10 @@ backend/data/
 # production client secrets.
 infrastructure/docker/keycloak/generated/*
 !infrastructure/docker/keycloak/generated/.gitkeep
+
+# Editor swap and backup files. A vim swap of .env holds the contents of
+# .env, which is the one file in this repository that must never be in it.
+*.swp
+*.swo
+*~
+.*.sw?
