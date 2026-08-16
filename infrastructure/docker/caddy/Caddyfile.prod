@@ -43,7 +43,6 @@
 		# with them.
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options nosniff
-		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
 		-Server
 	}
@@ -54,10 +53,32 @@
 	}
 }
 
+# Framing is decided per hostname, because the answer differs.
+#
+# Nothing may frame the admin, the API, Keycloak or object storage — there is
+# no legitimate reason to, and clickjacking a session is the reason not to.
+(noframe) {
+	header X-Frame-Options DENY
+}
+
+# A club's website is framed by exactly one thing: the live preview on the
+# Site & design screen, which is the whole point of that screen. `DENY` here
+# left the preview showing "refused to connect" and no way to tell that the
+# site itself was fine.
+#
+# `frame-ancestors` rather than X-Frame-Options because it can name an origin,
+# and `ALLOW-FROM` has been dead for years. The two headers together are worse
+# than either alone: a browser honouring the older one still refuses, so the
+# club sites carry only this.
+(framed-by-platform) {
+	header Content-Security-Policy "frame-ancestors 'self' https://{$PLATFORM_DOMAIN}"
+}
+
 # --- the platform ------------------------------------------------------------
 
 {$PLATFORM_DOMAIN} {
 	import common
+	import noframe
 
 	# The marketing site and its assets. Everything else on this hostname is
 	# the admin application, which is a static bundle in production.
@@ -75,16 +96,19 @@
 
 api.{$PLATFORM_DOMAIN} {
 	import common
+	import noframe
 	reverse_proxy api:8000
 }
 
 auth.{$PLATFORM_DOMAIN} {
 	import common
+	import noframe
 	reverse_proxy keycloak:8080
 }
 
 files.{$PLATFORM_DOMAIN} {
 	import common
+	import noframe
 	reverse_proxy minio:9000
 }
 
@@ -107,6 +131,7 @@ files.{$PLATFORM_DOMAIN} {
 
 :443 {
 	import common
+	import framed-by-platform
 	tls {
 		on_demand
 	}
