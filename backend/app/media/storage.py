@@ -62,6 +62,17 @@ async def _client() -> AsyncIterator[Any]:
         # still looking at the screen.
         connect_timeout=5,
         read_timeout=20,
+        # Botocore began sending every upload as `aws-chunked` with a CRC32
+        # trailer, and validating one on the way back. Amazon understands it;
+        # most S3-compatible gateways do not, and reject the request with
+        # `MissingContentLength` — a message that points at a header we did
+        # send, for a body encoded in a way they cannot read.
+        #
+        # `when_required` keeps checksums where the operation genuinely needs
+        # one and sends a plain body otherwise, which is what every
+        # implementation has understood for fifteen years.
+        request_checksum_calculation="when_required",
+        response_checksum_validation="when_supported",
     )
     async with _session.client(
         "s3",
