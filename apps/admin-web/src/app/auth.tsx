@@ -79,11 +79,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const signedIn = await exchangeCode();
           if (cancelled) return;
           setUser(signedIn);
-          // Drop the code and state from the URL so a refresh does not replay
-          // a one-time authorization code. `/signin` rather than `/`, because
-          // on the platform host `/` is the marketing site — a refresh there
-          // would leave the signed-in user looking at the sales page.
-          window.history.replaceState({}, "", "/signin");
+          // Leaving `/auth/callback` is the router's job, not ours. This used
+          // to call `history.replaceState` here: the address bar changed, the
+          // router did not hear about it — `replaceState` emits no navigation
+          // event — and the callback route went on rendering its spinner until
+          // the user pressed refresh, at which point the browser re-read the
+          // URL and everything worked. Signing in appeared to need a refresh.
+          //
+          // The route itself now redirects, which also drops the one-time
+          // authorization code from the URL.
         } else {
           const existing = await manager.getUser();
           if (cancelled) return;

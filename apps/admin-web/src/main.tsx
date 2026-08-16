@@ -4,7 +4,7 @@ import { Button, Spinner, ToastProvider, TooltipProvider } from "@footbola/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode, useMemo } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthProvider, useAuth, useTokenRef } from "./app/auth";
 import { SessionProvider, getStoredTenantId } from "./app/session";
@@ -154,7 +154,15 @@ function Authenticated() {
 
             Club slugs share this namespace, which is why the API refuses to
             issue a slug that collides with any of the words above. */}
-        <Route path="/auth/callback" element={<Loading />} />
+        {/* By the time this renders, the code exchange has finished — the
+            spinner above covers it. Redirecting from the route rather than
+            from `history.replaceState` is what keeps the router's idea of the
+            location and the address bar the same; when they disagreed, signing
+            in left a spinner that only a refresh cleared.
+
+            `/signin` rather than `/`, because on the platform host `/` is the
+            marketing site: a signed-in user would land on the sales page. */}
+        <Route path="/auth/callback" element={<Navigate to="/signin" replace />} />
         <Route path="/signin" element={<WorkspacePicker />} />
         <Route path="/signup" element={<WorkspacePicker />} />
         <Route path="/platform" element={<PlatformShell />} />
