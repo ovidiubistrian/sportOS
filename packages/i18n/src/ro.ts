@@ -405,6 +405,7 @@ export const ro: Catalogue = {
   },
 
   squads: {
+    staffPhoto: "Fotografie",
     add: "Adaugă echipă",
     addTitle: "Echipă nouă",
     addBody: "Un nume și un cod scurt sunt de ajuns — restul se poate schimba oricând.",

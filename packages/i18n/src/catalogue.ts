@@ -409,6 +409,7 @@ export const en = {
   },
 
   squads: {
+    staffPhoto: "Photo",
     add: "Add a team",
     addTitle: "New team",
     addBody: "A name and a short code is enough — everything else can change later.",

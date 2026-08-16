@@ -23,6 +23,7 @@ import { useState } from "react";
 
 import { useI18n } from "../app/locale";
 import { useSession } from "../app/session";
+import { ImageField } from "./site/image-field";
 
 /**
  * Adding and editing a squad.
@@ -60,6 +61,9 @@ function StaffSection({ teamId }: { teamId: string }) {
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [role, setRole] = useState<string>("HEAD_COACH");
+  // The list gives an asset id; the field wants a URL to show. Held here so a
+  // portrait appears the moment it is chosen rather than after a refetch.
+  const [photos, setPhotos] = useState<Record<string, string | null>>({});
 
   function submit() {
     add.mutate(
@@ -87,6 +91,29 @@ function StaffSection({ teamId }: { teamId: string }) {
         <ul className="mb-4 divide-y divide-border rounded-lg border border-border">
           {rows.map((member) => (
             <li key={member.id} className="flex items-center gap-3 px-3 py-2.5">
+              {/* The head coach's portrait appears beside the first team on
+                  the club's website, so it is set where the coach is set
+                  rather than on a screen of its own. */}
+              <div className="w-16 shrink-0">
+                <ImageField
+                  // A coach's portrait is the same kind of picture as a
+                  // player's — same shape, same treatment, same library — so
+                  // it shares the purpose rather than inventing one that would
+                  // need a migration to mean anything.
+                  purpose="PLAYER_PHOTO"
+                  label={t("squads", "staffPhoto")}
+                  aspect="3/4"
+                  value={photos[member.id] ?? null}
+                  onChange={(asset) => {
+                    setPhotos((current) => ({ ...current, [member.id]: asset?.url ?? null }));
+                    update.mutate({
+                      teamId,
+                      staffId: member.id,
+                      changes: { photo_media_id: asset?.id ?? null },
+                    });
+                  }}
+                />
+              </div>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium text-text">
                   {member.name}

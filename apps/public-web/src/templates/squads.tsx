@@ -140,16 +140,16 @@ function Manager({
   labels: SquadLabels;
 }) {
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-col items-start gap-3">
+      {/* A portrait, the same proportion as the players beside it, rather than
+          a small round avatar. The manager is the one person on this page a
+          supporter can put a face to, and a 20-pixel circle says otherwise. */}
       <span
-        className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-full text-base font-bold sm:size-20"
+        className="relative grid w-32 shrink-0 place-items-center overflow-hidden rounded-lg text-2xl font-bold sm:w-40"
         style={{
+          aspectRatio: "3 / 4",
           background: "color-mix(in srgb, var(--brand) 14%, transparent)",
           color: "var(--brand-text)",
-          // A hairline ring in the club's colour: it separates a portrait from
-          // whatever background it was shot against, which is most of what
-          // makes a supplied photograph look deliberate.
-          boxShadow: "0 0 0 2px color-mix(in srgb, var(--brand) 30%, transparent)",
         }}
       >
         {person.photo_url ? (
@@ -172,7 +172,7 @@ function Manager({
         <span className="block text-[11px] font-bold tracking-[0.18em] text-brand-text uppercase">
           {person.title ?? labels.staffRole(person.role)}
         </span>
-        <span className="font-display mt-1 block truncate text-xl leading-tight font-bold tracking-tight sm:text-2xl">
+        <span className="font-display mt-1 block text-xl leading-tight font-bold tracking-tight sm:text-2xl">
           {person.name}
         </span>
       </span>
@@ -211,6 +211,8 @@ function Feature({
         <span className="text-[11px] font-bold tracking-[0.2em] text-brand-text uppercase">
           {eyebrow}
         </span>
+        {manager && <Manager person={manager} labels={labels} />}
+
         <h3 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-[1] font-extrabold tracking-[-0.02em]">
           {team.name}
         </h3>
@@ -223,12 +225,6 @@ function Feature({
             {roster.length > 0 ? labels.playerCount(roster.length) : labels.squadComingSoon}
           </span>
         </p>
-        {manager && (
-          <div className="mt-1 border-t border-rule pt-5">
-            <Manager person={manager} labels={labels} />
-          </div>
-        )}
-
         <Link
           href={`/teams/${team.id}`}
           className="mt-2 inline-flex w-fit items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
