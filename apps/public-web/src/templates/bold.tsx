@@ -12,6 +12,7 @@ import {
   AccountLink,
   NAV,
   NewsEmpty,
+  PageHeader,
   SquadTable,
   type ArticleViewProps,
   type NewsListProps,
@@ -22,12 +23,15 @@ import {
 /**
  * BOLD — the modern professional club.
  *
- * A full-bleed brand-colour hero, the club name set very large and tight, and
- * team cards that fill with the brand colour on hover. The one template that
- * uses the brand colour as a large surface — which is safe precisely because
- * the API supplies `--brand-contrast`, a black or white chosen for readability
- * against whatever colour the club picked. A yellow club and a navy club both
- * get legible hero text.
+ * Editorial rather than branded: quiet chrome, very large tight headlines, and
+ * the club's colour spent on the few things a supporter is meant to act on.
+ *
+ * It used to put the brand colour on the header, the footer and every page
+ * header as full-bleed slabs. That reads as a brand guideline rather than as a
+ * design, and it was worst exactly where there was least to say — the shop
+ * header filled half the first screen with saturation above three words. The
+ * colour is still everywhere it counts: the crest, the calls to action, the
+ * eyebrow over every page title. See `globals.css` for the full reasoning.
  */
 
 export function Shell({
@@ -41,29 +45,24 @@ export function Shell({
 }) {
   return (
     <div className="min-h-screen bg-page">
-      <header
-        className="sticky top-0 z-20 border-b"
-        style={{
-          background: "var(--brand)",
-          color: "var(--brand-contrast)",
-          borderColor: "color-mix(in srgb, var(--brand-contrast) 20%, transparent)",
-        }}
-      >
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Crest site={site} size={30} inverted />
+      {/* Translucent, so a hero photograph carries on under it while the nav
+          stays readable over whatever happens to be scrolling past. */}
+      <header className="sticky top-0 z-20 border-b border-rule bg-page/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-6">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <Crest site={site} size={28} />
             <span className="font-display text-sm font-extrabold tracking-tight uppercase">
               {site.short_name}
             </span>
           </Link>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             <nav aria-label="Main">
-              <ul className="flex gap-6">
+              <ul className="flex gap-7">
                 {NAV.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-xs font-bold tracking-widest uppercase opacity-80 hover:opacity-100"
+                      className="text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
                     >
                       {i18n.t("publicSite", item.key)}
                     </Link>
@@ -71,20 +70,14 @@ export function Shell({
                 ))}
               </ul>
             </nav>
-            <AccountLink
-              inverted
-              label={i18n.t("publicSite", "accountNav")}
-            />
+            <AccountLink label={i18n.t("publicSite", "accountNav")} />
           </div>
         </div>
       </header>
 
       {children}
 
-      <footer
-        className="mt-16 py-12"
-        style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-      >
+      <footer className="mt-24 bg-surface-deep text-surface-deep-ink">
         <SiteFooter
           site={site}
           inverted
@@ -105,22 +98,16 @@ export function Shell({
 export function TeamView({ i18n, team, squad }: TeamViewProps) {
   return (
     <>
-      <section
-        className="px-6 py-14"
-        style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-      >
-        <div className="mx-auto max-w-6xl">
-          <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-75">
-            {i18n.t("publicSite", team.is_academy ? "academy" : "senior")}
-          </p>
-          <h1 className="font-display mt-2 text-4xl font-extrabold tracking-[-0.02em] uppercase sm:text-6xl">
-            {team.name}
-          </h1>
-        </div>
-      </section>
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <PageHeader
+        eyebrow={i18n.t("publicSite", team.is_academy ? "academy" : "senior")}
+        title={team.name}
+      />
+      <main className="mx-auto max-w-6xl px-6 py-12">
         <SquadTable squad={squad} emptyLabel={i18n.t("publicSite", "squadUnpublished")} />
-        <Link href="/teams" className="mt-8 inline-block text-sm font-semibold text-brand-text">
+        <Link
+          href="/teams"
+          className="mt-10 inline-block text-sm font-semibold text-brand-text underline-offset-4 hover:underline"
+        >
           ← {i18n.t("publicSite", "ourTeams")}
         </Link>
       </main>
@@ -131,69 +118,76 @@ export function TeamView({ i18n, team, squad }: TeamViewProps) {
 
 export function NewsList({ site, i18n, articles }: NewsListProps) {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-14">
-      <h1 className="font-display mb-8 text-4xl font-extrabold tracking-tighter uppercase">
-        {i18n.t("publicSite", "news")}
-      </h1>
-      {articles.length === 0 ? (
-        <NewsEmpty />
-      ) : (
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <Link
-              key={article.id}
-              href={`/news/${article.slug}`}
-              className="group flex flex-col rounded-lg border border-rule p-5 transition-colors hover:border-[var(--brand)]"
-            >
-              {article.is_pinned && (
-                <span
-                  className="mb-2 self-start rounded-sm px-1.5 py-0.5 text-[10px] font-bold tracking-widest uppercase"
-                  style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-                >
-                  Featured
-                </span>
-              )}
-              <h2 className="font-display text-xl leading-tight font-extrabold tracking-tight text-balance group-hover:text-brand-text">
-                {article.title}
-              </h2>
-              {article.excerpt && (
-                <p className="mt-2 line-clamp-3 flex-1 text-sm text-ink-muted">
-                  {article.excerpt}
-                </p>
-              )}
-              <div className="mt-4">
-                <ArticleDate article={article} site={site} />
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </main>
+    <>
+      <PageHeader eyebrow={site.short_name} title={i18n.t("publicSite", "news")} />
+      <main className="mx-auto max-w-6xl px-6 py-12">
+        {articles.length === 0 ? (
+          <NewsEmpty />
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article) => (
+              <Link
+                key={article.id}
+                href={`/news/${article.slug}`}
+                className="group flex flex-col rounded-xl border border-rule p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-rule-strong hover:shadow-[0_14px_32px_-22px_rgb(0_0_0/0.4)]"
+              >
+                {article.is_pinned && (
+                  <span
+                    className="mb-3 self-start rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.14em] uppercase"
+                    style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
+                  >
+                    Featured
+                  </span>
+                )}
+                <h2 className="font-display text-xl leading-tight font-extrabold tracking-tight text-balance transition-colors group-hover:text-brand-text">
+                  {article.title}
+                </h2>
+                {article.excerpt && (
+                  <p className="mt-2.5 line-clamp-3 flex-1 text-sm/relaxed text-ink-muted">
+                    {article.excerpt}
+                  </p>
+                )}
+                <div className="mt-5">
+                  <ArticleDate article={article} site={site} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </main>
+    </>
   );
 }
 
 export function ArticleView({ site, i18n, article }: ArticleViewProps) {
   return (
     <>
-      <header
-        className="px-6 py-14"
-        style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-      >
-        <div className="mx-auto max-w-3xl">
-          <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-75">{i18n.t("publicSite", "news")}</p>
-          <h1 className="font-display mt-3 text-3xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl">
+      {/* Narrower than the other page headers: this one sits directly over a
+          column of body text and has to line up with it. */}
+      <header className="border-b border-rule">
+        <div className="mx-auto max-w-3xl px-6 pt-14 pb-10 sm:pt-20">
+          <p
+            className="text-[11px] font-bold tracking-[0.18em] uppercase"
+            style={{ color: "var(--brand-text)" }}
+          >
+            {i18n.t("publicSite", "news")}
+          </p>
+          <h1 className="font-display mt-3 text-[clamp(1.875rem,4.5vw,3rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-balance">
             {article.title}
           </h1>
           {article.published_at && (
-            <p className="mt-4 text-sm opacity-80">
+            <p className="mt-4 text-sm text-ink-muted">
               {formatDate(article.published_at, site)}
             </p>
           )}
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-6 py-10 text-[15px]">
+      <main className="mx-auto max-w-2xl px-6 py-12 text-[16px]/relaxed">
         <ArticleBody blocks={article.body} />
-        <Link href="/news" className="mt-10 inline-block text-sm font-semibold text-brand-text">
+        <Link
+          href="/news"
+          className="mt-12 inline-block text-sm font-semibold text-brand-text underline-offset-4 hover:underline"
+        >
           ← {i18n.t("publicSite", "allNews")}
         </Link>
       </main>

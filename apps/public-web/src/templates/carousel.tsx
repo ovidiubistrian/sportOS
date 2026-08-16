@@ -62,8 +62,12 @@ export function NewsCarousel({
     <section
       aria-roledescription="carousel"
       aria-label={labels.news}
-      className="relative isolate overflow-hidden"
-      style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
+      // Neutral dark, not the club's colour: every slide is a photograph with a
+      // dark scrim over it, so on a club with a strong colour the ground only
+      // showed while the image loaded — a flash of saturation, then nothing.
+      // It is also what a club with no cover images falls back to, and text
+      // over near-black is legible in a way text over an arbitrary hue is not.
+      className="relative isolate overflow-hidden bg-surface-deep text-surface-deep-ink"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

@@ -5,6 +5,7 @@ import { preferredLocale, siteTranslator } from "@/lib/i18n";
 import { getShop, getSite } from "@/lib/site";
 import { getSupporter } from "@/lib/supporter";
 import { Beacon } from "@/templates/beacon";
+import { EmptyState } from "@/templates/shared";
 import { Shop } from "@/templates/shop";
 
 export const metadata = { title: "Shop" };
@@ -45,13 +46,14 @@ export default async function ShopPage() {
   return (
     <>
       {/* A club store is a destination, not a page of stock, so it opens the
-          way the club's own front page does: full-bleed, in the club's colour,
-          over the club's photograph. Under a plain heading the same products
-          read as an inventory list — the difference is entirely the frame. */}
-      <section
-        className="relative isolate overflow-hidden"
-        style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-      >
+          way the club's own front page does: full-bleed, over the club's
+          photograph. Under a plain heading the same products read as an
+          inventory list — the difference is entirely the frame.
+          The ground is neutral rather than the club's colour, because it is
+          only ever seen by a club that has not uploaded a picture — and a
+          store that opens on half a screen of flat saturation above three
+          words is exactly the frame this was trying to avoid. */}
+      <section className="relative isolate overflow-hidden bg-surface-deep text-surface-deep-ink">
         {site.branding.hero_url && (
           <>
             <img
@@ -93,7 +95,7 @@ export default async function ShopPage() {
 
       <main className="mx-auto max-w-6xl px-6 py-12">
       {products.length === 0 ? (
-        <p className="text-sm text-ink-muted">{i18n.t("publicSite", "shopEmpty")}</p>
+        <EmptyState>{i18n.t("publicSite", "shopEmpty")}</EmptyState>
       ) : (
         <Shop
           products={products}

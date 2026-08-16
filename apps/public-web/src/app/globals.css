@@ -7,6 +7,22 @@
  * the API — including the contrast-corrected text variants. A club supplies
  * three colours and picks a template; there is no mechanism for arbitrary CSS,
  * which is what keeps every club site recognisably the same product.
+ *
+ * On how much of the page the club's colour gets to be:
+ *
+ * It used to carry the header, the footer and every page header as full-bleed
+ * slabs. On a club with a strong colour that reads as a brand guideline being
+ * followed rather than as a design — and on the shop page, where the header is
+ * most of the first screen, it left a wall of saturation above three words of
+ * content. Saturated colour at that size is also the least forgiving surface
+ * to put photographs and small type against.
+ *
+ * So the chrome is neutral and the club's colour is an accent: the crest, the
+ * calls to action, the active nav item, the eyebrows, the badges. It appears
+ * often and always where something is happening, which reads as deliberate.
+ * `--surface-deep` is the near-black those slabs became — one dark neutral,
+ * the same for every club, so a photograph and a headline behave the same way
+ * on a yellow club as on a navy one.
  */
 
 @theme {
@@ -20,12 +36,22 @@
 
 :root {
   --page: #ffffff;
-  --page-alt: #f6f7f9;
-  --ink: #10141a;
-  --ink-muted: #59626e;
-  --ink-faint: #8a929c;
-  --rule: #e3e7ec;
-  --rule-strong: #c9d0d8;
+  --page-alt: #f7f8f9;
+  --ink: #0b0e12;
+  --ink-muted: #5a636f;
+  --ink-faint: #8b939e;
+  --rule: #e7e9ed;
+  --rule-strong: #cbd1d9;
+
+  /* The chrome: header, footer, page headers, and any hero without a
+     photograph. Near-black rather than black — pure black against white is a
+     harder edge than a club site wants, and it leaves nowhere to go for the
+     text on top of it. */
+  --surface-deep: #0e1116;
+  --surface-deep-alt: #171b22;
+  --surface-deep-ink: #f4f6f8;
+  --surface-deep-muted: #9aa3af;
+  --surface-deep-rule: #262c35;
   /* Not a brand colour: the one red on a club site that must mean "this
      removes something", whatever colour the club itself plays in. */
   --danger: #bb1f2f;
@@ -49,6 +75,13 @@
   --rule-strong: #333d49;
   --danger: #f4707d;
   --brand-text: var(--brand-text-dark, var(--brand));
+
+  /* Lifted off the page rather than sunk into it: in dark mode the chrome has
+     to separate from a background that is already dark, so it goes one step
+     lighter instead of one step darker. */
+  --surface-deep: #161b23;
+  --surface-deep-alt: #1e242e;
+  --surface-deep-rule: #2c3340;
 }
 
 @theme inline {
@@ -60,6 +93,11 @@
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
   --color-danger: var(--danger);
+  --color-surface-deep: var(--surface-deep);
+  --color-surface-deep-alt: var(--surface-deep-alt);
+  --color-surface-deep-ink: var(--surface-deep-ink);
+  --color-surface-deep-muted: var(--surface-deep-muted);
+  --color-surface-deep-rule: var(--surface-deep-rule);
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-brand-contrast: var(--brand-contrast);

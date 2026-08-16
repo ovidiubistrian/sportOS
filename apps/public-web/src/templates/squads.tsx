@@ -62,10 +62,7 @@ function Hero({
   stats: [string, string][];
 }) {
   return (
-    <section
-      className="relative isolate overflow-hidden"
-      style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-    >
+    <section className="relative isolate overflow-hidden bg-surface-deep text-surface-deep-ink">
       {site.branding.hero_url && (
         <>
           <img

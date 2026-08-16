@@ -17,8 +17,7 @@ export function OpeningHero({ site }: { site: Site }) {
 
   return (
     <section
-      className="relative isolate flex min-h-[380px] items-end overflow-hidden sm:min-h-[460px] lg:min-h-[540px]"
-      style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
+      className="relative isolate flex min-h-[380px] items-end overflow-hidden bg-surface-deep text-surface-deep-ink sm:min-h-[460px] lg:min-h-[540px]"
     >
       {image && (
         <>

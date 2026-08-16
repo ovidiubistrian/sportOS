@@ -94,6 +94,51 @@ export function Crest({
   );
 }
 
+/**
+ * The band at the top of a page that is not the front page.
+ *
+ * There were five of these, written separately — teams, shop, account, a team,
+ * an article — and they had drifted into five sizes of the same idea. One
+ * component instead, so the pages read as one site and the rhythm is set in a
+ * single place.
+ *
+ * Ink on the page rather than a slab of the club's colour. The eyebrow is
+ * where the colour goes: enough to place the page as this club's, small enough
+ * that the words stay the loudest thing.
+ */
+export function PageHeader({
+  eyebrow,
+  title,
+  lead,
+  children,
+}: {
+  eyebrow?: ReactNode;
+  title: string;
+  lead?: string;
+  /** Facts, filters or actions belonging to the page, under the rule. */
+  children?: ReactNode;
+}) {
+  return (
+    <header className="border-b border-rule">
+      <div className="mx-auto max-w-6xl px-6 pt-14 pb-10 sm:pt-20 sm:pb-12">
+        {eyebrow && (
+          <p
+            className="text-[11px] font-bold tracking-[0.18em] uppercase"
+            style={{ color: "var(--brand-text)" }}
+          >
+            {eyebrow}
+          </p>
+        )}
+        <h1 className="font-display mt-3 text-[clamp(2rem,5vw,3.5rem)] leading-[1.02] font-extrabold tracking-[-0.03em] text-balance">
+          {title}
+        </h1>
+        {lead && <p className="mt-4 max-w-xl text-base/relaxed text-ink-muted">{lead}</p>}
+        {children}
+      </div>
+    </header>
+  );
+}
+
 export function Established({ site }: { site: Site }) {
   if (!site.founded_year) return null;
   return (
@@ -292,12 +337,27 @@ export function ArticleDate({ article, site }: { article: ArticleSummary; site: 
   );
 }
 
-export function NewsEmpty() {
+/**
+ * A section that has nothing in it yet.
+ *
+ * These were single sentences of muted text left-aligned in an otherwise empty
+ * page, which reads as a page that failed rather than as a club that has not
+ * filled this in yet — the shop was one line floating in half a screen of
+ * white. Given a frame and centred, the same sentence reads as an answer.
+ *
+ * No illustration and no call to action: the person reading it is a supporter
+ * who cannot do anything about it, and "check back soon" is not information.
+ */
+export function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <p className="py-10 text-sm text-ink-muted">
-      There are no published articles yet.
-    </p>
+    <div className="rounded-xl border border-dashed border-rule px-6 py-16 text-center">
+      <p className="mx-auto max-w-sm text-sm/relaxed text-ink-muted">{children}</p>
+    </div>
   );
+}
+
+export function NewsEmpty() {
+  return <EmptyState>There are no published articles yet.</EmptyState>;
 }
 
 
@@ -337,12 +397,15 @@ export function AccountLink({
       className={
         inverted
           ? "rounded-full border px-3 py-1.5 text-xs font-bold tracking-widest uppercase opacity-80 transition-opacity hover:opacity-100"
-          : "rounded-full border border-rule px-3 py-1.5 text-xs font-semibold transition-colors hover:border-[var(--brand)] hover:text-brand-text"
+          : // Solid, because on quiet chrome this is the one thing in the header
+            // a supporter is meant to press, and an outline among six links is
+            // not a call to action.
+            "rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-90"
       }
       style={
         inverted
           ? { borderColor: "color-mix(in srgb, var(--brand-contrast) 35%, transparent)" }
-          : undefined
+          : { background: "var(--brand)", color: "var(--brand-contrast)" }
       }
     >
       {label}

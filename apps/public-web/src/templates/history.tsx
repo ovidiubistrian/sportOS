@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import type { ClubHistory } from "@/lib/site";
 import { SectionHeading } from "./section";
 
@@ -52,8 +54,15 @@ export function ClubRecord({
     <section className="mx-auto max-w-6xl px-6 py-14">
       <SectionHeading title={labels.title} lead={labels.lead} />
 
+      {/* Sized to what the club actually filled in. Fixed at three columns,
+          a club that has only entered its founding year got its one fact
+          followed by two empty cells — which reads as a page that failed to
+          load, not as a club that has not typed its ground in yet. */}
       {facts.length > 0 && (
-        <div className="mb-8 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule sm:grid-cols-3">
+        <div
+          className="mb-8 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule sm:grid-cols-[repeat(var(--facts),minmax(0,1fr))]"
+          style={{ "--facts": facts.length } as CSSProperties}
+        >
           {facts.map((fact) => (
             <div key={fact.label} className="bg-page p-5">
               <p className="text-[11px] tracking-[0.12em] text-ink-faint uppercase">

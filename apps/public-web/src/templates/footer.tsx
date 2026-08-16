@@ -48,16 +48,16 @@ export function SiteFooter({
 }: {
   site: Site;
   labels: FooterLabels;
-  /** On a brand-coloured surface, where the rules and muted text invert. */
+  /** On a dark surface, where the rules and muted text invert. */
   inverted?: boolean;
 }) {
   const { branding } = site;
   const social = socialLinks(branding.social as Record<string, string>);
   const sponsors = branding.sponsors ?? [];
 
-  const rule = inverted
-    ? "color-mix(in srgb, var(--brand-contrast) 22%, transparent)"
-    : "var(--rule)";
+  // Mixed from the text colour rather than from the brand, so one footer works
+  // on a club-coloured surface and on the neutral dark one alike.
+  const rule = inverted ? "color-mix(in srgb, currentColor 20%, transparent)" : "var(--rule)";
   const quiet = inverted ? "opacity-70" : "text-ink-muted";
   const faint = inverted ? "opacity-55" : "text-ink-faint";
 
