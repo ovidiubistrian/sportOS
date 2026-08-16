@@ -97,6 +97,7 @@ jobs:
             VITE_API_URL=https://api.${{ secrets.PLATFORM_DOMAIN }}
             VITE_OIDC_ISSUER=https://auth.${{ secrets.PLATFORM_DOMAIN }}/realms/football-os
             VITE_OIDC_CLIENT_ID=admin-web
+            VITE_PUBLIC_SITE_DOMAIN=${{ secrets.PLATFORM_DOMAIN }}
           push: true
           tags: |
             ghcr.io/${{ steps.names.outputs.repo }}/admin-web:${{ github.sha }}

@@ -216,6 +216,7 @@ services:
       VITE_API_URL: http://api.footbola.localhost
       VITE_OIDC_ISSUER: http://auth.footbola.localhost/realms/football-os
       VITE_OIDC_CLIENT_ID: admin-web
+      VITE_PUBLIC_SITE_DOMAIN: footbola.localhost
     volumes:
       - ./apps:/repo/apps
       - ./packages:/repo/packages
