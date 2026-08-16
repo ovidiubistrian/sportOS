@@ -511,6 +511,24 @@ export function useUpdateFeed(
   });
 }
 
+/** Bring in the provider's squad for one of our teams. */
+export function useImportSquad(
+  clubId: string,
+): UseMutationResult<{ created: number; skipped: number; notes: string[] }, ApiError, string> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (teamId) =>
+      api.post<{ created: number; skipped: number; notes: string[] }>(
+        `/api/v1/clubs/${clubId}/feed/squad?team_id=${encodeURIComponent(teamId)}`,
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["players"] });
+      void queryClient.invalidateQueries({ queryKey: ["teams"] });
+    },
+  });
+}
+
 /** Fetch now rather than waiting for the scheduler's next turn. */
 export function useSyncFeed(clubId: string): UseMutationResult<unknown, ApiError, void> {
   const api = useApi();

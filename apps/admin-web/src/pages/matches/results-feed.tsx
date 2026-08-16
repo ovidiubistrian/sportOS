@@ -1,12 +1,14 @@
 import {
   useFeed,
+  useImportSquad,
+  useTeams,
   useProviderLeagueTeams,
   useProviderLeagues,
   useSyncFeed,
   useUpdateFeed,
 } from "@footbola/api-client";
 import { Badge, Button, Card, Field, Select, Spinner, useToast } from "@footbola/ui";
-import { RefreshCw, Unlink } from "lucide-react";
+import { RefreshCw, Unlink, Users } from "lucide-react";
 import { useState } from "react";
 
 /**
@@ -31,6 +33,9 @@ export function ResultsFeed({ clubId, country }: { clubId: string; country: stri
   const feed = useFeed(clubId);
   const update = useUpdateFeed(clubId);
   const sync = useSyncFeed(clubId);
+  const ourTeams = useTeams();
+  const importSquad = useImportSquad(clubId);
+  const [squadTeam, setSquadTeam] = useState("");
 
   const linked = Boolean(feed.data?.provider_team_id);
   const [picking, setPicking] = useState(false);
@@ -113,6 +118,49 @@ export function ResultsFeed({ clubId, country }: { clubId: string; country: stri
         <p className="rounded-md border border-danger-border bg-danger-bg px-3 py-2 text-sm text-danger">
           {feed.data.last_error}
         </p>
+      )}
+
+      {/* The provider knows a club's squad as well as its fixtures. Which of
+          our teams it belongs to is the club's to say — the provider knows a
+          club has a squad, not that we hold six, and choosing on its behalf is
+          how a Liga II squad lands in the under-13s. */}
+      {linked && (
+        <div className="flex flex-wrap items-end gap-3 border-t border-rule pt-4">
+          <Field label="Bring in the squad" htmlFor="squad-team" className="min-w-56 flex-1">
+            {(props) => (
+              <Select
+                {...props}
+                value={squadTeam}
+                placeholder="Into which team…"
+                options={(ourTeams.data ?? []).map((team) => ({
+                  value: team.id,
+                  label: team.name,
+                  description: team.code,
+                }))}
+                onChange={setSquadTeam}
+              />
+            )}
+          </Field>
+          <Button
+            variant="secondary"
+            disabled={!squadTeam}
+            loading={importSquad.isPending}
+            onClick={() =>
+              importSquad.mutate(squadTeam, {
+                onSuccess: (out) =>
+                  toast.success(
+                    out.created
+                      ? `${out.created} added, ${out.skipped} already here.`
+                      : `Nobody new — all ${out.skipped} are already in the squad.`,
+                  ),
+                onError: (error) => toast.error(error.message),
+              })
+            }
+          >
+            <Users />
+            Import
+          </Button>
+        </div>
       )}
 
       {linked && feed.data && !feed.data.last_fixtures_at && (
