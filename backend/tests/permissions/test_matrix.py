@@ -255,6 +255,12 @@ EXEMPT = {
     ("GET", "/api/v1/clubs/{club_id}/feed"),
     ("PUT", "/api/v1/clubs/{club_id}/feed"),
     ("GET", "/api/v1/feed/teams"),
+    # Reading the provider's catalogue — divisions in a country, then the clubs
+    # in one. Same permission as the rest of the feed and no tenant data in the
+    # answer, but each call spends from a shared allowance, which is why they
+    # are behind the same gate as linking rather than open to any signed-in user.
+    ("GET", "/api/v1/feed/leagues"),
+    ("GET", "/api/v1/feed/leagues/{league_id}/teams"),
     ("POST", "/api/v1/clubs/{club_id}/feed/sync"),
     ("POST", "/api/v1/clubs/{club_id}/feed/history"),
     ("GET", "/api/v1/platform/api-football"),
