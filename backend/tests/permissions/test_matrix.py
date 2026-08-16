@@ -263,6 +263,10 @@ EXEMPT = {
     ("GET", "/api/v1/feed/leagues/{league_id}/teams"),
     ("POST", "/api/v1/clubs/{club_id}/feed/sync"),
     ("POST", "/api/v1/clubs/{club_id}/feed/history"),
+    # Bringing in the provider's squad. Writes players, so the same permission
+    # as editing them, and exercised in tests/integrations/ where a provider
+    # response can be faked.
+    ("POST", "/api/v1/clubs/{club_id}/feed/squad"),
     ("GET", "/api/v1/platform/api-football"),
     ("GET", "/api/v1/platform/api-football/links"),
     ("POST", "/api/v1/platform/api-football/links"),
