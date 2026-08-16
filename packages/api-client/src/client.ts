@@ -24,8 +24,23 @@ export class ApiError extends Error {
     this.requestId = body.request_id ?? null;
   }
 
+  /**
+   * Whether the session itself is gone, as opposed to this one request being
+   * refused.
+   *
+   * Not every 401 means "sign in again". `STEP_UP_REQUIRED` is the server
+   * asking for a second factor before one particular action — the session is
+   * perfectly valid — and treating it as a lost session throws the person out
+   * of the application for doing something sensitive, which is both wrong and
+   * the exact moment they will least understand it.
+   */
   get isAuthError(): boolean {
-    return this.status === 401;
+    return this.status === 401 && this.code !== "STEP_UP_REQUIRED";
+  }
+
+  /** The server wants a second factor before it will do this. */
+  get needsStepUp(): boolean {
+    return this.code === "STEP_UP_REQUIRED";
   }
 
   /** Field-level messages from a 422, keyed by field path. */
