@@ -8,6 +8,7 @@ import { ClubFeed } from "@/templates/club-feed";
 import { MatchTimeline } from "@/templates/events";
 import { ClubRecord } from "@/templates/history";
 import { Newsletter } from "@/templates/newsletter";
+import { OpeningHero } from "@/templates/opening";
 import { FeaturedMatch, LeagueTable } from "@/templates/matchday";
 
 /**
@@ -45,6 +46,10 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* The carousel renders nothing without articles, which on a club's
+          first day left the page opening at the newsletter signup — just after
+          they had uploaded something called the home page image. */}
+      {hero.length === 0 && <OpeningHero site={site} />}
       <NewsCarousel
         site={site}
         articles={hero}
