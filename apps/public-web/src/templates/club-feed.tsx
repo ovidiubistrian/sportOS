@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 
+// Types only from `@/lib/site` — it reaches for `next/headers`, which a client
+// component cannot import. The crest is drawn below rather than borrowed from
+// `shared.tsx` for the same reason.
 import type { ArticleSummary, Site } from "@/lib/site";
 import { SectionHeading } from "./section";
 
@@ -101,14 +104,43 @@ export function ClubFeed({
               href={`/news/${article.slug}`}
               className="group flex h-full flex-col overflow-hidden rounded-2xl border border-rule bg-page transition-shadow duration-300 hover:shadow-[0_18px_40px_-24px_rgb(0_0_0/0.45)]"
             >
-              <div className="relative aspect-[3/4] overflow-hidden">
-                {(article.cover_url ?? site.branding.hero_url) && (
+              {/* This article's own picture, or none.
+                  It used to fall back to the club's home page image, which put
+                  the same stadium on every card that had no cover of its own —
+                  indistinguishable from a photograph somebody had chosen, so
+                  setting a cover looked like it had done nothing and not
+                  setting one looked like it had. A card in a list stands for
+                  one article, and a picture on it is a claim about that
+                  article. The hero still falls back, because a hero with no
+                  backdrop is worse and the club's home page image is exactly
+                  what it is for. */}
+              <div className="relative grid aspect-[3/4] place-items-center overflow-hidden bg-page-alt">
+                {article.cover_url ? (
                   <img
-                    src={article.cover_url ?? site.branding.hero_url ?? ""}
+                    src={article.cover_url}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.05]"
                   />
+                ) : (
+                  // Faint, and unmistakably the crest rather than a photograph:
+                  // the card keeps its shape and the badge keeps its ground,
+                  // without anything on it pretending to be this article's
+                  // picture.
+                  <span aria-hidden className="opacity-25 grayscale">
+                    {site.branding.crest_url ? (
+                      <img
+                        src={site.branding.crest_url}
+                        alt=""
+                        loading="lazy"
+                        className="size-14 object-contain"
+                      />
+                    ) : (
+                      <span className="font-display text-3xl font-extrabold tracking-tight">
+                        {site.short_name.slice(0, 3).toUpperCase()}
+                      </span>
+                    )}
+                  </span>
                 )}
                 <span
                   className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-white uppercase"

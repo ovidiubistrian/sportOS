@@ -72,11 +72,41 @@ export function NewsCarousel({
       onMouseLeave={() => setPaused(false)}
     >
       <div className="relative h-[380px] sm:h-[460px] lg:h-[540px]">
+        {/* The club's own picture, once, behind every slide — not the
+            article's.
+
+            It used to prefer `article.cover_url`, which made this band the
+            place a newly set cover showed up: the newest few articles are the
+            hero and the rest are the feed, so an article in the hero had no
+            card of its own, and choosing a photograph for a story appeared to
+            change the top of the site instead. The two are different jobs.
+            This is the club's front door and stays on the club's image; a
+            story's own photograph belongs to the story, on its card and on its
+            page.
+
+            Drawn here rather than per slide because it no longer changes
+            between them: what cross-fades is the words. */}
+        {site.branding.hero_url && (
+          <img
+            src={site.branding.hero_url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            // The page's largest paint, and there is nothing above it.
+            loading="eager"
+            fetchPriority="high"
+          />
+        )}
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.45) 45%, rgb(0 0 0 / 0.12) 100%)",
+          }}
+        />
+
         {articles.map((article, position) => {
           const active = position === index;
-          // Every slide is mounted and cross-faded, so the picture is already
-          // decoded when its turn comes and the hero never flashes empty.
-          const background = article.cover_url ?? site.branding.hero_url;
           return (
             <article
               key={article.id}
@@ -84,26 +114,6 @@ export function NewsCarousel({
               className="absolute inset-0 transition-opacity duration-700 ease-out"
               style={{ opacity: active ? 1 : 0, pointerEvents: active ? "auto" : "none" }}
             >
-              {background && (
-                <img
-                  src={background}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                  // The first slide is the page's largest paint; the rest can
-                  // wait until the reader is actually on them.
-                  loading={position === 0 ? "eager" : "lazy"}
-                  fetchPriority={position === 0 ? "high" : "low"}
-                />
-              )}
-              <span
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.45) 45%, rgb(0 0 0 / 0.12) 100%)",
-                }}
-              />
-
               <div className="relative mx-auto flex h-full max-w-6xl flex-col justify-end px-6 pb-12 text-white sm:pb-16">
                 <p className="font-display text-[11px] font-bold tracking-[0.2em] uppercase opacity-80">
                   {labels.news}
