@@ -24,8 +24,10 @@ from sqlalchemy import select
 
 from app.api.deps import Db, Requires
 from app.audit.service import AuditService
+from app.core.config import settings
 from app.core.context import RequestContext
 from app.core.errors import NotFound, ValidationFailed
+from app.integrations.api_football.autolink import COUNTRY_NAMES
 from app.integrations.api_football.client import (
     PROVIDER,
     ApiFootball,
@@ -88,6 +90,32 @@ class ProviderTeam(BaseModel):
     country: str | None
     logo: str | None
     founded: int | None
+
+
+class ProviderLeague(BaseModel):
+    """One division the provider covers, as a club would recognise it."""
+
+    id: str
+    name: str
+    country: str | None
+    logo: str | None
+    tier: int | None = None
+    season: int | None = None
+    """The season the provider currently holds for it — what to ask for next."""
+
+
+class ProviderCatalogue(BaseModel):
+    """What the provider knows, and whether it knows anything at all.
+
+    `available` is false for the two cases a club must be able to tell apart
+    without reading an error: the platform has no provider key, and the
+    provider has no divisions for this country. Both mean the same next step —
+    enter the competition by hand — and neither is a fault.
+    """
+
+    available: bool
+    reason: str | None = None
+    leagues: list[ProviderLeague] = []
 
 
 class SyncOut(BaseModel):
@@ -182,6 +210,95 @@ async def update_feed(
     out = FeedSettings.model_validate(row)
     out.provider_available = bool(settings.api_football_key.get_secret_value())
     return out
+
+
+@router.get(
+    "/feed/leagues",
+    response_model=ProviderCatalogue,
+    summary="The divisions the feed covers in a country",
+)
+async def list_provider_leagues(
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+    country: Annotated[str, Query(min_length=2, max_length=2)] = "RO",
+) -> ProviderCatalogue:
+    """Every division the provider holds for a country, newest season first.
+
+    A club picks its division from this rather than typing one, so there is no
+    spelling to get wrong and no ambiguity to resolve later. Where the answer
+    is empty the club has learned something true — its league is not covered —
+    which is worth a screen of its own rather than an error.
+    """
+    if not settings.api_football_key:
+        return ProviderCatalogue(
+            available=False, reason="This platform has no results feed configured."
+        )
+    try:
+        async with ApiFootball() as client:
+            rows = await client.leagues(country=COUNTRY_NAMES.get(country.upper(), country))
+    except ProviderUnavailable as exc:
+        return ProviderCatalogue(available=False, reason=str(exc))
+
+    leagues: list[ProviderLeague] = []
+    for row in rows:
+        league = row.get("league") or {}
+        if not league.get("id"):
+            continue
+        seasons = [s.get("year") for s in (row.get("seasons") or []) if s.get("year")]
+        leagues.append(
+            ProviderLeague(
+                id=str(league["id"]),
+                name=league.get("name") or "",
+                country=(row.get("country") or {}).get("name"),
+                logo=league.get("logo"),
+                season=max(seasons) if seasons else None,
+            )
+        )
+    leagues.sort(key=lambda item: item.name)
+
+    if not leagues:
+        return ProviderCatalogue(
+            available=False,
+            reason="The feed covers no divisions in this country. Add your competition here.",
+        )
+    return ProviderCatalogue(available=True, leagues=leagues)
+
+
+@router.get(
+    "/feed/leagues/{league_id}/teams",
+    response_model=list[ProviderTeam],
+    summary="The clubs in one division",
+)
+async def list_league_teams(
+    league_id: str,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+    season: Annotated[int, Query(ge=2000, le=2100)],
+) -> list[ProviderTeam]:
+    """Everyone in that division that season, for the club to point at itself.
+
+    Choosing from a list is the whole point: it removes the only decision that
+    could put another club's fixtures on this one's website.
+    """
+    try:
+        async with ApiFootball() as client:
+            rows = await client.teams(league=league_id, season=season)
+    except ProviderUnavailable as exc:
+        raise ValidationFailed(str(exc), field="provider") from exc
+
+    teams = [
+        ProviderTeam(
+            id=str(row["team"]["id"]),
+            name=row["team"].get("name") or "",
+            country=row["team"].get("country"),
+            logo=row["team"].get("logo"),
+            founded=row["team"].get("founded"),
+        )
+        for row in rows
+        if row.get("team")
+    ]
+    teams.sort(key=lambda team: team.name)
+    return teams
 
 
 @router.get(
