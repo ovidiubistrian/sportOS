@@ -90,17 +90,20 @@ files.{$PLATFORM_DOMAIN} {
 
 # --- every club website ------------------------------------------------------
 #
-# Both the subdomain a club is given at sign-up and any domain it brings later.
-# The certificate for each is obtained the first time somebody visits, once the
-# API has confirmed the hostname belongs to a club.
-
-*.{$PLATFORM_DOMAIN} {
-	import common
-	tls {
-		on_demand
-	}
-	reverse_proxy public-web:3000
-}
+# Anything not named above: the subdomain a club is given at sign-up, and any
+# domain it brings later. The certificate for each is obtained the first time
+# somebody visits, once the API has confirmed the hostname belongs to a club.
+#
+# There is deliberately no `*.{$PLATFORM_DOMAIN}` block. A wildcard site with
+# `on_demand` covers `api.`, `auth.` and `files.` as well, and Caddy then stops
+# obtaining certificates for them at startup and defers to the ask endpoint —
+# which answers from the club domains table, correctly says it has never heard
+# of `api.teamsport360.com`, and leaves the API unreachable behind a TLS
+# handshake that fails with `internal error`. The apex kept working throughout,
+# because a wildcard does not cover the domain it is a wildcard of, which is
+# what made it look like a certificate problem rather than a routing one.
+#
+# This catch-all does the same job without shadowing the named sites.
 
 :443 {
 	import common
