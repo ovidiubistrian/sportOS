@@ -103,4 +103,34 @@ def register_exception_handlers(app: FastAPI) -> None:
             if not settings.is_production
             else "Something went wrong."
         )
-        return JSONResponse(status_code=500, content=_body("INTERNAL_ERROR", message))
+        return JSONResponse(
+            status_code=500,
+            content=_body("INTERNAL_ERROR", message),
+            headers=_cors_headers(request),
+        )
+
+
+def _cors_headers(request: Request) -> dict[str, str]:
+    """The CORS headers this response would have had, if anything had added them.
+
+    A handler registered for bare `Exception` is not installed alongside the
+    others: Starlette hands it to `ServerErrorMiddleware`, which wraps the
+    entire application — CORSMiddleware included. So a 500 leaves without the
+    headers every other response carries, and the browser reports "blocked by
+    CORS policy: no Access-Control-Allow-Origin" instead of "500".
+
+    That is a bad trade. The CORS message points at configuration, the real
+    fault is in a request handler, and the two live in different files. Echoing
+    the headers here costs nothing and lets the browser say what happened.
+
+    Only for origins already on the allow-list — this reports the decision the
+    middleware would have made, it does not make a new one.
+    """
+    origin = request.headers.get("origin")
+    if not origin or origin not in settings.cors_origins:
+        return {}
+    return {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Vary": "Origin",
+    }
