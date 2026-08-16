@@ -27,6 +27,7 @@ from app.audit.service import AuditService
 from app.core.config import settings
 from app.core.context import RequestContext
 from app.core.errors import NotFound, ValidationFailed
+from app.integrations.api_football import squads
 from app.integrations.api_football.autolink import COUNTRY_NAMES
 from app.integrations.api_football.client import (
     PROVIDER,
@@ -35,6 +36,7 @@ from app.integrations.api_football.client import (
 )
 from app.integrations.models import ClubFeed
 from app.sports.registry import profile
+from app.teams.models import Season, Team
 from app.tenants.models import Club
 
 router = APIRouter(tags=["competitions"])
@@ -331,6 +333,72 @@ async def search_teams(
         for row in rows
         if row.get("team")
     ]
+
+
+class SquadImportOut(BaseModel):
+    created: int
+    skipped: int
+    notes: list[str] = []
+
+
+@router.post(
+    "/clubs/{club_id}/feed/squad",
+    response_model=SquadImportOut,
+    summary="Bring in the provider's squad for one team",
+)
+async def import_squad_from_feed(
+    club_id: UUID,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+    team_id: Annotated[UUID, Query()],
+) -> SquadImportOut:
+    """Add the players the provider lists for this club, to one of our teams.
+
+    Which team is the club's to say. The provider knows a club has a squad; it
+    does not know we hold six, and choosing on its behalf is how a second
+    division squad lands in the under-13s.
+    """
+    feed = await _settings(db, ctx, club_id)
+    if not feed.provider_team_id:
+        raise ValidationFailed(
+            "Connect this club to the results feed first.", field="provider_team_id"
+        )
+
+    team = await db.scalar(select(Team).where(Team.id == team_id, Team.club_id == club_id))
+    if team is None:
+        raise NotFound(object_type="team", object_id=str(team_id))
+
+    season = await db.scalar(
+        select(Season).where(Season.club_id == club_id, Season.is_current.is_(True))
+    )
+    if season is None:
+        raise ValidationFailed(
+            "This club has no current season, and a registration needs one.", field="season"
+        )
+
+    try:
+        async with ApiFootball() as client:
+            result = await squads.import_squad(
+                db,
+                client,
+                tenant_id=ctx.tenant,
+                club_id=club_id,
+                team_id=team_id,
+                season_id=season.id,
+                provider_team_id=feed.provider_team_id,
+            )
+    except ProviderUnavailable as exc:
+        raise ValidationFailed(str(exc), field="provider") from exc
+
+    AuditService(db).record(
+        ctx,
+        action="players.squad.import",
+        object_type="team",
+        object_id=team_id,
+        club_id=club_id,
+        after={"created": result.created, "skipped": result.skipped},
+    )
+    return SquadImportOut(created=result.created, skipped=result.skipped, notes=result.notes)
 
 
 @router.post(
