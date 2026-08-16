@@ -4,6 +4,7 @@ import time
 from collections.abc import Awaitable, Callable
 
 import structlog
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -15,6 +16,45 @@ from app.core.ids import new_id
 log = structlog.get_logger("http")
 
 Handler = Callable[[Request], Awaitable[Response]]
+
+
+def enlist(request: Request, session: AsyncSession) -> None:
+    """Hand a session to `UnitOfWorkMiddleware` to commit."""
+    sessions: list[AsyncSession] | None = getattr(request.state, "sessions", None)
+    if sessions is None:
+        sessions = []
+        request.state.sessions = sessions
+    sessions.append(session)
+
+
+class UnitOfWorkMiddleware(BaseHTTPMiddleware):
+    """Commits the request's work before the response leaves the building.
+
+    A dependency with `yield` runs its exit code *after* Starlette has handed
+    the response to the client. Committing there means a caller can fail to
+    read back its own write: `POST /products` returns 201, the row is committed
+    a moment later, and a read that arrives in between finds nothing. The
+    window is a millisecond on a warm machine, which is why it survived so
+    long — the slower the commit, the wider it gets.
+
+    Here `call_next` has returned, so the endpoint is finished and every
+    dependency has done its work, but nothing has been sent yet. A client
+    cannot observe the response before the commit because the commit happens
+    first.
+
+    Sessions still own rollback. An endpoint that raises unwinds through the
+    dependency's exit code, so a failure is already discarded by the time it
+    arrives here — and a route that *returns* a 4xx keeps whatever it wrote,
+    committed by that same exit code as before. This middleware only moves the
+    successful commit earlier; it never decides what persists.
+    """
+
+    async def dispatch(self, request: Request, call_next: Handler) -> Response:
+        response = await call_next(request)
+        if response.status_code < 400:
+            for session in getattr(request.state, "sessions", ()):
+                await session.commit()
+        return response
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):

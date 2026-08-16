@@ -9,7 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.errors import register_exception_handlers
-from app.api.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
+from app.api.middleware import (
+    RequestContextMiddleware,
+    SecurityHeadersMiddleware,
+    UnitOfWorkMiddleware,
+)
 from app.api.router import api_v1
 from app.core.cache import cache
 from app.core.config import settings
@@ -60,6 +64,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Added first, so it sits innermost: the work is committed the moment the
+    # endpoint is done, before anything else touches the response.
+    app.add_middleware(UnitOfWorkMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(RequestContextMiddleware)
     app.add_middleware(

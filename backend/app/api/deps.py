@@ -22,6 +22,7 @@ from fastapi import Depends, Header, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.middleware import enlist
 from app.audit.service import record_access
 from app.authz.permissions import EffectivePermissions, get_permission
 from app.authz.scope import Scope, ScopeLevel
@@ -54,7 +55,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 STEP_UP_MAX_AGE = timedelta(minutes=15)
 
 
-async def bootstrap_session() -> AsyncIterator[AsyncSession]:
+async def bootstrap_session(request: Request) -> AsyncIterator[AsyncSession]:
     """A session with no tenant bound, for identity work only.
 
     Only global tables (user_account, role_assignment, tenant, role) are
@@ -69,13 +70,19 @@ async def bootstrap_session() -> AsyncIterator[AsyncSession]:
     """
     async with SessionFactory() as session:
         await session.begin()
+        enlist(request, session)
         try:
             yield session
         except Exception:
             await session.rollback()
             raise
         else:
-            await session.commit()
+            # Usually already committed by `UnitOfWorkMiddleware`, before the
+            # response went out. This remains the backstop for the paths it
+            # deliberately leaves alone — a route that returns a 4xx of its own
+            # accord, and any caller that is not an HTTP request.
+            if session.in_transaction():
+                await session.commit()
 
 
 async def get_principal(
@@ -174,6 +181,7 @@ async def get_context(
 
 
 async def get_db(
+    request: Request,
     _: Annotated[RequestContext, Depends(get_context)],
 ) -> AsyncIterator[AsyncSession]:
     """The request's unit of work, already bound to the resolved tenant.
@@ -182,6 +190,7 @@ async def get_db(
     resolved before a session exists.
     """
     async with tenant_session() as session:
+        enlist(request, session)
         yield session
 
 

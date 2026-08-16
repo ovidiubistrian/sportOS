@@ -119,7 +119,11 @@ async def tenant_session(
             await session.rollback()
             raise
         else:
-            await session.commit()
+            # For a request this is usually already done, by the middleware
+            # that commits before the response is sent. Everything else — the
+            # outbox relay, maintenance jobs, seeds — commits here as always.
+            if session.in_transaction():
+                await session.commit()
 
 
 @asynccontextmanager
