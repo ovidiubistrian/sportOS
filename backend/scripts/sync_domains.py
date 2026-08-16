@@ -12,6 +12,13 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from pathlib import Path
+
+# `python scripts/sync_domains.py` puts `scripts/` on the path, not the project
+# root, and the project is deliberately not installed as a package — so `app`
+# is importable only from the working directory. Fixed here rather than by
+# demanding a PYTHONPATH from every caller, of which there are now three.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sqlalchemy import select
 

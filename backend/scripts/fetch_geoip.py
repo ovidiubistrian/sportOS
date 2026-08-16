@@ -22,6 +22,10 @@ from pathlib import Path
 
 import httpx
 
+# See the note in sync_domains.py: `app` is importable only from the project
+# root, and running a file in `scripts/` does not put the root on the path.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from app.core.config import settings
 
 
