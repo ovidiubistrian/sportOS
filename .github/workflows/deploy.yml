@@ -133,7 +133,24 @@ jobs:
             echo "infrastructure/scripts/bootstrap-vps.sh prints all four."
             exit 1
           fi
-          echo "all four present"
+
+          # Present is not the same as usable. A key pasted without its BEGIN
+          # and END lines, or flattened onto one line by a terminal, gets as
+          # far as `ssh: no key found` from inside the SSH action — which does
+          # not mention the secret it is complaining about.
+          case "$VPS_SSH_KEY" in
+            *"-----BEGIN "*"PRIVATE KEY-----"*) ;;
+            *) echo "VPS_SSH_KEY has no BEGIN line. Paste the whole file, markers included."; exit 1 ;;
+          esac
+          case "$VPS_SSH_KEY" in
+            *"-----END "*"PRIVATE KEY-----"*) ;;
+            *) echo "VPS_SSH_KEY has no END line. The paste was cut short."; exit 1 ;;
+          esac
+          if [ "$(printf '%s' "$VPS_SSH_KEY" | wc -l)" -lt 3 ]; then
+            echo "VPS_SSH_KEY is on one line. Its newlines were lost in the paste."
+            exit 1
+          fi
+          echo "all four present, key looks like a key"
 
       - name: Ship it
         uses: appleboy/ssh-action@v1
