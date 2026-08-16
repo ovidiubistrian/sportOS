@@ -132,6 +132,14 @@ export const en = {
   },
 
   players: {
+    selectAll: "Select every player on this page",
+    selectedCount: "{count} selected",
+    moveTo: "Move to…",
+    moved: "{count} moved",
+    remove: "Remove",
+    removeSure: "Remove them from the club?",
+    removeConfirm: "Yes, remove",
+    removed: "{count} removed",
     eyebrow: "Squad",
     title: "Players",
     description: "Everyone registered with the club, across every team.",

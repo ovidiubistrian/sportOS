@@ -119,3 +119,30 @@ async def change_registration(
     ctx: Annotated[RequestContext, Depends(Requires("players.player.update", feature=ACADEMY))],
 ) -> PlayerDetail:
     return await PlayerService(db).change_registration(player_id, payload, ctx)
+
+
+@router.delete(
+    "/{player_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove a player from the club",
+)
+async def delete_player(
+    player_id: UUID,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires("players.player.delete", feature=ACADEMY))],
+) -> None:
+    """Delete a player, their registrations, and the person if nobody else needs them.
+
+    A real delete rather than a status change, because the two are different
+    things and the club means different things by them. A player who has left
+    is `DEPARTED` and stays in the archive: they played, the results they were
+    part of are real, and erasing them would rewrite the club's own history.
+    This is for the other case — somebody entered by mistake, a test record, an
+    import that brought in the wrong squad — where the honest answer is that
+    they were never a player here.
+
+    The person behind the player is removed only if nothing else refers to
+    them: the same human may be on the coaching staff, and deleting a player
+    should not take a coach with it.
+    """
+    await PlayerService(db).delete_player(player_id, ctx)

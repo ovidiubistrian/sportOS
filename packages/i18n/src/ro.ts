@@ -127,6 +127,14 @@ export const ro: Catalogue = {
   },
 
   players: {
+    selectAll: "Selectează toți jucătorii de pe pagină",
+    selectedCount: "{count} selectați",
+    moveTo: "Mută la…",
+    moved: "{count} mutați",
+    remove: "Șterge",
+    removeSure: "Îi ștergi din club?",
+    removeConfirm: "Da, șterge",
+    removed: "{count} șterși",
     eyebrow: "Lot",
     title: "Jucători",
     description: "Toți jucătorii legitimați la club, de la toate echipele.",

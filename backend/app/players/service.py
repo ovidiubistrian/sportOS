@@ -5,7 +5,7 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy import Row, and_, select
+from sqlalchemy import Row, and_, delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -261,6 +261,52 @@ class PlayerService:
             actor=str(ctx.actor_id),
         )
         return await self.get_player(player_id, ScopeFilter(unrestricted=True))
+
+    async def delete_player(self, player_id: UUID, ctx: RequestContext) -> None:
+        """Remove a player, their registrations, and their person if unused.
+
+        Registrations go with the player by foreign key. The person does not:
+        the same human may also be on the coaching staff, and deleting a player
+        must not delete a coach. So the person is removed only when nothing
+        else points at them.
+        """
+        from app.identity.models import Person, PersonRoleFlag
+        from app.teams.models import TeamStaff
+
+        player = await self.repo.get_or_404(player_id)
+        person_id = player.person_id
+        before = {"display_name": (await self.session.get(Person, person_id)).display_name}
+
+        await self.session.execute(
+            delete(PlayerRegistration).where(PlayerRegistration.player_id == player.id)
+        )
+        club_id = player.club_id
+        await self.session.delete(player)
+        await self.session.flush()
+
+        still_a_player = await self.session.scalar(
+            select(Player.id).where(Player.person_id == person_id).limit(1)
+        )
+        still_on_staff = await self.session.scalar(
+            select(TeamStaff.id).where(TeamStaff.person_id == person_id).limit(1)
+        )
+        if still_a_player is None and still_on_staff is None:
+            await self.session.execute(
+                delete(PersonRoleFlag).where(PersonRoleFlag.person_id == person_id)
+            )
+            person = await self.session.get(Person, person_id)
+            if person is not None:
+                await self.session.delete(person)
+
+        AuditService(self.session).record(
+            ctx,
+            action="players.player.delete",
+            object_type="player",
+            object_id=player_id,
+            before=before,
+            club_id=club_id,
+        )
+        await self.session.flush()
 
     async def change_registration(
         self, player_id: UUID, payload: RegistrationChange, ctx: RequestContext

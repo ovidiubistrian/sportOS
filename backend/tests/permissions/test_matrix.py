@@ -145,6 +145,7 @@ EXEMPT = {
     # the coach's 403 and the cross-tenant 404 this matrix would assert.
     ("PATCH", "/api/v1/teams/{team_id}"),
     ("PUT", "/api/v1/players/{player_id}/registration"),
+    ("DELETE", "/api/v1/players/{player_id}"),
     # Design settings: covered in tests/tenants/test_public_site.py, which
     # exercises read, write, the coach's 403 and the cross-tenant 404 together.
     ("PUT", "/api/v1/clubs/{club_id}/branding"),

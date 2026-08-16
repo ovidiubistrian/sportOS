@@ -753,6 +753,25 @@ export function useUpdateTeam(): UseMutationResult<
   });
 }
 
+/**
+ * Remove a player from the club.
+ *
+ * Not the same as a departure. A player who has left is `DEPARTED` and stays
+ * in the archive — they played, and the results they were part of are real.
+ * This is for a record that should never have existed.
+ */
+export function useDeletePlayer(): UseMutationResult<void, ApiError, string> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete<void>(`/api/v1/players/${id}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["players"] });
+      void queryClient.invalidateQueries({ queryKey: ["teams"] });
+    },
+  });
+}
+
 export function useUpdatePlayer(): UseMutationResult<
   PlayerDetail,
   ApiError,

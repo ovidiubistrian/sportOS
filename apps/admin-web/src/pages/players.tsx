@@ -1,4 +1,11 @@
-import { usePlayers, useTeams, type PlayerSummary } from "@footbola/api-client";
+import {
+  useChangeRegistration,
+  useDeletePlayer,
+  usePlayers,
+  useTeams,
+  type PlayerSummary,
+  type Team,
+} from "@footbola/api-client";
 import {
   Avatar,
   Badge,
@@ -12,9 +19,10 @@ import {
   Pagination,
   Select,
   Toolbar,
+  useToast,
   type Column,
 } from "@footbola/ui";
-import { Search, UserPlus, Users } from "lucide-react";
+import { Search, Trash2, UserPlus, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -99,7 +107,60 @@ export function PlayersPage() {
     setParams(new URLSearchParams());
   }
 
+  const rows = query.data?.data ?? [];
+  const canEdit = can("players.player.update");
+  const canRemove = can("players.player.delete");
+
+  // Selection lives here rather than in the table, because it is cleared by
+  // things the table knows nothing about: a filter change, a page turn, a
+  // successful bulk action. A checkbox still ticked next to a row that is no
+  // longer on screen is how somebody deletes the wrong player.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  useEffect(() => setSelected(new Set()), [teamId, status, debouncedSearch, offset]);
+
   const columns: Column<PlayerSummary>[] = [
+    // Selection first, and only for people who can act on a selection. A
+    // checkbox that leads to a disabled toolbar is worse than no checkbox.
+    ...(canEdit
+      ? [
+          {
+            key: "select",
+            header: (
+              <input
+                type="checkbox"
+                aria-label={t("players", "selectAll")}
+                className="size-4 accent-[var(--brand)]"
+                checked={rows.length > 0 && selected.size === rows.length}
+                ref={(box) => {
+                  if (box) box.indeterminate = selected.size > 0 && selected.size < rows.length;
+                }}
+                onChange={(event) =>
+                  setSelected(
+                    event.target.checked ? new Set(rows.map((row) => row.id)) : new Set(),
+                  )
+                }
+              />
+            ),
+            width: "2.5rem",
+            render: (player: PlayerSummary) => (
+              <input
+                type="checkbox"
+                aria-label={player.display_name}
+                className="size-4 accent-[var(--brand)]"
+                checked={selected.has(player.id)}
+                // The row itself opens the player, so the box must not.
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => {
+                  const next = new Set(selected);
+                  if (event.target.checked) next.add(player.id);
+                  else next.delete(player.id);
+                  setSelected(next);
+                }}
+              />
+            ),
+          } as Column<PlayerSummary>,
+        ]
+      : []),
     {
       key: "shirt",
       header: "#",
@@ -151,7 +212,6 @@ export function PlayersPage() {
     },
   ];
 
-  const rows = query.data?.data ?? [];
   const meta = query.data?.page;
   const hasFilters = Boolean(teamId || status || debouncedSearch);
 
@@ -256,6 +316,14 @@ export function PlayersPage() {
         )
       ) : (
         <>
+          {selected.size > 0 && (
+            <SelectionBar
+              ids={[...selected]}
+              teams={teams ?? []}
+              canRemove={canRemove}
+              onDone={() => setSelected(new Set())}
+            />
+          )}
           <DataTable
             columns={columns}
             rows={rows}
@@ -278,6 +346,115 @@ export function PlayersPage() {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+
+/**
+ * What to do with the players somebody has ticked.
+ *
+ * Moving and removing, because those are the two things a club does to a group
+ * rather than to a person: a whole age group moves up in July, and an import
+ * that brought in the wrong squad has to go.
+ *
+ * One request per player rather than a bulk endpoint. Fifty players is fifty
+ * requests and takes a moment, which is honest — each one is a real
+ * registration change with its own audit entry, and a bulk endpoint would
+ * either lose that or lie about it. The count reported afterwards is what
+ * actually succeeded, not what was asked for.
+ */
+function SelectionBar({
+  ids,
+  teams,
+  canRemove,
+  onDone,
+}: {
+  ids: string[];
+  teams: Team[];
+  canRemove: boolean;
+  onDone: () => void;
+}) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const move = useChangeRegistration();
+  const remove = useDeletePlayer();
+  const [target, setTarget] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
+  async function run(what: (id: string) => Promise<unknown>, done: (n: number) => string) {
+    setBusy(true);
+    let ok = 0;
+    for (const id of ids) {
+      try {
+        await what(id);
+        ok += 1;
+      } catch {
+        // Keep going: one player with a shirt number clash should not stop the
+        // other forty-nine, and the count below says how many made it.
+      }
+    }
+    setBusy(false);
+    setConfirming(false);
+    onDone();
+    if (ok === ids.length) toast.success(done(ok));
+    else toast.error(`${done(ok)} — ${ids.length - ok} failed.`);
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-brand-border bg-brand-bg px-4 py-3">
+      <span className="text-sm font-medium text-text">
+        {t("players", "selectedCount", { count: String(ids.length) })}
+      </span>
+
+      <span className="ml-auto flex flex-wrap items-center gap-2">
+        <Select
+          value={target}
+          ariaLabel={t("players", "moveTo")}
+          placeholder={t("players", "moveTo")}
+          size="sm"
+          options={teams.map((team) => ({ value: team.id, label: team.name }))}
+          onChange={(value) => {
+            setTarget(value);
+            if (value) {
+              void run(
+                (id) => move.mutateAsync({ id, change: { team_id: value } }),
+                (n) => t("players", "moved", { count: String(n) }),
+              );
+              setTarget("");
+            }
+          }}
+        />
+
+        {canRemove &&
+          (confirming ? (
+            <>
+              <span className="text-sm text-text-secondary">{t("players", "removeSure")}</span>
+              <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
+                {t("common", "cancel")}
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                loading={busy}
+                onClick={() =>
+                  void run(
+                    (id) => remove.mutateAsync(id),
+                    (n) => t("players", "removed", { count: String(n) }),
+                  )
+                }
+              >
+                {t("players", "removeConfirm")}
+              </Button>
+            </>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
+              <Trash2 />
+              {t("players", "remove")}
+            </Button>
+          ))}
+      </span>
     </div>
   );
 }
