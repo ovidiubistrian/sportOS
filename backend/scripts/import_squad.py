@@ -86,7 +86,10 @@ async def main() -> int:
 
         for note in result.notes:
             print(" ", note)
-        print(f"\ncreated  {result.created}")
+        print()
+        if result.coach:
+            print(f"coach    {result.coach}")
+        print(f"created  {result.created}")
         print(f"skipped  {result.skipped}  (already in the squad)")
 
         if args.dry_run:

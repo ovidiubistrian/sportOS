@@ -171,5 +171,14 @@ class ApiFootball:
     async def standings(self, *, league: str, season: int) -> list[dict[str, Any]]:
         return await self.get("/standings", league=league, season=season)
 
+    async def coaches(self, *, team: str) -> list[dict[str, Any]]:
+        """Whoever the provider has managing this club.
+
+        Only the head coach. There is no assistant, no goalkeeping coach and no
+        physio in this catalogue — a club's technical staff below the manager
+        is not something a results provider tracks.
+        """
+        return await self.get("/coachs", team=team)
+
     async def squad(self, *, team: str) -> list[dict[str, Any]]:
         return await self.get("/players/squads", team=team)

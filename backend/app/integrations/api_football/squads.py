@@ -59,6 +59,7 @@ class SquadResult:
     created: int = 0
     updated: int = 0
     skipped: int = 0
+    coach: str | None = None
     notes: list[str] = field(default_factory=list)
 
 
@@ -183,6 +184,16 @@ async def import_squad(
         existing[key] = player
         result.created += 1
 
+    result.coach = await _import_coach(
+        session,
+        client,
+        tenant_id=tenant_id,
+        club_id=club_id,
+        team_id=team_id,
+        provider_team_id=provider_team_id,
+        result=result,
+    )
+
     log.info(
         "squad_imported",
         club_id=str(club_id),
@@ -191,3 +202,79 @@ async def import_squad(
         skipped=result.skipped,
     )
     return result
+
+
+async def _import_coach(
+    session: AsyncSession,
+    client: ApiFootball,
+    *,
+    tenant_id: UUID,
+    club_id: UUID,
+    team_id: UUID,
+    provider_team_id: str,
+    result: SquadResult,
+) -> str | None:
+    """Add the head coach, if this team has none and the provider knows one.
+
+    Only the head coach: assistants, goalkeeping coaches and physios are not in
+    a results provider's catalogue, because they are not part of a result.
+    Those stay the club's to enter, which is also where the club's own words
+    for the jobs belong.
+
+    Never replaces a coach the club has entered. A club knows who is in charge
+    of its team better than a catalogue that lags a change by weeks, and the
+    week it lags is exactly the week somebody looks.
+    """
+    from app.teams.models import TeamStaff
+
+    already = await session.scalar(
+        select(TeamStaff).where(TeamStaff.team_id == team_id, TeamStaff.role == "HEAD_COACH")
+    )
+    if already is not None:
+        return None
+
+    try:
+        rows = await client.coaches(team=provider_team_id)
+    except Exception:
+        # A squad that arrived is worth keeping even when this does not.
+        log.info("coach_lookup_failed", club_id=str(club_id))
+        return None
+
+    current = next(
+        (
+            row
+            for row in rows
+            if row.get("name") and not (row.get("career") or [{}])[0].get("end")
+        ),
+        rows[0] if rows else None,
+    )
+    if current is None or not current.get("name"):
+        result.notes.append("The provider does not list a coach for this club.")
+        return None
+
+    first, last = split_name(str(current["name"]))
+    person = Person(
+        id=new_id(),
+        tenant_id=tenant_id,
+        first_name=first,
+        last_name=last,
+        display_name=f"{first} {last}",
+        nationality=[],
+    )
+    session.add(person)
+    await session.flush()
+    session.add(PersonRoleFlag(tenant_id=tenant_id, person_id=person.id, role_kind="STAFF"))
+    session.add(
+        TeamStaff(
+            id=new_id(),
+            tenant_id=tenant_id,
+            club_id=club_id,
+            team_id=team_id,
+            person_id=person.id,
+            role="HEAD_COACH",
+            is_public=True,
+        )
+    )
+    await session.flush()
+    log.info("coach_imported", club_id=str(club_id), name=person.display_name)
+    return person.display_name

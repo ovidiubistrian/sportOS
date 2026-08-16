@@ -338,6 +338,7 @@ async def search_teams(
 class SquadImportOut(BaseModel):
     created: int
     skipped: int
+    coach: str | None = None
     notes: list[str] = []
 
 
@@ -398,7 +399,12 @@ async def import_squad_from_feed(
         club_id=club_id,
         after={"created": result.created, "skipped": result.skipped},
     )
-    return SquadImportOut(created=result.created, skipped=result.skipped, notes=result.notes)
+    return SquadImportOut(
+        created=result.created,
+        skipped=result.skipped,
+        coach=result.coach,
+        notes=result.notes,
+    )
 
 
 @router.post(
