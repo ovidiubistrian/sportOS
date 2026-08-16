@@ -26,7 +26,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
 import structlog
@@ -41,6 +41,7 @@ from app.core.ids import new_id
 from app.core.locales import normalise, validate
 from app.identity.keycloak import get_admin
 from app.identity.models import Person, UserAccount
+from app.teams.models import Season
 from app.tenants.branding_models import ClubBranding
 from app.tenants.domain_service import attach, hostname_for
 from app.tenants.models import Club, Tenant
@@ -128,6 +129,23 @@ async def _start_trial(session, tenant_id: UUID, now: datetime) -> None:
         )
     )
     await session.flush()
+
+
+def opening_season(today: date) -> tuple[str, date, date]:
+    """The season a club joining today would be playing in.
+
+    European football runs July to June, so the year flips at the start of
+    July: somebody signing up in August 2026 is in 2026/27, and somebody
+    signing up in March is still in the season that began the previous summer.
+
+    A club gets one at sign-up because everything about a squad hangs off it —
+    a player cannot be registered without a season — and there is no screen
+    where a club can create its first. Being unable to add a single player
+    until somebody notices is not a state to ship a club into.
+    """
+    start_year = today.year if today.month >= 7 else today.year - 1
+    name = f"{start_year}/{str(start_year + 1)[2:]}"
+    return name, date(start_year, 7, 1), date(start_year + 1, 6, 30)
 
 
 def short_name_for(club_name: str) -> str:
@@ -253,6 +271,20 @@ async def _create_records(session: AsyncSession, signup: SignUp, subject_id: str
         preferred_locale=locale,
     )
     session.add(person)
+    await session.flush()
+
+    name, starts, ends = opening_season(now.date())
+    session.add(
+        Season(
+            id=new_id(),
+            tenant_id=tenant.id,
+            club_id=club.id,
+            name=name,
+            start_date=starts,
+            end_date=ends,
+            is_current=True,
+        )
+    )
     await session.flush()
 
     owner_role = await session.scalar(select(Role).where(Role.key == "TENANT_OWNER"))
