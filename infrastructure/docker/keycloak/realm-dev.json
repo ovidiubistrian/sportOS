@@ -155,6 +155,18 @@
   ],
   "users": [
     {
+      "username": "service-account-footbola-registration",
+      "enabled": true,
+      "serviceAccountClientId": "footbola-registration",
+      "clientRoles": { "realm-management": ["manage-users"] }
+    },
+    {
+      "username": "service-account-footbola-domains",
+      "enabled": true,
+      "serviceAccountClientId": "footbola-domains",
+      "clientRoles": { "realm-management": ["view-clients", "manage-clients"] }
+    },
+    {
       "id": "0192a000-0000-7000-8000-000000000001",
       "username": "owner@fcexample.test",
       "email": "owner@fcexample.test",

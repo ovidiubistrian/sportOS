@@ -28,6 +28,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import NullPool
 
+from app.cms.service import slugify
 from app.competitions.models import CompetitionSeason, DirectoryClub, Match
 from app.core.config import settings
 from app.integrations.api_football import sync as syncer
@@ -322,16 +323,31 @@ class TestPullingFixtures:
 
         Without it, switching the feed on would create a second "CSM Reșița"
         and split its league table in two.
-        """
-        existing = await platform_db.scalar(
-            select(DirectoryClub).where(DirectoryClub.slug == "csm-resita")
-        )
-        assert existing is not None
 
-        club = await syncer.ensure_club(
-            platform_db, {"id": 777001, "name": "CSM Reșița", "logo": None}
-        )
-        assert club.id == existing.id
+        The club is created here rather than looked up. It used to be read from
+        the directory on the assumption that seeding had put it there, which was
+        true on one machine and nowhere else — the test passed locally and could
+        never have passed on a fresh database.
+        """
+        name = f"CSM Reșița {uuid4().hex[:6]}"
+        existing = DirectoryClub(slug=slugify(name), name=name, short_name="CSM")
+        platform_db.add(existing)
+        await platform_db.flush()
+
+        try:
+            club = await syncer.ensure_club(
+                platform_db, {"id": 777001, "name": name, "logo": None}
+            )
+            assert club.id == existing.id, "matched by slug, not duplicated"
+        finally:
+            await platform_db.execute(
+                text("DELETE FROM provider_link WHERE entity_type = 'CLUB' AND local_id = :c"),
+                {"c": str(existing.id)},
+            )
+            await platform_db.execute(
+                text("DELETE FROM directory_club WHERE id = :c"), {"c": str(existing.id)}
+            )
+            await platform_db.commit()
 
         # The link this just wrote points a real club at an invented provider
         # id. Left behind, the next genuine sync for that club collides with it.

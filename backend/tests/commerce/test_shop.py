@@ -22,6 +22,11 @@ pytestmark = pytest.mark.commerce
 
 BASE = "/api/v1"
 HOST = {"X-Forwarded-Host": "fcexample.localhost"}
+# A second tenant's website, for the scoping tests. It must be one the demo
+# seed actually creates: an earlier version of these tests pointed at a club
+# that existed only in one developer's database, so they passed there and
+# nowhere else.
+OTHER_HOST = "northern.localhost"
 
 
 def unique(prefix: str) -> str:
@@ -232,7 +237,7 @@ class TestTheShopWindow:
         ours = (await client.get(f"{BASE}/public/shop", headers=HOST)).json()
         theirs = (
             await client.get(
-                f"{BASE}/public/shop", headers={"X-Forwarded-Host": "csm-resita.localhost"}
+                f"{BASE}/public/shop", headers={"X-Forwarded-Host": OTHER_HOST}
             )
         ).json()
         assert product["id"] in {row["id"] for row in ours}
@@ -279,7 +284,7 @@ class TestTheBasket:
             await client.get(
                 f"{BASE}/public/basket",
                 headers={
-                    "X-Forwarded-Host": "csm-resita.localhost",
+                    "X-Forwarded-Host": OTHER_HOST,
                     "X-Cart-Token": basket["token"],
                 },
             )

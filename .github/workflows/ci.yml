@@ -25,6 +25,15 @@ jobs:
           cp infrastructure/environments/.env.example .env
           docker compose up -d --wait postgres redis keycloak minio mailpit
           docker compose up init
+          # `up` reports success as long as it managed to start the container,
+          # whatever the container then did. Without this, a failed migration
+          # surfaces three steps later as an unexplained timeout waiting for
+          # the API, with the actual traceback nowhere in the log.
+          code=$(docker inspect -f '{{.State.ExitCode}}' "$(docker compose ps -aq init)")
+          if [ "$code" != 0 ]; then
+            docker compose logs --no-log-prefix init
+            exit "$code"
+          fi
 
       - name: Lint
         run: docker compose run --rm --no-deps api .venv/bin/ruff check app tests scripts
@@ -34,12 +43,15 @@ jobs:
 
       - name: Tests
         run: |
-          docker compose up -d --wait api
+          # The relay too: two tests assert that a domain event actually gets
+          # delivered, which nothing does if the relay is not running. They
+          # passed locally, where it always is.
+          docker compose up -d --wait api outbox-relay
           docker compose exec -T api .venv/bin/pytest -q
 
       - name: Diagnostics on failure
         if: failure()
-        run: docker compose logs --tail 120 api keycloak postgres
+        run: docker compose logs --tail 120 init api keycloak postgres
 
   frontend:
     runs-on: ubuntu-latest
