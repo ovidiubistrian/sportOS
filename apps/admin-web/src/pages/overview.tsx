@@ -32,6 +32,7 @@ import { Link } from "react-router-dom";
 import { useI18n } from "../app/locale";
 import { useSession } from "../app/session";
 import { ARTICLE_TYPE_LABELS, STATUS_TONE } from "./news/labels";
+import { clubHostname, clubSiteUrl } from "../app/site-url";
 
 /**
  * The dashboard.
@@ -46,7 +47,7 @@ function ClubBanner() {
   const { me, club } = useSession();
   const { t } = useI18n();
   const branding = useBranding(club.id);
-  const siteUrl = `http://${club.slug}.localhost`;
+  const siteUrl = clubSiteUrl(club.slug);
 
   return (
     <Card className="relative overflow-hidden">
@@ -86,7 +87,7 @@ function ClubBanner() {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Globe className="size-3.5" />
-              {club.slug}.localhost
+              {clubHostname(club.slug)}
             </span>
             <span aria-hidden className="text-text-disabled">
               ·

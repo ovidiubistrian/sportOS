@@ -35,6 +35,7 @@ import { NAVIGATION, activeItem } from "./navigation";
 import { useSession } from "./session";
 import { useI18n } from "./locale";
 import { useTheme } from "./theme";
+import { clubSiteUrl } from "./site-url";
 
 /**
  * Application shell.
@@ -219,9 +220,10 @@ function Topbar() {
   const navigate = useNavigate();
   const current = activeItem(location.pathname.replace(`/${club.slug}`, "") || "/");
 
-  // Dev hosts are `<slug>.localhost`; production reads the club's own domain
-  // from branding. Either way the link is the honest test of "is my site live".
-  const siteUrl = `http://${club.slug}.localhost`;
+  // The honest test of "is my site live": the same address a supporter would
+  // type. Built for the domain this bundle was compiled against — see
+  // app/site-url.ts.
+  const siteUrl = clubSiteUrl(club.slug);
 
   const openPalette = () =>
     window.dispatchEvent(

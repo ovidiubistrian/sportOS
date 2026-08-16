@@ -16,6 +16,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { PLATFORM_DOMAIN } from "../app/site-url";
+
 /**
  * Sign-up.
  *
@@ -29,21 +31,6 @@ import { Link } from "react-router-dom";
  * is the worst moment to be told.
  */
 
-/**
- * The suffix a club's site hangs off, shown beside the address field.
- *
- * A subdomain, not a path: the public site decides which club a request
- * belongs to from the Host header alone, certificates are issued per host, and
- * Keycloak registers redirect URIs per host. It is also the same shape a club
- * gets when it brings its own domain later, so there is one mechanism rather
- * than two.
- *
- * Shown here because the field is otherwise a box with no indication of what
- * it becomes — it read as a path for as long as this said "footbola.com/".
- */
-const PLATFORM_DOMAIN =
-  (import.meta.env.VITE_PUBLIC_SITE_DOMAIN as string | undefined) ??
-  "footbola.localhost";
 
 const COUNTRIES = [
   { code: "RO", name: "România" },

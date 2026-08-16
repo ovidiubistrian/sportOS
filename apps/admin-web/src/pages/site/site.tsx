@@ -38,6 +38,7 @@ import { useI18n } from "../../app/locale";
 import { useSession } from "../../app/session";
 import { ImageField } from "./image-field";
 import { TemplateThumbnail, resolvedPalette } from "./template-preview";
+import { clubHostname, clubSiteUrl } from "../../app/site-url";
 
 /**
  * Site & design.
@@ -382,7 +383,7 @@ export function SitePage() {
     );
 
   const palette = resolvedPalette(draft);
-  const siteUrl = `http://${club.slug}.localhost`;
+  const siteUrl = clubSiteUrl(club.slug);
 
   return (
     <div className="space-y-8 pb-20">
@@ -390,7 +391,7 @@ export function SitePage() {
         eyebrow={
           <>
             <Globe className="size-3.5" />
-            {club.slug}.localhost
+            {clubHostname(club.slug)}
           </>
         }
         title={t("site", "title")}
