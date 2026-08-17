@@ -10,69 +10,74 @@ import { createContext, useContext } from "react";
 import type { ApiClient } from "./client";
 import { ApiError } from "./client";
 import type {
-  AssistantStatus,
+  AnalyticsOverview,
+  AnalyticsRange,
   AssistRequest,
+  AssistantStatus,
+  AudienceSize,
   Branding,
   BrandingUpdate,
+  Campaign,
+  CampaignAudience,
+  CampaignInput,
   Competition,
   CompetitionEntry,
-  DirectoryClub,
-  JoinCompetitionInput,
-  FeedSettings,
-  FeedUpdate,
-  JoinedCompetition,
-  Match,
-  MatchCreate,
-  MatchUpdate,
-  TableRow,
   ContentCreate,
   ContentDetail,
   ContentFilters,
   ContentStatus,
   ContentSummary,
-  HeadlineSuggestion,
-  MediaAsset,
-  MediaPurpose,
-  PlatformLocale,
-  SignUpInput,
-  SignUpResult,
-  SlugCheck,
-  MeResponse,
-  Page,
-  PlayerDetail,
-  PlayerFilters,
-  PlayerSummary,
-  PlatformCompetition,
-  ProviderCatalogue,
-  ProviderTeam,
-  PlatformPlan,
-  PlatformTenant,
-  PlayerUpdate,
-  Product,
-  StaffInvite,
-  StaffMember,
-  AnalyticsOverview,
-  AnalyticsRange,
-  AudienceSize,
-  Campaign,
-  CampaignAudience,
-  CampaignInput,
+  DirectoryClub,
   EmailPreview,
   EmailTemplate,
   EmailTemplateChanges,
   EmailTemplateInput,
-  Sport,
-  StaffRole,
-  TeamStaffInput,
-  TeamStaffMember,
+  FeedSettings,
+  FeedUpdate,
+  HeadlineSuggestion,
+  JoinCompetitionInput,
+  JoinedCompetition,
+  Match,
+  MatchCreate,
+  MatchUpdate,
+  MeResponse,
+  MediaAsset,
+  MediaPurpose,
+  Page,
+  PaymentCall,
+  PaymentCallDetail,
+  PaymentGateway,
+  PaymentGatewayCheck,
+  PaymentGatewayInput,
+  PlatformCompetition,
+  PlatformLocale,
+  PlatformPlan,
+  PlatformTenant,
+  PlayerDetail,
+  PlayerFilters,
+  PlayerSummary,
+  PlayerUpdate,
+  PolishSuggestion,
+  Product,
   ProductChanges,
   ProductInput,
+  ProviderCatalogue,
+  ProviderTeam,
   RegistrationChange,
   ShopOrder,
-  TeamInput,
-  TeamUpdate,
-  PolishSuggestion,
+  SignUpInput,
+  SignUpResult,
+  SlugCheck,
+  Sport,
+  StaffInvite,
+  StaffMember,
+  StaffRole,
+  TableRow,
   Team,
+  TeamInput,
+  TeamStaffInput,
+  TeamStaffMember,
+  TeamUpdate,
   TranslationInput,
 } from "./types";
 
@@ -1298,5 +1303,80 @@ export function useSendTestEmail(): UseMutationResult<
   const api = useApi();
   return useMutation({
     mutationFn: ({ id, to }) => api.post<void>(`/api/v1/campaigns/${id}/test`, { to }),
+  });
+}
+
+// --- Card payments ----------------------------------------------------------
+
+/**
+ * A tenant's card gateways.
+ *
+ * Reading is not sensitive — no secret comes back — so this behaves like any
+ * other query. Writing is: the mutations below answer 401 `STEP_UP_REQUIRED`
+ * to somebody who has not proved themselves recently, which `useStepUp` in the
+ * admin application turns into a prompt and a retry.
+ */
+export function usePaymentGateways(): UseQueryResult<PaymentGateway[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["payment-gateways"],
+    queryFn: () => api.get<PaymentGateway[]>("/api/v1/payments/settings"),
+  });
+}
+
+export function useSavePaymentGateway(): UseMutationResult<
+  PaymentGateway,
+  ApiError,
+  { provider: string; settings: PaymentGatewayInput }
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ provider, settings }) =>
+      api.put<PaymentGateway>(`/api/v1/payments/settings/${provider}`, settings),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["payment-gateways"] });
+    },
+  });
+}
+
+export function useCheckPaymentGateway(): UseMutationResult<
+  PaymentGatewayCheck,
+  ApiError,
+  { provider: string }
+> {
+  const api = useApi();
+  return useMutation({
+    mutationFn: ({ provider }) =>
+      api.post<PaymentGatewayCheck>(`/api/v1/payments/settings/${provider}/test`, {}),
+  });
+}
+
+/** Every call made to a gateway, newest first. The evidence for a dispute. */
+export function usePaymentCalls(filters: {
+  order_ref?: string;
+  failed_only?: boolean;
+  limit?: number;
+}): UseQueryResult<Page<PaymentCall>, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["payment-calls", filters],
+    queryFn: () =>
+      api.get<Page<PaymentCall>>("/api/v1/payments/calls", {
+        ...(filters.order_ref ? { order_ref: filters.order_ref } : {}),
+        ...(filters.failed_only ? { failed_only: "true" } : {}),
+        limit: String(filters.limit ?? 50),
+      }),
+  });
+}
+
+export function usePaymentCall(
+  callId: string | null,
+): UseQueryResult<PaymentCallDetail, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["payment-call", callId],
+    queryFn: () => api.get<PaymentCallDetail>(`/api/v1/payments/calls/${callId}`),
+    enabled: Boolean(callId),
   });
 }

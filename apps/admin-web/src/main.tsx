@@ -1,4 +1,6 @@
 import { ApiClient, ApiError, ApiProvider } from "@footbola/api-client";
+
+import { PopupCallbackPage } from "./app/popup-callback";
 import "@footbola/ui/tokens.css";
 import { Button, Spinner, ToastProvider, TooltipProvider } from "@footbola/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,6 +24,7 @@ import { SettingsPage } from "./pages/settings";
 import { StaffPage } from "./pages/staff";
 import { SignUpPage } from "./pages/sign-up";
 import { WorkspacePicker } from "./pages/workspace-picker";
+import { PaymentsPage } from "./pages/payments";
 import { SitePage } from "./pages/site/site";
 import { MatchesPage } from "./pages/matches/matches";
 import { PlatformConsole } from "./pages/platform/console";
@@ -134,6 +137,10 @@ function Authenticated() {
       <ApiProvider value={api}>
         <Routes>
           <Route path="/signup" element={<SignUpPage />} />
+          {/* A step-up popup lands here too when the session has lapsed
+              between opening it and finishing. Without this route it would
+              render the sign-in screen inside a popup and never close. */}
+          <Route path="/auth/popup" element={<PopupCallbackPage />} />
           <Route path="*" element={<SignInScreen error={error} />} />
         </Routes>
       </ApiProvider>
@@ -163,6 +170,7 @@ function Authenticated() {
             `/signin` rather than `/`, because on the platform host `/` is the
             marketing site: a signed-in user would land on the sales page. */}
         <Route path="/auth/callback" element={<Navigate to="/signin" replace />} />
+        <Route path="/auth/popup" element={<PopupCallbackPage />} />
         <Route path="/signin" element={<WorkspacePicker />} />
         <Route path="/signup" element={<WorkspacePicker />} />
         <Route path="/platform" element={<PlatformShell />} />
@@ -206,6 +214,7 @@ function Workspace() {
           <Route path="news/:itemId" element={<NewsEditorPage />} />
           <Route path="shop" element={<ShopPage />} />
           <Route path="site" element={<SitePage />} />
+          <Route path="payments" element={<PaymentsPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="marketing" element={<MarketingPage />} />
           <Route path="staff" element={<StaffPage />} />

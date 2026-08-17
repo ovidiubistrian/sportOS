@@ -23,6 +23,9 @@ const settings = {
   authority: import.meta.env.VITE_OIDC_ISSUER as string,
   client_id: import.meta.env.VITE_OIDC_CLIENT_ID as string,
   redirect_uri: `${window.location.origin}/auth/callback`,
+  // Its own address, so the popup's callback is never mistaken for the main
+  // window's and does not walk over a sign-in already in progress.
+  popup_redirect_uri: `${window.location.origin}/auth/popup`,
   // Back to the marketing site, not to a blank app shell. Someone who signs
   // out has left the product, and the product's front door is that page.
   post_logout_redirect_uri: window.location.origin,
@@ -61,6 +64,8 @@ interface AuthState {
   token: string | null;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Prove it again, harder, without leaving the page. */
+  stepUp: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -117,6 +122,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(() => manager.signinRedirect(), []);
+
+  /**
+   * A second factor, for the handful of actions that demand one.
+   *
+   * `acr_values` asks Keycloak to reach level two, which its sign-in flow
+   * answers by asking for a one-time code — and only then, so an ordinary
+   * sign-in is untouched. The new token carries `acr: "2"` and the API accepts
+   * it for the next fifteen minutes.
+   *
+   * A popup rather than a redirect. The action that triggered this is usually
+   * a half-filled form, and a redirect would take the page away and bring back
+   * an empty one — the person would prove themselves and then have to type
+   * everything again. The popup leaves the page standing, so the caller can
+   * simply try again once this resolves. It is opened from a click, which is
+   * what keeps a blocker from swallowing it.
+   */
+  const stepUp = useCallback(async () => {
+    const next = await manager.signinPopup({
+      extraQueryParams: { acr_values: "2" },
+      // Without this Keycloak may answer from the existing session cookie and
+      // hand back the same level it already gave — no code asked for, and the
+      // API refusing the token again.
+      prompt: "login",
+    });
+    setUser(next);
+  }, []);
   const signOut = useCallback(async () => {
     await manager.signoutRedirect();
   }, []);
@@ -129,8 +160,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token: user?.access_token ?? null,
       signIn,
       signOut,
+      stepUp,
     }),
-    [user, isLoading, error, signIn, signOut],
+    [user, isLoading, error, signIn, signOut, stepUp],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

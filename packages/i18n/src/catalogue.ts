@@ -68,6 +68,8 @@ export const en = {
     analyticsHint: "Traffic, sources and conversions",
     marketing: "Email",
     marketingHint: "Newsletters and offers",
+    payments: "Card payments",
+    paymentsHint: "The bank, and what it was told",
     settings: "Settings",
     settingsHint: "Tenant, languages and plan",
     staff: "Staff",
@@ -642,6 +644,32 @@ export const en = {
     notInPlan: "The writing assistant is not included in your plan.",
   },
 
+  payments: {
+    eyebrow: "Money",
+    title: "Card payments",
+    description:
+      "Taking a supporter's card in the club shop. The bank issues these credentials to the club once its processing contract is signed — until they are here and switched on, the shop takes payment at the counter only.",
+    userName: "User name",
+    password: "Password",
+    passwordHint: "As the bank issued it.",
+    passwordKeptHint: "Leave blank to keep the one already stored. It cannot be shown again.",
+    passwordStored: "Password set",
+    sandbox: "Test gateway",
+    sandboxHint:
+      "Cards are not charged and no money moves. Turn this off only with the credentials the bank issued for real payments.",
+    acceptCards: "Accept cards",
+    acceptCardsHint:
+      "Until this is on, the shop does not offer to take a card at all. Leave it off while you are testing.",
+    check: "Check the credentials",
+    checkPassed: "The bank answered. These credentials work.",
+    saved: "Saved",
+    live: "Taking cards",
+    notLive: "Not taking cards",
+    callsTitle: "Everything said to the bank",
+    callsHint:
+      "Every call, kept as it was sent. This is what to show the bank when the two of you disagree about a payment.",
+    noCalls: "Nothing yet.",
+  },
   site: {
     title: "Site & design",
     description:

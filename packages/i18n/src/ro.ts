@@ -63,6 +63,8 @@ export const ro: Catalogue = {
     analyticsHint: "Trafic, surse și conversii",
     marketing: "Email",
     marketingHint: "Newsletter și oferte",
+    payments: "Plăți cu cardul",
+    paymentsHint: "Banca, și ce i s-a spus",
     settings: "Setări",
     settingsHint: "Organizație, limbi și abonament",
     staff: "Staff",
@@ -638,6 +640,32 @@ export const ro: Catalogue = {
     notInPlan: "Asistentul de scriere nu e inclus în abonamentul tău.",
   },
 
+  payments: {
+    eyebrow: "Bani",
+    title: "Plăți cu cardul",
+    description:
+      "Încasarea cardului unui supporter în magazinul clubului. Banca emite aceste date clubului după semnarea contractului de procesare — până nu sunt aici și pornite, magazinul încasează doar la casă.",
+    userName: "Utilizator",
+    password: "Parolă",
+    passwordHint: "Așa cum ți-a dat-o banca.",
+    passwordKeptHint: "Lasă gol ca să păstrezi parola salvată. Nu se mai poate afișa.",
+    passwordStored: "Parolă salvată",
+    sandbox: "Gateway de test",
+    sandboxHint:
+      "Cardurile nu se debitează și niciun ban nu se mișcă. Oprește-l doar cu datele emise de bancă pentru plăți reale.",
+    acceptCards: "Acceptă carduri",
+    acceptCardsHint:
+      "Până nu e pornit, magazinul nu oferă deloc plata cu cardul. Lasă-l oprit cât timp testezi.",
+    check: "Verifică datele",
+    checkPassed: "Banca a răspuns. Datele sunt bune.",
+    saved: "Salvat",
+    live: "Încasează carduri",
+    notLive: "Nu încasează carduri",
+    callsTitle: "Tot ce s-a spus băncii",
+    callsHint:
+      "Fiecare apel, păstrat cum a plecat. Asta îi arăți băncii când nu sunteți de acord asupra unei plăți.",
+    noCalls: "Încă nimic.",
+  },
   site: {
     title: "Site și design",
     description:

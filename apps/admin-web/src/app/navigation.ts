@@ -2,6 +2,7 @@ import type { Catalogue } from "@footbola/i18n";
 import {
   BarChart3,
   Building2,
+  CreditCard,
   LayoutDashboard,
   Mail,
   CalendarDays,
@@ -156,6 +157,17 @@ export const NAVIGATION: NavGroup[] = [
         keywords: [
           "coach", "manager", "physio", "account", "invite", "role", "permission",
           "antrenor", "staff", "cont", "invitatie", "invitație", "rol", "drepturi",
+        ],
+      },
+      {
+        to: "/payments",
+        labelKey: "payments",
+        descriptionKey: "paymentsHint",
+        icon: CreditCard,
+        permission: "payments.settings.read",
+        keywords: [
+          "card", "bt", "ipay", "banca", "bancă", "gateway", "plati", "plăți",
+          "payment", "online", "checkout",
         ],
       },
       {

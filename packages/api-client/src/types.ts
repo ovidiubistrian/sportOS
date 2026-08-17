@@ -1007,3 +1007,51 @@ export interface AudienceSize {
   /** Which way the club's email currently leaves — SMTP or MAILGUN. */
   provider: string;
 }
+
+// --- Card payments ----------------------------------------------------------
+
+/** A tenant's gateway, as the settings screen sees it. Never the password. */
+export interface PaymentGateway {
+  provider: string;
+  is_live: boolean;
+  sandbox: boolean;
+  user_name: string;
+  has_password: boolean;
+  child_id: string | null;
+  updated_at: string | null;
+}
+
+export interface PaymentGatewayInput {
+  user_name: string;
+  /** Omitted on an edit: it cannot be read back, so it cannot be retyped. */
+  password?: string;
+  sandbox: boolean;
+  child_id?: string | null;
+  is_live: boolean;
+}
+
+export interface PaymentGatewayCheck {
+  ok: boolean;
+  error?: string | null;
+  sandbox?: boolean;
+}
+
+/** One call to a gateway. The detail carries what was sent and returned. */
+export interface PaymentCall {
+  id: string;
+  provider: string;
+  endpoint: string;
+  order_ref: string | null;
+  provider_order_id: string | null;
+  ok: boolean;
+  http_status: number | null;
+  error_code: string | null;
+  error_message: string | null;
+  latency_ms: number | null;
+  created_at: string;
+}
+
+export interface PaymentCallDetail extends PaymentCall {
+  sent: Record<string, unknown>;
+  received: Record<string, unknown>;
+}
