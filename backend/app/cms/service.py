@@ -37,6 +37,30 @@ TRANSITIONS: dict[str, frozenset[str]] = {
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
 
 
+# `content_translation.seo_description`. The column, not the advice: a search
+# engine shows about a hundred and sixty characters of it.
+SEO_DESCRIPTION_MAX = 400
+
+
+def _meta_description(excerpt: str | None) -> str | None:
+    """The summary, cut to what the column holds.
+
+    The excerpt is `text` and the schema lets an editor write six hundred
+    characters of it; the meta description beside it is `varchar(400)`. Taking
+    one as the other worked until somebody pasted a paragraph, and then the
+    insert failed on the database rather than on any validation — a 500 on
+    saving an article, with the length of a field nobody had typed into.
+
+    Cut on a word, the way an excerpt derived from the body already is.
+    """
+    if not excerpt:
+        return None
+    text = excerpt.strip()
+    if len(text) <= SEO_DESCRIPTION_MAX:
+        return text or None
+    return text[: SEO_DESCRIPTION_MAX - 1].rsplit(" ", 1)[0] + "…"
+
+
 def slugify(value: str, *, max_length: int = 80) -> str:
     """A URL slug that survives diacritics.
 
@@ -172,7 +196,7 @@ class ContentService:
         translation.excerpt = (excerpt or plain_text(clean_body, limit=200)) or None
         translation.body = clean_body
         translation.seo_title = seo_title
-        translation.seo_description = seo_description or translation.excerpt
+        translation.seo_description = seo_description or _meta_description(translation.excerpt)
         translation.status = status or translation.status or "DRAFT"
         translation.translated_by = ctx.actor_id
 

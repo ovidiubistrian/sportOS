@@ -268,3 +268,57 @@ class TestCoverAtCreation:
             assert created.status_code == 404, created.text
         finally:
             await client.delete(f"/api/v1/media/{asset['id']}", headers=as_user("other_owner"))
+
+
+class TestALongSummary:
+    """The summary an editor pastes rather than writes.
+
+    `excerpt` is `text` and the schema allows six hundred characters; the meta
+    description derived from it is `varchar(400)`. Between those two numbers
+    the insert failed on the database, so pasting a paragraph into the summary
+    of a real article produced a 500 on save — naming no field, because no
+    validation had run.
+    """
+
+    async def test_a_summary_longer_than_the_meta_column_still_saves(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        # Inside what the schema permits, past what the column holds.
+        summary = " ".join(["cuvant"] * 90)[:560]
+        assert 400 < len(summary) <= 600
+
+        payload = _article(demo["club_id"], "J")
+        payload["translation"]["excerpt"] = summary
+
+        created = await client.post(
+            "/api/v1/content", headers=as_user("owner"), json=payload
+        )
+        assert created.status_code == 201, created.text
+        item = created.json()
+        try:
+            # Kept whole, because that is what will be read on the article.
+            stored = item["translations"][0]
+            assert stored["excerpt"] == summary
+        finally:
+            await client.delete(f"/api/v1/content/{item['id']}", headers=as_user("owner"))
+
+    async def test_the_same_summary_on_an_article_that_already_exists(
+        self, client: httpx.AsyncClient, as_user: Any, demo: dict[str, Any]
+    ) -> None:
+        """Which is how it was actually hit: editing a published article."""
+        created = await client.post(
+            "/api/v1/content", headers=as_user("owner"), json=_article(demo["club_id"], "K")
+        )
+        item_id = created.json()["id"]
+        try:
+            summary = " ".join(["propozitie"] * 60)[:590]
+            assert len(summary) > 400
+
+            saved = await client.put(
+                f"/api/v1/content/{item_id}/translations/ro",
+                headers=as_user("owner"),
+                json={"locale": "ro", "title": "Un titlu", "body": [], "excerpt": summary},
+            )
+            assert saved.status_code == 200, saved.text
+        finally:
+            await client.delete(f"/api/v1/content/{item_id}", headers=as_user("owner"))
