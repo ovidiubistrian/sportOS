@@ -88,7 +88,7 @@ class TestTheAddressBlock:
     and inventing one is worse than having none."""
 
     def test_an_absent_address_is_omitted_rather_than_filled_in(self) -> None:
-        """"N/A" in postAddress is refused. So is an empty string."""
+        """ "N/A" in postAddress is refused. So is an empty string."""
         bundle = provider()._order_bundle({"phone": "0740123456"}, "fan@example.com")
         details = bundle["customerDetails"]
         assert "deliveryInfo" not in details

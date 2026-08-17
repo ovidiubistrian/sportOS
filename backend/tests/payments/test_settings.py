@@ -62,9 +62,7 @@ class TestWhoMaySetItUp:
     ) -> None:
         """Otherwise it is an oracle: a way to test stolen credentials against
         a bank without ever holding them."""
-        response = await client.post(
-            f"{BASE}/settings/btipay/test", headers=as_user("owner")
-        )
+        response = await client.post(f"{BASE}/settings/btipay/test", headers=as_user("owner"))
         assert response.status_code == 401
         assert response.json()["code"] == "STEP_UP_REQUIRED"
 
@@ -88,9 +86,7 @@ class TestReading:
         self, client: httpx.AsyncClient, as_user: Any
     ) -> None:
         """It carries buyers' details and what was said to a bank about them."""
-        assert (
-            await client.get(f"{BASE}/calls", headers=as_user("owner"))
-        ).status_code == 200
+        assert (await client.get(f"{BASE}/calls", headers=as_user("owner"))).status_code == 200
         assert (
             await client.get(f"{BASE}/calls", headers=as_user("academy"))
         ).status_code == 403

@@ -135,6 +135,23 @@ class Settings(BaseSettings):
     public_web_internal_url: str = "http://public-web:3000"
     revalidate_secret: SecretStr = SecretStr("dev-only-revalidate-secret")
 
+    # --- Ticketing ----------------------------------------------------------
+    # The Ed25519 seed that signs QR credentials, base64url, 32 bytes. A
+    # scanner verifies against the matching public key, which is what lets it
+    # reject a forged code while completely offline.
+    #
+    # Environment-only in production, like every other secret here. The dev
+    # default is a fixed, published string on purpose: it must be obviously
+    # worthless, so that a deployment which forgot to set the real one is
+    # caught by `ticket_signing_key_id` reading `dev` rather than by nobody
+    # noticing. Rotating the key changes the id; credentials already issued
+    # carry the id they were signed with and keep verifying.
+    ticket_signing_key: SecretStr = SecretStr("ZGV2LW9ubHktdGlja2V0LXNpZ25pbmcta2V5LTAwMQ")
+
+    # How long a scanner's short-lived token lasts before it must be renewed.
+    # Short because a handset walks out of the ground in somebody's pocket.
+    scanner_token_minutes: int = 720
+
     # --- AI writing assistant ----------------------------------------------
     # One platform-held key serves every tenant. Deliberately environment-only
     # (secret manager in production) and never stored in the database: a

@@ -160,9 +160,7 @@ class TestSettling:
         club sending two receipts for one shirt is a support ticket.
         """
         tenant_id, _order, session_id = order_awaiting_card
-        paid = SessionStatus(
-            status="completed", paid_amount_minor=2500, raw={"orderStatus": 2}
-        )
+        paid = SessionStatus(status="completed", paid_amount_minor=2500, raw={"orderStatus": 2})
 
         settled, just_paid = await payments.settle(db, tenant_id, session_id, paid)
         assert just_paid is True
@@ -178,9 +176,7 @@ class TestSettling:
         """Two-phase: the money is committed as far as the buyer is concerned,
         and the club captures it later. The shirt is theirs either way."""
         tenant_id, _order, session_id = order_awaiting_card
-        held = SessionStatus(
-            status="approved", paid_amount_minor=2500, raw={"orderStatus": 1}
-        )
+        held = SessionStatus(status="approved", paid_amount_minor=2500, raw={"orderStatus": 1})
 
         settled, just_paid = await payments.settle(db, tenant_id, session_id, held)
         assert just_paid is True
@@ -253,9 +249,7 @@ class TestReconciling:
         assert await payments.reconcile_order(db, order) == "in_progress", why
         assert (await attempt_for(db, session_id)).settled_at is None
 
-    @pytest.mark.parametrize(
-        ("code", "state"), [(0, "pending"), (6, "failed")]
-    )
+    @pytest.mark.parametrize(("code", "state"), [(0, "pending"), (6, "failed")])
     async def test_a_dead_attempt_may_be_given_up_on(
         self,
         db: AsyncSession,

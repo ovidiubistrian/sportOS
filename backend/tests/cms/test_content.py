@@ -290,9 +290,7 @@ class TestALongSummary:
         payload = _article(demo["club_id"], "J")
         payload["translation"]["excerpt"] = summary
 
-        created = await client.post(
-            "/api/v1/content", headers=as_user("owner"), json=payload
-        )
+        created = await client.post("/api/v1/content", headers=as_user("owner"), json=payload)
         assert created.status_code == 201, created.text
         item = created.json()
         try:

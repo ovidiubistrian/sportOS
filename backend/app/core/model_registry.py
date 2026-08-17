@@ -31,6 +31,10 @@ from app.players import models as players_models
 from app.teams import models as teams_models
 from app.tenants import branding_models as tenants_branding_models
 from app.tenants import models as tenants_models
+from app.ticketing import access_models as ticketing_access_models
+from app.ticketing import event_models as ticketing_event_models
+from app.ticketing import ticket_models as ticketing_ticket_models
+from app.ticketing import venue_models as ticketing_venue_models
 
 __all__ = [
     "ai_models",
@@ -54,4 +58,8 @@ __all__ = [
     "teams_models",
     "tenants_branding_models",
     "tenants_models",
+    "ticketing_access_models",
+    "ticketing_event_models",
+    "ticketing_ticket_models",
+    "ticketing_venue_models",
 ]

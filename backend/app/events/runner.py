@@ -73,6 +73,7 @@ async def _maintenance_loop(stop: asyncio.Event) -> None:
         reconcile_card_payments,
         release_abandoned_orders,
     )
+    from app.ticketing.maintenance import expire_cart_holds, release_expired_allocations
 
     jobs = [
         # Frequent: an editor scheduling something for 18:00 expects it at 18:00,
@@ -87,6 +88,14 @@ async def _maintenance_loop(stop: asyncio.Event) -> None:
         # hurry.
         PeriodicJob(
             "release_abandoned_orders", timedelta(minutes=30), release_abandoned_orders
+        ),
+        # A ten-minute hold that lapsed at 19:00 must not still read as
+        # "in a basket" at 19:05, or a club watching a sell-out sees seats it
+        # has. Correctness does not depend on this — every read already treats
+        # a lapsed hold as free — but the numbers on the screen do.
+        PeriodicJob("expire_ticket_holds", timedelta(minutes=1), expire_cart_holds),
+        PeriodicJob(
+            "release_ticket_allocations", timedelta(minutes=15), release_expired_allocations
         ),
         PeriodicJob("outbox_cleanup", timedelta(hours=6), cleanup_published),
         PeriodicJob("audit_partitions", timedelta(hours=12), ensure_audit_partitions),
