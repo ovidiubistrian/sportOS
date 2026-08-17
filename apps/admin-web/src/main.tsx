@@ -25,6 +25,9 @@ import { StaffPage } from "./pages/staff";
 import { SignUpPage } from "./pages/sign-up";
 import { WorkspacePicker } from "./pages/workspace-picker";
 import { PaymentsPage } from "./pages/payments";
+import { MatchesPage as TicketedMatchesPage } from "./pages/ticketing/matches";
+import { ScannerPage } from "./pages/ticketing/scanner";
+import { StadiumPage } from "./pages/ticketing/stadium";
 import { SitePage } from "./pages/site/site";
 import { MatchesPage } from "./pages/matches/matches";
 import { PlatformConsole } from "./pages/platform/console";
@@ -215,6 +218,9 @@ function Workspace() {
           <Route path="shop" element={<ShopPage />} />
           <Route path="site" element={<SitePage />} />
           <Route path="payments" element={<PaymentsPage />} />
+          <Route path="stadium" element={<StadiumPage />} />
+          <Route path="tickets" element={<TicketedMatchesPage />} />
+          <Route path="scanner" element={<ScannerPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="marketing" element={<MarketingPage />} />
           <Route path="staff" element={<StaffPage />} />

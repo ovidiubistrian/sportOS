@@ -10,12 +10,14 @@ import { createContext, useContext } from "react";
 import type { ApiClient } from "./client";
 import { ApiError } from "./client";
 import type {
+  Allocation,
   AnalyticsOverview,
   AnalyticsRange,
   AssistRequest,
   AssistantStatus,
   AudienceSize,
   Branding,
+  ConfigurationReview,
   BrandingUpdate,
   Campaign,
   CampaignAudience,
@@ -28,6 +30,10 @@ import type {
   ContentStatus,
   ContentSummary,
   DirectoryClub,
+  EventCapacity,
+  EventGate,
+  EventLayout,
+  EventReport,
   EmailPreview,
   EmailTemplate,
   EmailTemplateChanges,
@@ -79,6 +85,16 @@ import type {
   TeamStaffMember,
   TeamUpdate,
   TranslationInput,
+  IssuedTicket,
+  PricingMatrix,
+  ScanCounts,
+  ScanVerdict,
+  SeasonProduct,
+  StadiumLayout,
+  TicketType,
+  TicketedEvent,
+  Venue,
+  VenueConfiguration,
 } from "./types";
 
 const ApiContext = createContext<ApiClient | null>(null);
@@ -1378,5 +1394,325 @@ export function usePaymentCall(
     queryKey: ["payment-call", callId],
     queryFn: () => api.get<PaymentCallDetail>(`/api/v1/payments/calls/${callId}`),
     enabled: Boolean(callId),
+  });
+}
+
+// --- stadium & ticketing ---------------------------------------------------
+
+/**
+ * Query keys for the ticketing module.
+ *
+ * Deliberately nested under the thing they belong to, so that publishing a
+ * configuration or holding a seat can invalidate exactly what changed. A flat
+ * `["ticketing"]` key would refetch a thirty-thousand-seat layout every time
+ * somebody blocked one seat.
+ */
+export const ticketingKeys = {
+  venues: (clubId?: string) => ["ticketing", "venues", { clubId }] as const,
+  configurations: (venueId: string) => ["ticketing", "configurations", venueId] as const,
+  layout: (configurationId: string) => ["ticketing", "layout", configurationId] as const,
+  review: (configurationId: string) => ["ticketing", "review", configurationId] as const,
+  priceZones: (configurationId: string) => ["ticketing", "zones", configurationId] as const,
+  events: (clubId?: string) => ["ticketing", "events", { clubId }] as const,
+  eventLayout: (eventId: string) => ["ticketing", "event-layout", eventId] as const,
+  capacity: (eventId: string) => ["ticketing", "capacity", eventId] as const,
+  pricing: (eventId: string) => ["ticketing", "pricing", eventId] as const,
+  allocations: (eventId: string) => ["ticketing", "allocations", eventId] as const,
+  tickets: (eventId: string) => ["ticketing", "tickets", eventId] as const,
+  report: (eventId: string) => ["ticketing", "report", eventId] as const,
+  ticketTypes: ["ticketing", "ticket-types"] as const,
+  seasonProducts: (clubId?: string) => ["ticketing", "season-products", { clubId }] as const,
+  gates: (eventId: string) => ["access", "gates", eventId] as const,
+  live: (eventId: string) => ["access", "live", eventId] as const,
+  devices: ["access", "devices"] as const,
+};
+
+export function useVenues(clubId?: string): UseQueryResult<Venue[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.venues(clubId),
+    queryFn: () =>
+      api.get<Venue[]>("/api/v1/ticketing/venues", clubId ? { club_id: clubId } : undefined),
+  });
+}
+
+export function useVenueConfigurations(
+  venueId: string | undefined,
+): UseQueryResult<VenueConfiguration[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.configurations(venueId ?? ""),
+    queryFn: () =>
+      api.get<VenueConfiguration[]>(`/api/v1/ticketing/venues/${venueId}/configurations`),
+    enabled: Boolean(venueId),
+  });
+}
+
+export function useStadiumLayout(
+  configurationId: string | undefined,
+): UseQueryResult<StadiumLayout, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.layout(configurationId ?? ""),
+    queryFn: () =>
+      api.get<StadiumLayout>(`/api/v1/ticketing/configurations/${configurationId}/layout`),
+    enabled: Boolean(configurationId),
+  });
+}
+
+export function useConfigurationReview(
+  configurationId: string | undefined,
+): UseQueryResult<ConfigurationReview, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.review(configurationId ?? ""),
+    queryFn: () =>
+      api.get<ConfigurationReview>(
+        `/api/v1/ticketing/configurations/${configurationId}/review`,
+      ),
+    enabled: Boolean(configurationId),
+  });
+}
+
+export function usePublishConfiguration(): UseMutationResult<
+  VenueConfiguration,
+  ApiError,
+  string
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (configurationId) =>
+      api.post<VenueConfiguration>(
+        `/api/v1/ticketing/configurations/${configurationId}/publish`,
+        {},
+      ),
+    onSuccess: () => {
+      // Publishing changes the configuration list, the review and what the
+      // editor will accept, so the whole subtree goes.
+      void queryClient.invalidateQueries({ queryKey: ["ticketing"] });
+    },
+  });
+}
+
+export function useForkConfiguration(): UseMutationResult<
+  VenueConfiguration,
+  ApiError,
+  string
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (configurationId) =>
+      api.post<VenueConfiguration>(
+        `/api/v1/ticketing/configurations/${configurationId}/fork`,
+        {},
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["ticketing"] });
+    },
+  });
+}
+
+export function useGenerateSeats(): UseMutationResult<
+  { seats: number },
+  ApiError,
+  { sectionId: string; plan: Record<string, unknown> }
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sectionId, plan }) =>
+      api.post<{ seats: number }>(`/api/v1/ticketing/sections/${sectionId}/seats`, plan),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["ticketing"] });
+    },
+  });
+}
+
+export function useTicketedEvents(clubId?: string): UseQueryResult<TicketedEvent[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.events(clubId),
+    queryFn: () =>
+      api.get<TicketedEvent[]>(
+        "/api/v1/ticketing/events",
+        clubId ? { club_id: clubId } : undefined,
+      ),
+  });
+}
+
+export function useEventLayout(
+  eventId: string | undefined,
+): UseQueryResult<EventLayout, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.eventLayout(eventId ?? ""),
+    queryFn: () => api.get<EventLayout>(`/api/v1/ticketing/events/${eventId}/layout`),
+    enabled: Boolean(eventId),
+  });
+}
+
+export function useEventCapacity(
+  eventId: string | undefined,
+): UseQueryResult<EventCapacity, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.capacity(eventId ?? ""),
+    queryFn: () => api.get<EventCapacity>(`/api/v1/ticketing/events/${eventId}/capacity`),
+    enabled: Boolean(eventId),
+  });
+}
+
+export function useEventReport(
+  eventId: string | undefined,
+): UseQueryResult<EventReport, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.report(eventId ?? ""),
+    queryFn: () => api.get<EventReport>(`/api/v1/ticketing/events/${eventId}/report`),
+    enabled: Boolean(eventId),
+  });
+}
+
+export function usePricingMatrix(
+  eventId: string | undefined,
+): UseQueryResult<PricingMatrix, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.pricing(eventId ?? ""),
+    queryFn: () => api.get<PricingMatrix>(`/api/v1/ticketing/events/${eventId}/pricing`),
+    enabled: Boolean(eventId),
+  });
+}
+
+export function useSaveEventPricing(): UseMutationResult<
+  { rules: number },
+  ApiError,
+  { eventId: string; rules: Record<string, unknown>[] }
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ eventId, rules }) =>
+      api.put<{ rules: number }>(`/api/v1/ticketing/events/${eventId}/pricing`, rules),
+    onSuccess: (_data, { eventId }) => {
+      void queryClient.invalidateQueries({ queryKey: ticketingKeys.pricing(eventId) });
+    },
+  });
+}
+
+export function usePublishEvent(): UseMutationResult<
+  { id: string; status: string },
+  ApiError,
+  string
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (eventId) =>
+      api.post<{ id: string; status: string }>(
+        `/api/v1/ticketing/events/${eventId}/publish`,
+        {},
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["ticketing"] });
+    },
+  });
+}
+
+export function useAllocations(
+  eventId: string | undefined,
+): UseQueryResult<Allocation[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.allocations(eventId ?? ""),
+    queryFn: () => api.get<Allocation[]>(`/api/v1/ticketing/events/${eventId}/allocations`),
+    enabled: Boolean(eventId),
+  });
+}
+
+export function useEventTickets(
+  eventId: string | undefined,
+): UseQueryResult<IssuedTicket[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.tickets(eventId ?? ""),
+    queryFn: () => api.get<IssuedTicket[]>(`/api/v1/ticketing/events/${eventId}/tickets`),
+    enabled: Boolean(eventId),
+  });
+}
+
+export function useTicketTypes(): UseQueryResult<TicketType[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.ticketTypes,
+    queryFn: () => api.get<TicketType[]>("/api/v1/ticketing/ticket-types"),
+  });
+}
+
+export function useSeasonProducts(
+  clubId?: string,
+): UseQueryResult<SeasonProduct[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.seasonProducts(clubId),
+    queryFn: () =>
+      api.get<SeasonProduct[]>(
+        "/api/v1/ticketing/season-products",
+        clubId ? { club_id: clubId } : undefined,
+      ),
+  });
+}
+
+// --- access control ---------------------------------------------------------
+
+export function useEventGates(
+  eventId: string | undefined,
+): UseQueryResult<EventGate[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.gates(eventId ?? ""),
+    queryFn: () => api.get<EventGate[]>(`/api/v1/access/events/${eventId}/gates`),
+    enabled: Boolean(eventId),
+  });
+}
+
+/**
+ * Live entry counts. Polled rather than pushed: a control room refreshing every
+ * few seconds is enough, and a websocket for a number that changes at walking
+ * pace is infrastructure nobody needs to operate.
+ */
+export function useLiveScans(
+  eventId: string | undefined,
+  options?: { refetchInterval?: number },
+): UseQueryResult<ScanCounts, ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ticketingKeys.live(eventId ?? ""),
+    queryFn: () => api.get<ScanCounts>(`/api/v1/access/events/${eventId}/live`),
+    enabled: Boolean(eventId),
+    refetchInterval: options?.refetchInterval ?? 5000,
+  });
+}
+
+export function useValidateScan(): UseMutationResult<
+  ScanVerdict,
+  ApiError,
+  {
+    event_id: string;
+    credential: string;
+    gate_code?: string | null;
+    idempotency_key?: string;
+    operator_name?: string | null;
+  }
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => api.post<ScanVerdict>("/api/v1/access/scans/validate", payload),
+    onSuccess: (_verdict, { event_id }) => {
+      void queryClient.invalidateQueries({ queryKey: ticketingKeys.live(event_id) });
+    },
   });
 }

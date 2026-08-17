@@ -1055,3 +1055,311 @@ export interface PaymentCallDetail extends PaymentCall {
   sent: Record<string, unknown>;
   received: Record<string, unknown>;
 }
+
+// --- stadium & ticketing ---------------------------------------------------
+
+export interface Venue {
+  id: string;
+  club_id: string;
+  name: string;
+  code: string;
+  address: string | null;
+  city: string | null;
+  country_code: string;
+  timezone: string;
+  currency: string;
+  expected_capacity: number;
+  pitch_orientation: string;
+  cover_media_id: string | null;
+}
+
+/** One versioned layout. Immutable once `status` is PUBLISHED. */
+export interface VenueConfiguration {
+  id: string;
+  venue_id: string;
+  name: string;
+  version: number;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  valid_from: string | null;
+  total_capacity: number;
+  published_at: string | null;
+  forked_from_id: string | null;
+}
+
+export interface PriceZone {
+  id: string;
+  name: string;
+  code: string;
+  colour: string;
+}
+
+/**
+ * The serialised layout — the same shape whether it comes from a live
+ * configuration or from a match's frozen snapshot, so one map component draws
+ * both.
+ */
+export interface StadiumLayout {
+  venue: { id: string | null; name: string; city: string | null; pitch_orientation: string };
+  configuration: { id: string; name: string; version: number };
+  price_zones: PriceZone[];
+  access_zones: { id: string; name: string; code: string }[];
+  stands: LayoutStand[];
+  gates: LayoutGate[];
+}
+
+export interface LayoutStand {
+  id: string;
+  name: string;
+  code: string;
+  geometry: { points?: [number, number][] };
+  sections: LayoutSection[];
+}
+
+export interface LayoutSection {
+  id: string;
+  name: string;
+  code: string;
+  kind: "RESERVED" | "GENERAL_ADMISSION";
+  capacity: number;
+  geometry: { points?: [number, number][] };
+  price_zone: PriceZone | null;
+  rows: { id: string; label: string; seats: LayoutSeat[] }[];
+}
+
+export interface LayoutSeat {
+  id: string;
+  label: string;
+  kind: "STANDARD" | "WHEELCHAIR" | "COMPANION" | "OBSTRUCTED_VIEW";
+  blocked: boolean;
+  index: number;
+  zone: string | null;
+}
+
+export interface LayoutGate {
+  id: string;
+  name: string;
+  code: string;
+  kind: string;
+  supporter_side: string;
+  is_accessible: boolean;
+  access_zone: { id: string; name: string; code: string } | null;
+  section_ids: string[];
+}
+
+/** A finding from the review step. ERROR blocks publication; WARNING does not. */
+export interface ConfigurationFinding {
+  code: string;
+  message: string;
+  severity: "ERROR" | "WARNING";
+  subject: string | null;
+}
+
+export interface ConfigurationReview {
+  total_capacity: number;
+  reserved_seats: number;
+  general_admission: number;
+  blocked_seats: number;
+  accessible_seats: number;
+  by_stand: { id: string; name: string; capacity: number }[];
+  by_section: {
+    id: string;
+    stand: string;
+    name: string;
+    code: string;
+    kind: string;
+    capacity: number;
+  }[];
+  publishable: boolean;
+  findings: ConfigurationFinding[];
+}
+
+export interface TicketedEvent {
+  id: string;
+  name: string;
+  slug: string;
+  status: "DRAFT" | "PUBLISHED" | "CLOSED" | "CANCELLED";
+  category: "A" | "B" | "C";
+  kickoff_at: string;
+  doors_open_at: string | null;
+  sales_start_at: string | null;
+  sales_end_at: string | null;
+  is_public: boolean;
+  currency: string;
+  venue_id: string;
+  opponent_name: string | null;
+  competition_label: string | null;
+  max_per_customer: number;
+  avoid_orphan_seats: boolean;
+}
+
+export interface EventCapacity {
+  total: number;
+  sellable: number;
+  sold: number;
+  available: number;
+  held: number;
+  reserved: number;
+  blocked: number;
+  allocated: number;
+  complimentary: number;
+  /** Against sellable capacity, not architectural — a closed stand is not empty seats. */
+  occupancy: number;
+  by_state: Record<string, number>;
+  by_stand: { stand: string; total: number; sold: number }[];
+}
+
+export interface SectionAvailability {
+  section_id: string;
+  code: string;
+  name: string;
+  stand: string;
+  kind: "RESERVED" | "GENERAL_ADMISSION";
+  price_zone_code: string | null;
+  total: number;
+  available: number;
+}
+
+export interface EventLayout {
+  source_version: number;
+  source_name: string;
+  total_capacity: number;
+  payload: StadiumLayout;
+  availability: SectionAvailability[];
+}
+
+export interface TicketType {
+  id: string;
+  name: string;
+  code: string;
+  requires_proof: boolean;
+  is_complimentary: boolean;
+  is_away: boolean;
+  is_active: boolean;
+}
+
+/** One cell of the price zone x ticket type grid. `source` says where it came from. */
+export interface PriceCell {
+  zone_code: string;
+  ticket_type_id: string;
+  ticket_type_code: string;
+  ticket_type_name: string;
+  amount_minor: number | null;
+  vat_rate_bp?: number;
+  vat_included?: boolean;
+  fee_minor?: number;
+  source: "VENUE" | "SEASON" | "EVENT" | null;
+  price_list_id?: string;
+  rule_id?: string;
+}
+
+export interface PricingMatrix {
+  currency: string;
+  ticket_types: { id: string; code: string; name: string; is_complimentary: boolean }[];
+  zone_codes: string[];
+  cells: PriceCell[];
+}
+
+export interface Allocation {
+  id: string;
+  kind: "HARD_HOLD" | "SOFT_ALLOCATION";
+  reason: string;
+  name: string;
+  owner_name: string | null;
+  seat_count: number;
+  expires_at: string | null;
+  released_at: string | null;
+  note: string | null;
+}
+
+export interface SeasonProduct {
+  id: string;
+  name: string;
+  status: "DRAFT" | "ON_SALE" | "CLOSED";
+  price_minor: number;
+  currency: string;
+  eligibility: string;
+  is_transferable: boolean;
+  matches: number;
+  sold: number;
+}
+
+export interface IssuedTicket {
+  id: string;
+  ticket_number: string;
+  status: "ISSUED" | "VOID" | "REFUNDED";
+  ticket_type: string;
+  holder_name: string | null;
+  price_minor: number;
+  vat_minor: number;
+  fee_minor: number;
+  currency: string;
+  issued_at: string | null;
+}
+
+export interface EventReport {
+  capacity: EventCapacity;
+  scans: ScanCounts;
+  tickets_issued: number;
+  season_tickets: number;
+  revenue: {
+    gross_minor: number;
+    vat_minor: number;
+    fees_minor: number;
+    net_minor: number;
+  };
+  by_ticket_type: { ticket_type: string; count: number; gross_minor: number }[];
+}
+
+/** Every verdict the scanner can return. Machine-readable by design. */
+export type ScanResult =
+  | "VALID"
+  | "ALREADY_USED"
+  | "WRONG_GATE"
+  | "WRONG_EVENT"
+  | "NOT_YET_VALID"
+  | "EXPIRED"
+  | "CANCELLED"
+  | "REFUNDED"
+  | "DEVICE_REVOKED"
+  | "UNKNOWN_CREDENTIAL";
+
+export interface ScanVerdict {
+  result: ScanResult;
+  scan_id: string | null;
+  ticket_number: string | null;
+  holder_name: string | null;
+  ticket_type: string | null;
+  seat: string | null;
+  gate_code: string | null;
+  scanned_at: string | null;
+  /** Set on ALREADY_USED: the first entry's time and gate. */
+  first_seen_at: string | null;
+  first_seen_gate: string | null;
+}
+
+export interface ScanCounts {
+  admitted: number;
+  issued: number;
+  no_shows: number;
+  refused: number;
+  by_result: Record<string, number>;
+  by_gate: { gate_code: string | null; admitted: number }[];
+  recent?: RecentScan[];
+}
+
+export interface RecentScan {
+  id: string;
+  result: ScanResult;
+  gate_code: string | null;
+  scan_type: "ENTRY" | "EXIT";
+  server_at: string;
+  seat: string | null;
+  was_offline: boolean;
+}
+
+export interface EventGate {
+  code: string;
+  name: string;
+  kind: string;
+  is_accessible: boolean;
+}
