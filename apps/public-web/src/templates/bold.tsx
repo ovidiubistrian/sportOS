@@ -144,10 +144,16 @@ export function NewsList({ site, i18n, articles }: NewsListProps) {
                 href={`/news/${article.slug}`}
                 className="group flex flex-col overflow-hidden rounded-xl border border-rule transition-all duration-200 hover:-translate-y-0.5 hover:border-rule-strong hover:shadow-[0_14px_32px_-22px_rgb(0_0_0/0.4)]"
               >
-                {/* This article's own picture, or the crest faintly. Never the
+                {/* Portrait, matching the shape a club actually posts in: a
+                    signing graphic is made for Instagram, taller than it is
+                    wide, and a landscape card cropped the announcement down to
+                    a strip of it. The same three-by-four as the club feed, so
+                    the two rows of cards read as one thing.
+
+                    This article's own picture, or the crest faintly. Never the
                     club's home page image: on a list, a borrowed photograph is
                     indistinguishable from a chosen one. */}
-                <div className="relative grid aspect-[16/10] place-items-center overflow-hidden bg-page-alt">
+                <div className="relative grid aspect-[3/4] place-items-center overflow-hidden bg-page-alt">
                   {article.cover_url ? (
                     <img
                       src={article.cover_url}
@@ -224,19 +230,19 @@ export function ArticleView({ site, i18n, article }: ArticleViewProps) {
           unavoidable and the focal point decides what survives it; here nothing
           has to be lost, so nothing is.
 
-          Capped by height rather than width, because that is the dimension that
-          runs away: a tall portrait at the text's own measure would push the
-          first paragraph off the screen.
-
-          On the same measure as the body, so the two share a left edge instead
-          of sitting on two margins forty points apart. */}
+          Bounded on both axes, and by the text's own measure on the horizontal
+          one. Width alone lets a portrait run down past the fold, and height
+          alone — which this had — lets one grow *wider* than the column it sits
+          in, so the picture and the paragraph under it lined up on two
+          different margins. Whichever limit binds first, the two edges match
+          the body, and a landscape and a portrait cover both sit in the same
+          column. */}
       {article.cover_url && (
         <figure className="mx-auto max-w-2xl px-6 pt-10">
-
           <img
             src={article.cover_url}
             alt={article.title}
-            className="mx-auto max-h-[70vh] w-auto rounded-xl"
+            className="mx-auto max-h-[75vh] w-auto max-w-full rounded-xl"
             loading="eager"
             fetchPriority="high"
           />
