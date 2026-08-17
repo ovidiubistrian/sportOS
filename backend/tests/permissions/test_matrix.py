@@ -22,6 +22,21 @@ pytestmark = pytest.mark.permissions
 #   coach        COACH, scoped to U15 only
 #   other_owner  TENANT_OWNER in a different tenant
 MATRIX: dict[tuple[str, str], dict[str, int]] = {
+    ("GET", "/api/v1/payments/settings"): {
+        # The card gateway is the tenant's, not a club's: whoever holds these
+        # credentials can take a supporter's money somewhere else. The academy
+        # director runs an academy, which is not that.
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
+    ("GET", "/api/v1/payments/calls"): {
+        # The record of what was said to a bank. Same reasoning, and it carries
+        # buyers' details besides.
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
     ("GET", "/api/v1/me"): {
         "owner": 200,
         "academy": 200,
@@ -138,6 +153,13 @@ MATRIX: dict[tuple[str, str], dict[str, int]] = {
 
 # Routes intentionally excluded from the matrix, with the reason.
 EXEMPT = {
+    # The card gateway. Saving credentials and checking them are sensitive —
+    # they answer 401 STEP_UP_REQUIRED even to somebody who holds the
+    # permission, which this matrix cannot express. Covered in
+    # tests/payments/test_settings.py together with the 403s.
+    ("PUT", "/api/v1/payments/settings/{provider}"),
+    ("POST", "/api/v1/payments/settings/{provider}/test"),
+    ("GET", "/api/v1/payments/calls/{call_id}"),
     ("GET", "/api/v1/players/{player_id}"),  # covered by the isolation probe
     ("PATCH", "/api/v1/players/{player_id}"),  # covered below, needs a fixture id
     # Squad editing needs a real team and a real registration, so both are

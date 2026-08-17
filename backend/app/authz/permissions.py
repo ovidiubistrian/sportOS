@@ -115,6 +115,16 @@ CATALOGUE: tuple[Permission, ...] = (
         (T,),
         sensitive=True,
     ),
+    _p("payments.settings.read", "payments", "View the card gateway settings", (T,)),
+    # Sensitive, and tenant-level: these credentials are what takes a
+    # supporter's money, and whoever holds them can take it somewhere else.
+    _p(
+        "payments.settings.manage",
+        "payments",
+        "Set up the card gateway",
+        (T,),
+        sensitive=True,
+    ),
     # --- platform ---------------------------------------------------------
     _p("platform.tenant.read", "platform", "View tenants", (P,)),
     _p("platform.tenant.manage", "platform", "Create and edit tenants", (P,), sensitive=True),

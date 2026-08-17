@@ -69,11 +69,25 @@ async def _maintenance_loop(stop: asyncio.Event) -> None:
     from app.audit.maintenance import ensure_audit_partitions
     from app.cms.scheduler import publish_due_content
     from app.events.relay import cleanup_published
+    from app.payments.maintenance import (
+        reconcile_card_payments,
+        release_abandoned_orders,
+    )
 
     jobs = [
         # Frequent: an editor scheduling something for 18:00 expects it at 18:00,
         # not up to six hours later.
         PeriodicJob("publish_scheduled_content", timedelta(seconds=30), publish_due_content),
+        # The card gateway has no webhook, so an order whose buyer closed the
+        # tab learns nothing until somebody asks. Often, because until it is
+        # asked the supporter has paid and the club cannot see the sale.
+        PeriodicJob("reconcile_card_payments", timedelta(minutes=2), reconcile_card_payments),
+        # And rarely, because this one gives up: it puts the stock of an
+        # unpaid order back, which is the last thing that should happen in a
+        # hurry.
+        PeriodicJob(
+            "release_abandoned_orders", timedelta(minutes=30), release_abandoned_orders
+        ),
         PeriodicJob("outbox_cleanup", timedelta(hours=6), cleanup_published),
         PeriodicJob("audit_partitions", timedelta(hours=12), ensure_audit_partitions),
     ]

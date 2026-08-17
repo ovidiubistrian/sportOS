@@ -27,6 +27,7 @@ from app.marketing.public_router import router as marketing_public_router
 from app.marketing.router import router as marketing_router
 from app.media.router import router as media_router
 from app.payments.public_router import router as payments_public_router
+from app.payments.router import router as payments_router
 from app.platform.ai_router import router as ai_platform_router
 from app.platform.router import router as platform_router
 from app.players.router import router as players_router
@@ -52,6 +53,7 @@ api_v1.include_router(plans_router)
 api_v1.include_router(ai_router)
 api_v1.include_router(marketing_router)
 api_v1.include_router(media_router)
+api_v1.include_router(payments_router)
 api_v1.include_router(ai_platform_router)
 api_v1.include_router(platform_router)
 api_v1.include_router(feed_router)
