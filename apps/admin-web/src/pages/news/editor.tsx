@@ -450,62 +450,13 @@ null
         </div>
 
         <div className="space-y-4">
-          {/* The picture is chosen before the first save as well as after.
-              It used to be deferred — the field was shown, explained and
-              disabled until the article existed — on the reasoning that a new
-              article has no id for an image to attach to. But the image does
-              not attach to the article: it is uploaded to the club's media
-              library, which exists already, and the article merely names it.
-              So the id is held here and sent with the create. Writing a piece
-              and picking its photograph is one job, and being told to come
-              back for the second half of it is the kind of small refusal that
-              gets a club posting to Facebook instead. */}
-          {isNew && canWrite && (
-            <Card className="p-4">
-              <ImageField
-                purpose="ARTICLE_IMAGE"
-                label={t("news", "cover")}
-                help={t("news", "coverHint")}
-                value={newCover?.url ?? null}
-                onChange={(asset) => {
-                  setNewCover(asset);
-                  // Otherwise choosing a picture and nothing else leaves the
-                  // editor claiming there is nothing to save.
-                  setDirty(true);
-                }}
-              />
-            </Card>
-          )}
-
-          {item && canWrite && (
-            <Card className="p-4">
-              <ImageField
-                purpose="ARTICLE_IMAGE"
-                label={t("news", "cover")}
-                help={t("news", "coverHint")}
-                value={item.cover_url}
-                onChange={(asset) =>
-                  cover.mutate(
-                    { id: item.id, changes: { cover_media_id: asset?.id ?? null } },
-                    { onError: (error) => toast.error(error.message) },
-                  )
-                }
-              />
-            </Card>
-          )}
-
-          {assistant.data && canWrite && (
-            <AssistantPanel
-              status={assistant.data}
-              contentItemId={isNew ? null : (itemId ?? null)}
-              locale={locale}
-              title={draft.title}
-              blocks={draft.blocks}
-              onApplyBlocks={(blocks) => update({ blocks })}
-              onApplyTitle={(title) => update({ title })}
-            />
-          )}
-
+          {/* First in the column, not last.
+              It used to sit under the picture and the assistant, off the
+              bottom of the screen — so an article was written, saved, and
+              left as a draft by somebody who had no reason to think there
+              was anything else to press. The status is a pill beside the
+              title; the control that changes it belongs at the top of the
+              side column, where it is read in the same glance. */}
           {item && canPublish && (
             <Card className="space-y-2.5 p-4">
               <p className="text-sm font-medium text-text">{t("news", "publishing")}</p>
@@ -566,6 +517,63 @@ null
               )}
             </Card>
           )}
+
+          {/* The picture is chosen before the first save as well as after.
+              It used to be deferred — the field was shown, explained and
+              disabled until the article existed — on the reasoning that a new
+              article has no id for an image to attach to. But the image does
+              not attach to the article: it is uploaded to the club's media
+              library, which exists already, and the article merely names it.
+              So the id is held here and sent with the create. Writing a piece
+              and picking its photograph is one job, and being told to come
+              back for the second half of it is the kind of small refusal that
+              gets a club posting to Facebook instead. */}
+          {isNew && canWrite && (
+            <Card className="p-4">
+              <ImageField
+                purpose="ARTICLE_IMAGE"
+                label={t("news", "cover")}
+                help={t("news", "coverHint")}
+                value={newCover?.url ?? null}
+                onChange={(asset) => {
+                  setNewCover(asset);
+                  // Otherwise choosing a picture and nothing else leaves the
+                  // editor claiming there is nothing to save.
+                  setDirty(true);
+                }}
+              />
+            </Card>
+          )}
+
+          {item && canWrite && (
+            <Card className="p-4">
+              <ImageField
+                purpose="ARTICLE_IMAGE"
+                label={t("news", "cover")}
+                help={t("news", "coverHint")}
+                value={item.cover_url}
+                onChange={(asset) =>
+                  cover.mutate(
+                    { id: item.id, changes: { cover_media_id: asset?.id ?? null } },
+                    { onError: (error) => toast.error(error.message) },
+                  )
+                }
+              />
+            </Card>
+          )}
+
+          {assistant.data && canWrite && (
+            <AssistantPanel
+              status={assistant.data}
+              contentItemId={isNew ? null : (itemId ?? null)}
+              locale={locale}
+              title={draft.title}
+              blocks={draft.blocks}
+              onApplyBlocks={(blocks) => update({ blocks })}
+              onApplyTitle={(title) => update({ title })}
+            />
+          )}
+
         </div>
       </div>
     </div>
