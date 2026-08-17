@@ -9,6 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
+from app.api.errors import response_for
 from app.core.config import settings
 from app.core.context import set_request_id
 from app.core.ids import new_id
@@ -47,13 +48,38 @@ class UnitOfWorkMiddleware(BaseHTTPMiddleware):
     arrives here — and a route that *returns* a 4xx keeps whatever it wrote,
     committed by that same exit code as before. This middleware only moves the
     successful commit earlier; it never decides what persists.
+
+    A commit can itself fail — a deferred constraint is checked here and
+    nowhere earlier — and that failure happens in a middleware, which Starlette
+    runs *outside* `ExceptionMiddleware`. Left to propagate it would skip every
+    registered handler and arrive at the bare `Exception` one, turning a
+    constraint violation into an opaque 500. So the exception is mapped through
+    the same function the handlers use and returned, which is also how it keeps
+    the CORS headers every other response gets.
     """
 
     async def dispatch(self, request: Request, call_next: Handler) -> Response:
         response = await call_next(request)
-        if response.status_code < 400:
-            for session in getattr(request.state, "sessions", ()):
+        if response.status_code >= 400:
+            return response
+
+        sessions = getattr(request.state, "sessions", ())
+        try:
+            for session in sessions:
                 await session.commit()
+        except Exception as exc:
+            # Whatever did not commit must not be left half-applied for the
+            # dependency's exit code to find and try again.
+            for session in sessions:
+                await session.rollback()
+            log.warning(
+                "unit_of_work_commit_failed",
+                method=request.method,
+                path=request.url.path,
+                error=type(exc).__name__,
+            )
+            return response_for(request, exc)
+
         return response
 
 

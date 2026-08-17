@@ -27,7 +27,9 @@ import uvicorn
 from fastapi import Depends, FastAPI
 from starlette.requests import Request
 
+from app.api.errors import register_exception_handlers
 from app.api.middleware import UnitOfWorkMiddleware, enlist
+from app.core.errors import Conflict
 
 pytestmark = pytest.mark.concurrency
 
@@ -145,3 +147,65 @@ async def test_a_request_that_touched_no_session_is_left_alone() -> None:
     log: list[str] = []
     assert (await drive(app, log, method="get")).status_code == 200
     assert log == ["client_got_response"]
+
+
+class RefusingSession:
+    """A session whose commit fails, the way a deferred constraint does."""
+
+    def __init__(self, error: Exception, log: list[str]) -> None:
+        self.error = error
+        self.log = log
+
+    async def commit(self) -> None:
+        self.log.append("commit_failed")
+        raise self.error
+
+    async def rollback(self) -> None:
+        self.log.append("rolled_back")
+
+
+def refusing(error: Exception, log: list[str]) -> FastAPI:
+    app = FastAPI()
+    register_exception_handlers(app)
+    app.add_middleware(UnitOfWorkMiddleware)
+
+    @app.post("/work", status_code=201)
+    async def write(request: Request) -> dict[str, str]:
+        enlist(request, RefusingSession(error, log))  # type: ignore[arg-type]
+        return {"ok": "yes"}
+
+    return app
+
+
+async def test_a_commit_that_fails_still_gets_the_error_it_deserves() -> None:
+    """The reason the mapping is a function and not only a set of handlers.
+
+    Starlette runs middleware *outside* `ExceptionMiddleware`, so an exception
+    raised while committing skips every registered handler and lands on the
+    bare `Exception` one. A constraint violation would reach the client as an
+    opaque 500 — the endpoint having already succeeded, with nothing on the
+    response to say what went wrong.
+    """
+    log: list[str] = []
+    response = await drive(refusing(Conflict(), log), log)
+
+    assert response.status_code == 409, response.text
+    assert response.json()["code"] == "CONFLICT"
+
+
+async def test_nothing_is_left_half_applied_when_a_commit_fails() -> None:
+    """Or the dependency's exit code finds a broken session and tries again."""
+    log: list[str] = []
+    await drive(refusing(Conflict(), log), log)
+
+    assert log[:2] == ["commit_failed", "rolled_back"]
+
+
+async def test_an_unmapped_failure_is_still_a_500() -> None:
+    """Nothing is invented: an error with no mapping keeps the generic body,
+    and the detail goes to the logs rather than to the client."""
+    log: list[str] = []
+    response = await drive(refusing(RuntimeError("disk on fire"), log), log)
+
+    assert response.status_code == 500
+    assert response.json()["code"] == "INTERNAL_ERROR"
