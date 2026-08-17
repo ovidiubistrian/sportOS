@@ -29,7 +29,9 @@ log = structlog.get_logger(__name__)
 
 async def expire_cart_holds() -> dict[str, int]:
     """Put seats from abandoned baskets back on sale."""
-    async with platform_session() as session:
+    async with platform_session(
+        reason="maintenance: return lapsed cart holds to sale", routine=True
+    ) as session:
         released = await expire_holds(session)
         await session.commit()
 
@@ -49,7 +51,9 @@ async def release_expired_allocations() -> dict[str, int]:
     released = 0
     lapsed = 0
 
-    async with platform_session() as session:
+    async with platform_session(
+        reason="maintenance: release expired soft allocations", routine=True
+    ) as session:
         allocations = list(
             await session.scalars(
                 select(Allocation).where(

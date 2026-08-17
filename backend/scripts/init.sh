@@ -28,6 +28,9 @@ python -m app.platform.seeds.competitions
 if [ "${SEED_DEMO_DATA:-false}" = "true" ]; then
   echo "▸ seeding demo tenants"
   python -m app.platform.seeds.demo
+
+  echo "▸ seeding demonstration stadium and ticketing"
+  python -m app.platform.seeds.ticketing fc-example
 fi
 
 cat <<'BANNER'
