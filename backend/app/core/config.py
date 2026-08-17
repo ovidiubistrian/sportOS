@@ -113,6 +113,12 @@ class Settings(BaseSettings):
         ]
     )
 
+    # Where this API answers from, as the outside world reaches it. Needed
+    # because a payment gateway redirects a buyer's browser back to us and can
+    # only be given an absolute address — one it will refuse if it does not
+    # match what the merchant registered, so this is not merely cosmetic.
+    api_public_url: str = "http://api.footbola.localhost"
+
     permission_cache_seconds: int = 60
     entitlement_cache_seconds: int = 300
 

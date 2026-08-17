@@ -153,6 +153,7 @@ class OrderingService:
         buyer_phone: str | None,
         note: str | None,
         supporter_id: UUID | None = None,
+        payment_method: str = "ON_COLLECTION",
     ) -> Order:
         """Turn a basket into an order.
 
@@ -162,6 +163,13 @@ class OrderingService:
         one sold while the form was open — rolls the whole thing back, which is
         the right answer while payment happens at the counter: nobody has been
         charged, so nobody has to be refunded.
+
+        A card order takes its stock here too, and waits in `AWAITING_PAYMENT`
+        until the bank says what happened. Holding nothing until the money
+        lands would sell the last shirt to two people who both then pay for it,
+        and one of them would have to be refunded and apologised to. An
+        abandoned checkout instead holds a shirt until reconciliation gives up
+        on it and returns the stock the way a cancellation does.
         """
         lines = await self.lines_of(cart)
         if not lines:
@@ -185,7 +193,7 @@ class OrderingService:
             tenant_id=cart.tenant_id,
             club_id=cart.club_id,
             reference=new_reference(),
-            status="AWAITING_COLLECTION",
+            status=("AWAITING_PAYMENT" if payment_method == "CARD" else "AWAITING_COLLECTION"),
             currency=cart.currency,
             subtotal_minor=subtotal.amount_minor,
             total_minor=subtotal.amount_minor,
@@ -194,7 +202,7 @@ class OrderingService:
             buyer_phone=buyer_phone,
             note=note,
             supporter_id=supporter_id,
-            payment_method="ON_COLLECTION",
+            payment_method=payment_method,
             placed_at=datetime.now(UTC),
         )
         self.session.add(order)

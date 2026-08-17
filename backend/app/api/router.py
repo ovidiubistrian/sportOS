@@ -26,6 +26,7 @@ from app.integrations.api_football.router import router as feed_router
 from app.marketing.public_router import router as marketing_public_router
 from app.marketing.router import router as marketing_router
 from app.media.router import router as media_router
+from app.payments.public_router import router as payments_public_router
 from app.platform.ai_router import router as ai_platform_router
 from app.platform.router import router as platform_router
 from app.players.router import router as players_router
@@ -58,6 +59,7 @@ api_v1.include_router(club_feed_router)
 
 # Unauthenticated, host-scoped, CDN-cacheable. Mounted last so its prefix
 # cannot shadow an authenticated route.
+api_v1.include_router(payments_public_router)
 api_v1.include_router(public_router)
 api_v1.include_router(shop_public_router)
 api_v1.include_router(fans_router)

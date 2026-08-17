@@ -12,7 +12,7 @@ tenant is the one thing the tenancy design forbids.
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Response, status
@@ -20,13 +20,16 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import select
 
 from app.commerce.models import Product, ProductVariant
+from app.core.config import settings
 from app.core.db import tenant_session
-from app.core.errors import NotFound
+from app.core.errors import NotFound, ValidationFailed
 from app.fans.supporter_service import optional_subject, supporter_id_for
 from app.media import storage
 from app.media.models import MediaAsset
 from app.ordering.models import OrderLine
+from app.ordering.payments import start_card_payment
 from app.ordering.service import OrderingService
+from app.payments.registry import can_take_card, configured_providers
 from app.tenants.models import Club
 from app.tenants.site_service import SiteRoute, resolve_host
 
@@ -87,6 +90,10 @@ class CheckoutIn(BaseModel):
     email: EmailStr | None = None
     phone: str | None = Field(default=None, max_length=32)
     note: str | None = Field(default=None, max_length=500)
+    # Absent means the counter, which is what every club could do before any of
+    # them could take a card. A club with no gateway configured that is asked
+    # for `CARD` is told so rather than silently sold to on the old terms.
+    payment_method: Literal["ON_COLLECTION", "CARD"] = "ON_COLLECTION"
 
 
 class PlacedOrder(BaseModel):
@@ -95,6 +102,10 @@ class PlacedOrder(BaseModel):
     currency: str
     buyer_name: str
     lines: list[BasketLine]
+    # Set only for a card order: where to send the buyer to pay. The order
+    # exists and its stock is held, but nothing is collectable until the bank
+    # has said so.
+    payment_url: str | None = None
 
 
 def _host(forwarded: str | None, header_host: str | None) -> str | None:
@@ -287,6 +298,15 @@ async def checkout(
         if cart is None:
             raise NotFound("Your basket has expired.")
 
+        if payload.payment_method == "CARD" and not await can_take_card(
+            session, route.tenant_id
+        ):
+            # Asked for before anything is written. A club that cannot take a
+            # card should not end up holding an order nobody can pay for.
+            raise ValidationFailed(
+                "This club is not taking card payments yet.", field="payment_method"
+            )
+
         basket = await _basket(session, route, cart)
         order = await service.checkout(
             cart,
@@ -294,6 +314,7 @@ async def checkout(
             buyer_email=payload.email,
             buyer_phone=payload.phone,
             note=payload.note,
+            payment_method=payload.payment_method,
             # A bonus, not a requirement: the order stands either way, and a
             # signed-in supporter simply finds it in their account afterwards.
             supporter_id=await supporter_id_for(
@@ -309,8 +330,27 @@ async def checkout(
                 .order_by(OrderLine.created_at)
             )
         )
+        payment_url: str | None = None
+        if payload.payment_method == "CARD":
+            club = await session.get(Club, route.club_id)
+            # The gateway sends the buyer back to us, not to the site: the
+            # outcome has to be asked for before anybody is shown a result, and
+            # arriving on a page proves only that they arrived.
+            checkout_session = await start_card_payment(
+                session,
+                order,
+                provider_key=(await configured_providers(session, route.tenant_id))[0],
+                return_url=(
+                    f"{settings.api_public_url}{settings.api_prefix}"
+                    f"/payments/return/{route.tenant_id}"
+                ),
+                club_name=club.display_name if club else None,
+            )
+            payment_url = checkout_session.url
+
         by_variant = {line.variant_id: line for line in basket.lines}
         return PlacedOrder(
+            payment_url=payment_url,
             reference=order.reference,
             total_minor=order.total_minor,
             currency=order.currency,
