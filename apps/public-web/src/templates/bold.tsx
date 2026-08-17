@@ -216,17 +216,27 @@ export function ArticleView({ site, i18n, article }: ArticleViewProps) {
           )}
         </div>
       </header>
-      {/* The picture the club chose for this story, at the top of the story.
-          It was being shown on the card that links here and then nowhere on
-          the page itself, which reads as the photograph having been lost on
-          the way in. Cropped around the focal point, like every other frame. */}
+      {/* Whole, in whatever shape it was made.
+          This is the one frame on the site that does not crop. A club's signing
+          announcement is usually a designed portrait — a player, the crest, the
+          words "bine ai venit" — and forcing it into a wide banner cut the head
+          off the person it was announcing. Everywhere else a fixed frame is
+          unavoidable and the focal point decides what survives it; here nothing
+          has to be lost, so nothing is.
+
+          Capped by height rather than width, because that is the dimension that
+          runs away: a tall portrait at the text's own measure would push the
+          first paragraph off the screen.
+
+          On the same measure as the body, so the two share a left edge instead
+          of sitting on two margins forty points apart. */}
       {article.cover_url && (
-        <figure className="mx-auto max-w-4xl px-6 pt-10">
+        <figure className="mx-auto max-w-2xl px-6 pt-10">
+
           <img
             src={article.cover_url}
             alt={article.title}
-            className="aspect-[16/9] w-full rounded-xl object-cover"
-            style={{ objectPosition: article.cover_focus ?? undefined }}
+            className="mx-auto max-h-[70vh] w-auto rounded-xl"
             loading="eager"
             fetchPriority="high"
           />

@@ -198,6 +198,10 @@ export function NewsEditorPage() {
   const types = assistant.data?.article_types ?? [];
   const canWrite = can("cms.content.write");
   const canPublish = can("cms.content.publish");
+  // Saved, allowed, and somewhere publishing is a legal next step.
+  const publishable = Boolean(
+    item && canPublish && NEXT_STATUS[item.status].includes("PUBLISHED"),
+  );
 
   const missingLocales = useMemo(() => {
     if (!item) return [];
@@ -298,15 +302,46 @@ export function NewsEditorPage() {
         }
         action={
           canWrite ? (
-            <Button
-              variant="primary"
-              loading={save.isPending || create.isPending}
-              disabled={!draft.title.trim()}
-              onClick={onSave}
-            >
-              <Save />
-              {t("common", "save")}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={publishable ? "secondary" : "primary"}
+                loading={save.isPending || create.isPending}
+                disabled={!draft.title.trim()}
+                onClick={onSave}
+              >
+                <Save />
+                {t("common", "save")}
+              </Button>
+
+              {/* Beside Save, because that is where it is looked for.
+                  In the side column it sat under the picture and the assistant,
+                  off the bottom of the screen, and articles were written, saved
+                  and left as drafts by people with no reason to think there was
+                  anything else to press. Only publishing is promoted here — the
+                  schedule, the review and the archive are rarer and stay
+                  together in the panel below. */}
+              {publishable && (
+                <Button
+                  variant="primary"
+                  loading={transition.isPending}
+                  disabled={dirty}
+                  title={dirty ? t("news", "saveFirst") : undefined}
+                  onClick={() =>
+                    transition.mutate(
+                      { status: "PUBLISHED", scheduled_for: null },
+                      {
+                        onSuccess: () => toast.success(t("news", "publishNow")),
+                        onError: (error) =>
+                          toast.error(t("site", "couldNotSave"), error.message),
+                      },
+                    )
+                  }
+                >
+                  <Send />
+                  {t("news", "publishNow")}
+                </Button>
+              )}
+            </div>
           ) : undefined
         }
       />
@@ -469,7 +504,11 @@ null
                 </p>
               )}
 
-              {NEXT_STATUS[item.status].map((target) => (
+              {NEXT_STATUS[item.status]
+                // `PUBLISHED` is the button beside Save. The schedule, the
+                // review and the archive are rarer and stay grouped here.
+                .filter((target) => target !== "PUBLISHED")
+                .map((target) => (
                 <div key={target} className="space-y-1">
                   {target === "SCHEDULED" && (
                     <Input
@@ -481,7 +520,7 @@ null
                     />
                   )}
                   <Button
-                    variant={target === "PUBLISHED" ? "primary" : "secondary"}
+                    variant="secondary"
                     size="sm"
                     className="w-full"
                     disabled={
@@ -506,7 +545,6 @@ null
                       )
                     }
                   >
-                    {target === "PUBLISHED" && <Send />}
                     {t("news", ACTION_KEYS[target])}
                   </Button>
                 </div>
