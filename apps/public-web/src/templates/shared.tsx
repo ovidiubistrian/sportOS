@@ -41,6 +41,9 @@ export const NAV = [
   { href: "/", key: "home" },
   { href: "/news", key: "news" },
   { href: "/teams", key: "teams" },
+  // Ahead of the shop: on a matchday a supporter is looking for a ticket, and
+  // a club sells more of those than it does scarves.
+  { href: "/bilete", key: "ticketsEyebrow" },
   { href: "/shop", key: "shop" },
   { href: "/club", key: "club" },
 ] as const;

@@ -338,3 +338,89 @@ export interface ClubHistory {
 export async function getHistory(): Promise<ClubHistory | null> {
   return fetchPublic<ClubHistory>("/history", 3600);
 }
+
+/* --- tickets ---------------------------------------------------------------- */
+
+export interface TicketedEventSummary {
+  slug: string;
+  name: string;
+  opponent_name: string | null;
+  competition_label: string | null;
+  kickoff_at: string;
+  doors_open_at: string | null;
+  currency: string;
+  available: number;
+}
+
+export interface TicketSectionAvailability {
+  section_id: string;
+  code: string;
+  name: string;
+  stand: string;
+  kind: "RESERVED" | "GENERAL_ADMISSION";
+  price_zone_code: string | null;
+  total: number;
+  available: number;
+}
+
+export interface TicketZone {
+  id: string;
+  name: string;
+  code: string;
+  colour: string;
+}
+
+export interface TicketLayoutSection {
+  id: string;
+  name: string;
+  code: string;
+  kind: "RESERVED" | "GENERAL_ADMISSION";
+  capacity: number;
+  geometry: { points?: [number, number][] };
+  price_zone: TicketZone | null;
+}
+
+export interface TicketLayoutStand {
+  id: string;
+  name: string;
+  code: string;
+  geometry: { points?: [number, number][] };
+  sections: TicketLayoutSection[];
+}
+
+export interface TicketEventDetail {
+  slug: string;
+  name: string;
+  kickoff_at: string;
+  doors_open_at: string | null;
+  currency: string;
+  max_per_customer: number;
+  hold_minutes: number;
+  layout: {
+    venue: { name: string; city: string | null };
+    price_zones: TicketZone[];
+    stands: TicketLayoutStand[];
+    gates: { code: string; name: string; section_ids: string[] }[];
+  };
+  availability: TicketSectionAvailability[];
+  prices: Record<string, { amount_minor: number; currency: string }>;
+}
+
+/**
+ * Matches on sale. Cached briefly, like the shop: a page that says a match is
+ * available after it sold out is worse than one that loads a moment slower.
+ */
+export async function getTicketedEvents(): Promise<TicketedEventSummary[]> {
+  return (await fetchPublic<TicketedEventSummary[]>("/tickets/events", 30)) ?? [];
+}
+
+/**
+ * One match, with its frozen layout and a free/total count per sector.
+ *
+ * Never cached. Availability is the whole point of the page, and a supporter
+ * choosing from a thirty-second-old map is a supporter told a seat is free and
+ * then refused it at checkout.
+ */
+export async function getTicketedEvent(slug: string): Promise<TicketEventDetail | null> {
+  return fetchPublic<TicketEventDetail>(`/tickets/events/${slug}`, 0);
+}
