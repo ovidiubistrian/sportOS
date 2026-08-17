@@ -46,6 +46,25 @@ _COACH = (
     "development.evaluation.manage",
 )
 
+# Everything a club's ticketing operation needs. Named once because a club
+# administrator and a dedicated ticketing manager hold the same set — the
+# difference between them is everything *else* the administrator can do.
+_TICKETING_FULL = (
+    "ticketing.venue.read",
+    "ticketing.venue.manage",
+    "ticketing.venue.publish",
+    "ticketing.event.read",
+    "ticketing.event.manage",
+    "ticketing.pricing.manage",
+    "ticketing.allocation.manage",
+    "ticketing.order.read",
+    "ticketing.order.manage",
+    "ticketing.season.manage",
+    "ticketing.access.manage",
+    "ticketing.access.scan",
+    "ticketing.report.read",
+)
+
 TEMPLATES: tuple[RoleTemplate, ...] = (
     # --- platform ---------------------------------------------------------
     RoleTemplate(
@@ -110,8 +129,59 @@ TEMPLATES: tuple[RoleTemplate, ...] = (
             "commerce.product.manage",
             "commerce.order.read",
             "commerce.order.manage",
+            *_TICKETING_FULL,
         ),
         "Day-to-day administration of one club.",
+    ),
+    RoleTemplate(
+        "TICKETING_MANAGER",
+        "Ticketing Manager",
+        ScopeLevel.CLUB,
+        (
+            "clubs.club.read",
+            "teams.team.read",
+            *_TICKETING_FULL,
+            "finance.report.read",
+        ),
+        "The stadium, matches, prices, allocations and season tickets.",
+    ),
+    RoleTemplate(
+        "BOX_OFFICE",
+        "Box Office",
+        ScopeLevel.CLUB,
+        (
+            "clubs.club.read",
+            # Enough of the ground and the fixture list to sell against, and
+            # nothing that lets a counter clerk change what a seat costs.
+            "ticketing.venue.read",
+            "ticketing.event.read",
+            "ticketing.order.read",
+            "ticketing.order.manage",
+        ),
+        "Selling at the counter: orders, customer lookup, issue and reprint.",
+    ),
+    RoleTemplate(
+        "GATE_OPERATOR",
+        "Gate Operator",
+        ScopeLevel.CLUB,
+        # Deliberately two permissions. A steward's handset is lost, borrowed
+        # and left on a wall; whatever it holds should be worth as little as
+        # possible to whoever picks it up.
+        ("ticketing.event.read", "ticketing.access.scan"),
+        "Scanning at a turnstile. No access to any other club data.",
+    ),
+    RoleTemplate(
+        "TICKETING_ANALYST",
+        "Ticketing Analyst",
+        ScopeLevel.CLUB,
+        (
+            "clubs.club.read",
+            "ticketing.venue.read",
+            "ticketing.event.read",
+            "ticketing.order.read",
+            "ticketing.report.read",
+        ),
+        "Read-only reporting on ticket sales and attendance.",
     ),
     RoleTemplate(
         "ACADEMY_DIRECTOR",

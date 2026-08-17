@@ -22,6 +22,36 @@ pytestmark = pytest.mark.permissions
 #   coach        COACH, scoped to U15 only
 #   other_owner  TENANT_OWNER in a different tenant
 MATRIX: dict[tuple[str, str], dict[str, int]] = {
+    # --- ticketing --------------------------------------------------------
+    # The academy director and the coach hold no ticketing permission at all:
+    # running an academy and selling seats are different jobs, and a club that
+    # wants one person doing both grants them the ticketing role as well.
+    ("GET", "/api/v1/ticketing/venues"): {
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
+    ("GET", "/api/v1/ticketing/events"): {
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
+    ("GET", "/api/v1/ticketing/ticket-types"): {
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
+    ("GET", "/api/v1/ticketing/season-products"): {
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
+    ("GET", "/api/v1/access/devices"): {
+        # A scanner's token is a working turnstile in whoever's hand holds it.
+        "owner": 200,
+        "academy": 403,
+        "coach": 403,
+    },
     ("GET", "/api/v1/payments/settings"): {
         # The card gateway is the tenant's, not a club's: whoever holds these
         # credentials can take a supporter's money somewhere else. The academy
@@ -153,6 +183,74 @@ MATRIX: dict[tuple[str, str], dict[str, int]] = {
 
 # Routes intentionally excluded from the matrix, with the reason.
 EXEMPT = {
+    # Buying a ticket is unauthenticated and Host-scoped, like the rest of
+    # the public API — a supporter must not need an account to get in. The
+    # seat hold, the ten-minute expiry and what the map does *not* reveal
+    # are covered in tests/ticketing/test_stadium_to_scan.py.
+    ("GET", "/api/v1/public/tickets/events"),
+    ("GET", "/api/v1/public/tickets/events/{slug}"),
+    ("POST", "/api/v1/public/tickets/events/{slug}/best-available"),
+    ("POST", "/api/v1/public/tickets/events/{slug}/checkout"),
+    ("POST", "/api/v1/public/tickets/events/{slug}/hold"),
+    ("GET", "/api/v1/public/tickets/events/{slug}/seats"),
+    ("DELETE", "/api/v1/public/tickets/holds"),
+    ("GET", "/api/v1/public/tickets/orders/{reference}"),
+    # Every ticketing write needs a real stadium, a real match or a real
+    # seat to act on, so they are exercised as sequences rather than as
+    # bare probes: tests/ticketing/test_permissions.py covers the role
+    # boundaries (a gate operator who can scan and read nothing else, a
+    # box office that cannot reprice a stand, a read-only analyst, and a
+    # different tenant's owner seeing none of this club's grounds) and
+    # tests/ticketing/test_stadium_to_scan.py covers the behaviour.
+    ("POST", "/api/v1/access/devices/enroll"),
+    ("GET", "/api/v1/access/devices/{device_id}/config"),
+    ("POST", "/api/v1/access/devices/{device_id}/gate"),
+    ("POST", "/api/v1/access/devices/{device_id}/revoke"),
+    ("GET", "/api/v1/access/events/{event_id}/gates"),
+    ("GET", "/api/v1/access/events/{event_id}/live"),
+    ("GET", "/api/v1/access/events/{event_id}/manifest"),
+    ("POST", "/api/v1/access/scans/sync"),
+    ("POST", "/api/v1/access/scans/validate"),
+    ("POST", "/api/v1/ticketing/allocations/{allocation_id}/release"),
+    ("POST", "/api/v1/ticketing/configurations/{configuration_id}/access-zones"),
+    ("POST", "/api/v1/ticketing/configurations/{configuration_id}/fork"),
+    ("POST", "/api/v1/ticketing/configurations/{configuration_id}/gates"),
+    ("GET", "/api/v1/ticketing/configurations/{configuration_id}/layout"),
+    ("POST", "/api/v1/ticketing/configurations/{configuration_id}/price-zones"),
+    ("GET", "/api/v1/ticketing/configurations/{configuration_id}/price-zones"),
+    ("POST", "/api/v1/ticketing/configurations/{configuration_id}/publish"),
+    ("GET", "/api/v1/ticketing/configurations/{configuration_id}/review"),
+    ("POST", "/api/v1/ticketing/configurations/{configuration_id}/stands"),
+    ("POST", "/api/v1/ticketing/events"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/allocations"),
+    ("POST", "/api/v1/ticketing/events/{event_id}/allocations"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/capacity"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/inventory"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/layout"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/pricing"),
+    ("PUT", "/api/v1/ticketing/events/{event_id}/pricing"),
+    ("POST", "/api/v1/ticketing/events/{event_id}/publish"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/report"),
+    ("GET", "/api/v1/ticketing/events/{event_id}/tickets"),
+    ("PUT", "/api/v1/ticketing/gates/{gate_id}"),
+    ("DELETE", "/api/v1/ticketing/gates/{gate_id}"),
+    ("POST", "/api/v1/ticketing/season-products"),
+    ("POST", "/api/v1/ticketing/season-products/{product_id}/open"),
+    ("POST", "/api/v1/ticketing/season-products/{product_id}/passes"),
+    ("POST", "/api/v1/ticketing/seats/assign"),
+    ("PATCH", "/api/v1/ticketing/sections/{section_id}"),
+    ("DELETE", "/api/v1/ticketing/sections/{section_id}"),
+    ("POST", "/api/v1/ticketing/sections/{section_id}/seats"),
+    ("GET", "/api/v1/ticketing/sections/{section_id}/seats"),
+    ("PATCH", "/api/v1/ticketing/stands/{stand_id}"),
+    ("DELETE", "/api/v1/ticketing/stands/{stand_id}"),
+    ("POST", "/api/v1/ticketing/stands/{stand_id}/sections"),
+    ("POST", "/api/v1/ticketing/ticket-types"),
+    ("POST", "/api/v1/ticketing/venues"),
+    ("PATCH", "/api/v1/ticketing/venues/{venue_id}"),
+    ("GET", "/api/v1/ticketing/venues/{venue_id}/configurations"),
+    ("POST", "/api/v1/ticketing/venues/{venue_id}/configurations"),
+    ("PUT", "/api/v1/ticketing/venues/{venue_id}/pricing"),
     # The card gateway. Saving credentials and checking them are sensitive —
     # they answer 401 STEP_UP_REQUIRED even to somebody who holds the
     # permission, which this matrix cannot express. Covered in

@@ -105,6 +105,31 @@ CATALOGUE: tuple[Permission, ...] = (
     _p("commerce.product.manage", "commerce", "Add and edit shop products"),
     _p("commerce.order.read", "commerce", "View shop orders"),
     _p("commerce.order.manage", "commerce", "Mark orders collected or cancelled"),
+    # --- stadium & ticketing ----------------------------------------------
+    # Split along the lines of who actually does the work on a matchday. A
+    # ticketing manager draws the ground and sets prices; a box-office clerk
+    # sells and reprints but must not be able to reprice a stand; a steward on
+    # a turnstile needs one permission and nothing else.
+    _p("ticketing.venue.read", "ticketing", "View stadiums and configurations"),
+    _p("ticketing.venue.manage", "ticketing", "Draw and edit stadium configurations"),
+    # Publishing freezes a layout that matches will be sold from, so it is a
+    # separate permission from drawing one — the same split as cms.content.
+    _p("ticketing.venue.publish", "ticketing", "Publish a stadium configuration"),
+    _p("ticketing.event.read", "ticketing", "View ticketed matches"),
+    _p("ticketing.event.manage", "ticketing", "Create and edit ticketed matches"),
+    _p("ticketing.pricing.manage", "ticketing", "Set ticket prices and promotional codes"),
+    # Holding back seats is how a stand gets closed and how a sponsor gets its
+    # block. Both change what the public can buy, so they travel together.
+    _p("ticketing.allocation.manage", "ticketing", "Hold and allocate inventory"),
+    _p("ticketing.order.read", "ticketing", "View ticket orders and customers"),
+    # The box office: sell at the counter, reissue a lost ticket, refund one.
+    _p("ticketing.order.manage", "ticketing", "Sell, reissue and refund tickets"),
+    _p("ticketing.season.manage", "ticketing", "Create and sell season tickets"),
+    # What a steward's handset holds. Deliberately narrow: it admits people and
+    # can read nothing else about the club.
+    _p("ticketing.access.scan", "ticketing", "Validate tickets at a gate"),
+    _p("ticketing.access.manage", "ticketing", "Enrol and revoke scanner devices"),
+    _p("ticketing.report.read", "ticketing", "View ticketing reports"),
     # --- finance & billing ------------------------------------------------
     _p("finance.report.read", "finance", "View financial reports"),
     _p("billing.subscription.read", "billing", "View the subscription"),

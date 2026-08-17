@@ -35,6 +35,9 @@ from app.sports.router import router as sports_router
 from app.teams.router import router as teams_router
 from app.tenants.branding_router import router as branding_router
 from app.tenants.public_router import router as public_router
+from app.ticketing.access_router import router as access_router
+from app.ticketing.public_router import router as tickets_public_router
+from app.ticketing.router import router as ticketing_router
 
 api_v1 = APIRouter()
 
@@ -54,6 +57,8 @@ api_v1.include_router(ai_router)
 api_v1.include_router(marketing_router)
 api_v1.include_router(media_router)
 api_v1.include_router(payments_router)
+api_v1.include_router(ticketing_router)
+api_v1.include_router(access_router)
 api_v1.include_router(ai_platform_router)
 api_v1.include_router(platform_router)
 api_v1.include_router(feed_router)
@@ -64,6 +69,7 @@ api_v1.include_router(club_feed_router)
 api_v1.include_router(payments_public_router)
 api_v1.include_router(public_router)
 api_v1.include_router(shop_public_router)
+api_v1.include_router(tickets_public_router)
 api_v1.include_router(fans_router)
 api_v1.include_router(analytics_public_router)
 api_v1.include_router(marketing_public_router)
