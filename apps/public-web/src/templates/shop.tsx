@@ -34,6 +34,9 @@ export interface ShopLabels {
   note: string;
   placeOrder: string;
   payOnCollection: string;
+  payByCard: string;
+  payAtCounter: string;
+  cardSafe: string;
   orderPlaced: string;
   orderReference: string;
   orderDone: string;
@@ -201,10 +204,14 @@ export function Shop({
   locale,
   labels,
   buyer,
+  acceptsCards = false,
 }: {
   products: ShopProduct[];
   locale: string;
   labels: ShopLabels;
+  /** Whether the club has a working card gateway switched on. Decided
+      server-side; the shop only asks, and offers nothing it cannot honour. */
+  acceptsCards?: boolean;
   /** Filled in when somebody is signed in. A supporter who has already told
       the club who they are should not be asked again at the till. */
   buyer?: Buyer;
@@ -256,6 +263,7 @@ export function Shop({
         locale={locale}
         labels={labels}
         buyer={buyer}
+        acceptsCards={acceptsCards}
         onChanged={setBasket}
         onPlaced={(reference) => {
           setBasket(null);
@@ -275,6 +283,7 @@ function BasketPanel({
   onChanged,
   onPlaced,
   buyer,
+  acceptsCards,
 }: {
   basket: Basket | null;
   locale: string;
@@ -282,6 +291,7 @@ function BasketPanel({
   onChanged: (basket: Basket) => void;
   onPlaced: (reference: string) => void;
   buyer?: Buyer;
+  acceptsCards: boolean;
 }) {
   const [name, setName] = useState(buyer?.name ?? "");
   const [email, setEmail] = useState(buyer?.email ?? "");
@@ -301,7 +311,7 @@ function BasketPanel({
     else setError(errorFrom(body));
   }
 
-  async function place() {
+  async function place(method: "ON_COLLECTION" | "CARD") {
     setBusy(true);
     setError(null);
     // Reported before the call, not after: a checkout somebody started and
@@ -315,15 +325,28 @@ function BasketPanel({
         email: email.trim() || null,
         phone: phone.trim() || null,
         note: note.trim() || null,
+        payment_method: method,
       }),
     });
-    setBusy(false);
-    if (ok) {
-      track("ORDER", { value_minor: basket?.total_minor ?? undefined });
-      onPlaced(String((body as { reference?: string }).reference ?? ""));
-    } else {
+    if (!ok) {
+      setBusy(false);
       setError(errorFrom(body));
+      return;
     }
+
+    const placed = body as { reference?: string; payment_url?: string | null };
+    if (placed.payment_url) {
+      // The order exists and its stock is held, but nothing has been paid and
+      // nothing is collectable. `busy` stays set: the page is about to be
+      // replaced by the bank's, and a button that came back to life in the
+      // meantime would mint a second order for the same basket.
+      window.location.assign(placed.payment_url);
+      return;
+    }
+
+    setBusy(false);
+    track("ORDER", { value_minor: basket?.total_minor ?? undefined });
+    onPlaced(String(placed.reference ?? ""));
   }
 
   return (
@@ -397,17 +420,47 @@ function BasketPanel({
 
           {error && <p className="mt-3 text-xs font-medium text-[#b3352c]">{error}</p>}
 
-          <p className="mt-3 text-xs text-ink-muted">{labels.payOnCollection}</p>
+          {/* Card first when the club takes one, because it is the one that
+              finishes here. Paying at the counter asks a supporter to turn up
+              with cash, which is a thing to choose rather than the thing that
+              happens by default — but it stays, because it is how every club
+              sold before any of them could take a card, and some still do. */}
+          {acceptsCards ? (
+            <>
+              <button
+                type="button"
+                disabled={busy || name.trim().length < 2}
+                onClick={() => place("CARD")}
+                className="mt-4 w-full rounded-full px-4 py-3.5 text-xs font-bold tracking-widest uppercase transition-opacity hover:opacity-90 disabled:opacity-40"
+                style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
+              >
+                {labels.payByCard}
+              </button>
+              <p className="mt-2 text-center text-xs text-ink-muted">{labels.cardSafe}</p>
 
-          <button
-            type="button"
-            disabled={busy || name.trim().length < 2}
-            onClick={place}
-            className="mt-3 w-full rounded-full px-4 py-3.5 text-xs font-bold tracking-widest uppercase transition-opacity hover:opacity-90 disabled:opacity-40"
-            style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-          >
-            {labels.placeOrder}
-          </button>
+              <button
+                type="button"
+                disabled={busy || name.trim().length < 2}
+                onClick={() => place("ON_COLLECTION")}
+                className="mt-3 w-full rounded-full border border-rule px-4 py-3 text-xs font-semibold transition-colors hover:border-rule-strong disabled:opacity-40"
+              >
+                {labels.payAtCounter}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="mt-3 text-xs text-ink-muted">{labels.payOnCollection}</p>
+              <button
+                type="button"
+                disabled={busy || name.trim().length < 2}
+                onClick={() => place("ON_COLLECTION")}
+                className="mt-3 w-full rounded-full px-4 py-3.5 text-xs font-bold tracking-widest uppercase transition-opacity hover:opacity-90 disabled:opacity-40"
+                style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
+              >
+                {labels.placeOrder}
+              </button>
+            </>
+          )}
         </>
       )}
     </aside>

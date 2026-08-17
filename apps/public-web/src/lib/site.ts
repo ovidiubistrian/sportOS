@@ -34,6 +34,9 @@ export interface Branding {
    *  crops around it, so one photograph survives a wide desktop band and a
    *  nearly square one on a phone. */
   hero_focus: string | null;
+  /** Whether this club can take a card. Decided server-side from whether a
+   *  gateway is configured and switched on. */
+  accepts_cards: boolean;
   announcement: string | null;
   tickets_url: string | null;
   tickets_label: string | null;

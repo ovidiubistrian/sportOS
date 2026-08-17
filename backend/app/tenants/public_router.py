@@ -36,6 +36,7 @@ from app.core.errors import NotFound
 from app.identity.models import Person
 from app.media import storage
 from app.media.models import MediaAsset
+from app.payments.registry import can_take_card
 from app.players.models import Player, PlayerRegistration
 from app.sports.registry import profile
 from app.teams.models import Team, TeamStaff
@@ -73,6 +74,9 @@ class BrandingOut(BaseModel):
     hero_alt: str | None = None
     # A CSS `object-position`, or null when the picture is centred.
     hero_focus: str | None = None
+    # Whether this club can take a card at all. The shop asks before offering
+    # one: a button that answers "not available here" is worse than no button.
+    accepts_cards: bool = False
     announcement: str | None = None
     tickets_url: str | None = None
     tickets_label: str | None = None
@@ -285,6 +289,11 @@ async def get_site(
                 )
             }
 
+        # Asked here, inside the tenant-bound transaction: the row this reads
+        # is behind row-level security, and the setting that unlocks it dies
+        # with the transaction.
+        accepts_cards = await can_take_card(session, route.tenant_id)
+
     template = branding.template if branding else "CLASSIC"
     primary = branding.color_primary if branding else "#1F4B99"
     secondary = branding.color_secondary if branding else None
@@ -317,6 +326,7 @@ async def get_site(
             hero_url=_asset_url(images, branding.hero_media_id if branding else None),
             hero_alt=_asset_alt(images, branding.hero_media_id if branding else None),
             hero_focus=_asset_focus(images, branding.hero_media_id if branding else None),
+            accepts_cards=accepts_cards,
             announcement=(
                 branding.announcement_text
                 if branding and branding.announcement_is_active

@@ -102,6 +102,7 @@ export default async function ShopPage() {
           products={products}
           locale={locale}
           buyer={buyer}
+          acceptsCards={site.branding.accepts_cards}
           // Resolved here because the shop is a client component and cannot
           // reach the translator, which reads request headers.
           labels={{
@@ -118,6 +119,9 @@ export default async function ShopPage() {
             note: i18n.t("publicSite", "orderNote"),
             placeOrder: i18n.t("publicSite", "placeOrder"),
             payOnCollection: i18n.t("publicSite", "payOnCollection"),
+            payByCard: i18n.t("publicSite", "payByCard"),
+            payAtCounter: i18n.t("publicSite", "payAtCounter"),
+            cardSafe: i18n.t("publicSite", "cardSafe"),
             orderPlaced: i18n.t("publicSite", "orderPlaced"),
             orderReference: i18n.t("publicSite", "orderReference"),
             orderDone: i18n.t("publicSite", "orderDone"),
