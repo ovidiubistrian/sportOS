@@ -142,26 +142,47 @@ export function NewsList({ site, i18n, articles }: NewsListProps) {
               <Link
                 key={article.id}
                 href={`/news/${article.slug}`}
-                className="group flex flex-col rounded-xl border border-rule p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-rule-strong hover:shadow-[0_14px_32px_-22px_rgb(0_0_0/0.4)]"
+                className="group flex flex-col overflow-hidden rounded-xl border border-rule transition-all duration-200 hover:-translate-y-0.5 hover:border-rule-strong hover:shadow-[0_14px_32px_-22px_rgb(0_0_0/0.4)]"
               >
-                {article.is_pinned && (
-                  <span
-                    className="mb-3 self-start rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.14em] uppercase"
-                    style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
-                  >
-                    Featured
-                  </span>
-                )}
-                <h2 className="font-display text-xl leading-tight font-extrabold tracking-tight text-balance transition-colors group-hover:text-brand-text">
-                  {article.title}
-                </h2>
-                {article.excerpt && (
-                  <p className="mt-2.5 line-clamp-3 flex-1 text-sm/relaxed text-ink-muted">
-                    {article.excerpt}
-                  </p>
-                )}
-                <div className="mt-5">
-                  <ArticleDate article={article} site={site} />
+                {/* This article's own picture, or the crest faintly. Never the
+                    club's home page image: on a list, a borrowed photograph is
+                    indistinguishable from a chosen one. */}
+                <div className="relative grid aspect-[16/10] place-items-center overflow-hidden bg-page-alt">
+                  {article.cover_url ? (
+                    <img
+                      src={article.cover_url}
+                      alt=""
+                      loading="lazy"
+                      style={{ objectPosition: article.cover_focus ?? undefined }}
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <span aria-hidden className="opacity-25 grayscale">
+                      <Crest site={site} size={44} />
+                    </span>
+                  )}
+                  {article.is_pinned && (
+                    <span
+                      className="absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.14em] uppercase"
+                      style={{ background: "var(--brand)", color: "var(--brand-contrast)" }}
+                    >
+                      Featured
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-1 flex-col p-6">
+                  <h2 className="font-display text-xl leading-tight font-extrabold tracking-tight text-balance transition-colors group-hover:text-brand-text">
+                    {article.title}
+                  </h2>
+                  {article.excerpt && (
+                    <p className="mt-2.5 line-clamp-3 flex-1 text-sm/relaxed text-ink-muted">
+                      {article.excerpt}
+                    </p>
+                  )}
+                  <div className="mt-5">
+                    <ArticleDate article={article} site={site} />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -195,6 +216,22 @@ export function ArticleView({ site, i18n, article }: ArticleViewProps) {
           )}
         </div>
       </header>
+      {/* The picture the club chose for this story, at the top of the story.
+          It was being shown on the card that links here and then nowhere on
+          the page itself, which reads as the photograph having been lost on
+          the way in. Cropped around the focal point, like every other frame. */}
+      {article.cover_url && (
+        <figure className="mx-auto max-w-4xl px-6 pt-10">
+          <img
+            src={article.cover_url}
+            alt={article.title}
+            className="aspect-[16/9] w-full rounded-xl object-cover"
+            style={{ objectPosition: article.cover_focus ?? undefined }}
+            loading="eager"
+            fetchPriority="high"
+          />
+        </figure>
+      )}
       <main className="mx-auto max-w-2xl px-6 py-12 text-[16px]/relaxed">
         <ArticleBody blocks={article.body} />
         <Link

@@ -548,7 +548,16 @@ async def _published_items(session, route: SiteRoute, limit: int, offset: int):
                 ContentItem.kind == "ARTICLE",
                 ContentItem.status == "PUBLISHED",
             )
-            .order_by(ContentItem.is_pinned.desc(), ContentItem.published_at.desc())
+            # Newest first, and `created_at` breaks the tie. Several articles
+            # published in the same minute — a club catching up on a season's
+            # news in one sitting — otherwise came back in whatever order the
+            # database found them, which changed between requests and made the
+            # front page look like it was shuffling itself.
+            .order_by(
+                ContentItem.is_pinned.desc(),
+                ContentItem.published_at.desc(),
+                ContentItem.created_at.desc(),
+            )
             .limit(limit)
             .offset(offset)
         )
