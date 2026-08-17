@@ -1,184 +1,128 @@
-"""The payment-provider port.
+"""The payment port: what the rest of the application is allowed to know.
 
-One implementation per acquirer, one instance per (tenant, provider), built
-from that tenant's own credentials. Nothing outside this package imports an
-acquirer's SDK or knows its wire format.
+One provider instance per `(tenant, provider)`, built from that tenant's own
+credentials. Nothing outside this package imports a provider SDK or speaks a
+provider's vocabulary — the types crossing this boundary are ours, and a
+provider's own objects never escape its adapter. `docs/architecture/09-payments.md`
+states the rule; this module is where it becomes enforceable.
 
-Two things are deliberately in the shape of the port rather than left to each
-implementation:
+Amounts are integer minor units in both directions. `app/core/money.py` explains
+why at length; the short version is that a float here is a rounding error
+somebody eventually has to refund.
 
-`amount_minor` everywhere. A payment amount never becomes a float, not even
-briefly, not even for display. The rest of the codebase already works this way
-(`app/core/money.py`); the boundary with a bank is the last place to relax it.
-
-`poll` as a first-class operation, not a fallback. Some acquirers notify us
-asynchronously and some — BT iPay among them — never do. A port that treats
-polling as the exception forces the ones that cannot notify into a shape that
-loses payments, so it is the webhook that is optional here.
+Async throughout, because everything that calls it is: a provider that blocks
+the event loop for the length of a bank's round trip would stall every other
+request on the worker.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import StrEnum
 from typing import Any
 
+from app.core.errors import DomainError
 
-class PaymentProviderError(Exception):
+
+class PaymentProviderError(DomainError):
     """The provider layer could not satisfy a request.
 
-    Bad credentials, a network failure, an unsupported operation. Callers are
-    expected to catch it and say something a supporter can act on — never to
-    let it become a 500, and never to interpret it as "not paid".
+    Bad credentials, a network failure, an unsupported operation. A
+    `DomainError` rather than a bare exception so it reaches the client as a
+    sentence and a status code rather than as a 500 — a supporter whose card
+    was refused is owed an explanation, not a stack trace.
     """
 
+    code, status = "PAYMENT_PROVIDER_ERROR", 502
+    default_message = "The payment provider could not be reached."
 
-class PaymentState(StrEnum):
-    """What the acquirer says about an attempt, in our vocabulary.
 
-    Deliberately not the union of every acquirer's status list. `HELD` and
-    `SETTLED` are distinct because the difference decides whether a club has
-    the money; `PENDING` and `UNSTARTED` because the difference decides whether
-    an order may be cancelled.
-    """
-
-    UNSTARTED = "UNSTARTED"  # registered, nobody has tried to pay
-    PENDING = "PENDING"  # in flight — 3-D Secure, most likely
-    HELD = "HELD"  # authorised, funds reserved, not captured
-    SETTLED = "SETTLED"  # captured; the club has the money
-    FAILED = "FAILED"  # declined
-    REVERSED = "REVERSED"  # authorisation voided before capture
-    REFUNDED = "REFUNDED"
-    PART_REFUNDED = "PART_REFUNDED"
-
-    @property
-    def is_final(self) -> bool:
-        return self in {
-            PaymentState.SETTLED,
-            PaymentState.FAILED,
-            PaymentState.REVERSED,
-            PaymentState.REFUNDED,
-            PaymentState.PART_REFUNDED,
-        }
-
-    @property
-    def may_cancel(self) -> bool:
-        """Whether an order on this attempt is safe to expire.
-
-        `PENDING` and `HELD` are not: one is a supporter part-way through their
-        bank's authentication, the other is money already reserved on their
-        card. Cancelling either takes an order away from somebody who is in the
-        middle of paying for it, or has.
-        """
-        return self in {PaymentState.UNSTARTED, PaymentState.FAILED, PaymentState.REVERSED}
+# What a checkout can be, once. Deliberately not the provider's own vocabulary:
+# a caller decides what to do next from these four words and nothing else.
+#
+#   pending    registered, no attempt yet, or an authentication in progress
+#   completed  the money has moved
+#   approved   held but not captured — two-phase only, capture is a later act
+#   failed     refused, by the issuer or the gateway
+#   expired    the session lapsed without payment
+#   refunded   returned, in full or in part
+PAYMENT_STATES = (
+    "pending",
+    "completed",
+    "approved",
+    "failed",
+    "expired",
+    "refunded",
+    "partially_refunded",
+)
 
 
 @dataclass(frozen=True, slots=True)
-class Checkout:
-    """Where to send the supporter, and what to remember them by."""
+class CheckoutSession:
+    """A hosted checkout the buyer must be sent to."""
 
-    reference: str
-    """The acquirer's own id for the attempt. Stored, polled, refunded by."""
-
-    redirect_url: str
-    """The acquirer's hosted page. We never see card details."""
-
+    session_id: str
+    url: str
+    expires_at: int | None = None  # unix seconds, as the provider reported it
     raw: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
-class Outcome:
-    """What an attempt came to."""
+class SessionStatus:
+    """What the provider says about a session, in our words.
 
-    state: PaymentState
-    paid_minor: int = 0
+    `raw` is kept because the mapping is lossy on purpose and some callers
+    need what was lost. Reconciliation is the one that matters: two provider
+    states can map to the same word here and still have to be treated
+    oppositely — see `BtIpayProvider` on order status 0 against 5.
+    """
+
+    status: str
+    paid_amount_minor: int = 0
     currency: str = "RON"
-
-    # Everything below is for reconciliation against the club's bank
-    # statement. A club treasurer matching a line on the statement to an order
-    # in the shop needs these, and they are unavailable later: the acquirer
-    # keeps them for a while, the statement forever.
-    rrn: str | None = None
-    approval_code: str | None = None
-    card_masked: str | None = None
-    card_holder: str | None = None
-    terminal_id: str | None = None
-    authorised_at: Any = None
-
     raw: dict[str, Any] = field(default_factory=dict)
 
 
 class PaymentProvider(ABC):
-    """One acquirer, holding one tenant's credentials."""
+    """One instance per `(tenant, provider)`.
+
+    Constructed from the tenant's parsed credentials; missing or malformed
+    ones raise `PaymentProviderError` at construction rather than at the
+    moment a supporter is trying to pay.
+    """
 
     key: str = "base"
-    display_name: str = "Payment provider"
-
-    #: False where the acquirer has no asynchronous callback at all, and the
-    #: only way to learn an outcome is to ask. Read by the reconciliation job.
-    supports_notifications: bool = False
+    display_name: str = "Payment Provider"
 
     @abstractmethod
-    async def start(
+    async def create_checkout_session(
         self,
         *,
         order_ref: str,
         amount_minor: int,
         currency: str,
         return_url: str,
-        description: str,
-        buyer: Buyer | None = None,
-    ) -> Checkout:
-        """Register an attempt and return where to send the supporter."""
+        metadata: dict[str, str] | None = None,
+        buyer_email: str | None = None,
+    ) -> CheckoutSession:
+        """Register a payment and return the URL to send the buyer to."""
 
     @abstractmethod
-    async def poll(self, reference: str) -> Outcome:
-        """Ask the acquirer what became of an attempt.
+    async def get_session_status(self, session_id: str) -> SessionStatus:
+        """Ask the provider what actually happened.
 
-        The only thing anywhere that is allowed to conclude that an order was
-        paid. Landing back on our return URL proves the supporter's browser
-        came back, which is not the same claim.
+        The only thing that may confirm a payment. A buyer arriving back on
+        the return URL proves they came back, and nothing else.
         """
 
-    async def refund(self, reference: str, amount_minor: int) -> dict[str, Any]:
-        raise PaymentProviderError(f"{self.display_name} cannot refund from here yet.")
+    async def refund(self, session_id: str, amount_minor: int) -> dict[str, Any]:
+        """Return money, in full or in part. Optional; the default refuses."""
+        raise PaymentProviderError(f"{self.display_name} cannot refund from the application.")
 
-    async def capture(self, reference: str, amount_minor: int) -> dict[str, Any]:
-        raise PaymentProviderError(f"{self.display_name} does not hold funds separately.")
-
-    async def void(self, reference: str) -> dict[str, Any]:
-        raise PaymentProviderError(f"{self.display_name} does not hold funds separately.")
-
-    @abstractmethod
-    async def check_credentials(self) -> CredentialCheck:
+    async def test_connection(self) -> dict[str, Any]:
         """Prove the credentials work, without taking a payment.
 
-        Exists so a club can tell a typo from a bank that has not finished
-        onboarding it, on the screen where they pasted the credentials, rather
-        than by discovering that no supporter can check out.
+        For the settings screen: a club that has just pasted a user name and a
+        password should find out immediately, not on its first sale.
         """
-
-
-@dataclass(frozen=True, slots=True)
-class Buyer:
-    """What the acquirer wants to know about the person paying.
-
-    Every field optional, and meant literally: acquirers reject an address
-    block containing `N/A` as readily as a malformed one, so a field we do not
-    have is a field we do not send.
-    """
-
-    email: str | None = None
-    phone: str | None = None
-    city: str | None = None
-    address: str | None = None
-    name: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class CredentialCheck:
-    ok: bool
-    message: str
-    sandbox: bool = True
-    raw: dict[str, Any] = field(default_factory=dict)
+        raise PaymentProviderError(f"{self.display_name} has no connection test.")

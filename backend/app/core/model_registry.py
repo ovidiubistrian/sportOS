@@ -26,6 +26,7 @@ from app.integrations import models as integrations_models
 from app.marketing import models as marketing_models
 from app.media import models as media_models
 from app.ordering import models as ordering_models
+from app.payments import models as payments_models
 from app.players import models as players_models
 from app.teams import models as teams_models
 from app.tenants import branding_models as tenants_branding_models
@@ -47,6 +48,7 @@ __all__ = [
     "marketing_models",
     "media_models",
     "ordering_models",
+    "payments_models",
     "players_models",
     "supporter_models",
     "teams_models",
