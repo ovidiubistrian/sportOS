@@ -1716,3 +1716,131 @@ export function useValidateScan(): UseMutationResult<
     },
   });
 }
+
+// --- stadium editing --------------------------------------------------------
+
+/**
+ * Everything below invalidates the whole `["ticketing"]` subtree on success.
+ *
+ * Coarse on purpose: adding a sector changes the layout, the review, the
+ * capacity totals and what the publish button will accept, and working out
+ * which of those to refetch is a correctness problem nobody should have to
+ * solve at every call site. A stadium is edited a few dozen times in its life,
+ * not a few dozen times a second.
+ */
+function useTicketingMutation<TResult, TInput>(
+  request: (api: ApiClient, input: TInput) => Promise<TResult>,
+): UseMutationResult<TResult, ApiError, TInput> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: TInput) => request(api, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["ticketing"] });
+    },
+  });
+}
+
+export function useCreateVenue(): UseMutationResult<Venue, ApiError, Record<string, unknown>> {
+  return useTicketingMutation((api, input) => api.post<Venue>("/api/v1/ticketing/venues", input));
+}
+
+export function useUpdateVenue(): UseMutationResult<
+  Venue,
+  ApiError,
+  { venueId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.patch<Venue>(`/api/v1/ticketing/venues/${input.venueId}`, input.body),
+  );
+}
+
+export function useCreateConfiguration(): UseMutationResult<
+  VenueConfiguration,
+  ApiError,
+  { venueId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.post<VenueConfiguration>(
+      `/api/v1/ticketing/venues/${input.venueId}/configurations`,
+      input.body,
+    ),
+  );
+}
+
+export function useCreateStand(): UseMutationResult<
+  { id: string },
+  ApiError,
+  { configurationId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.post<{ id: string }>(
+      `/api/v1/ticketing/configurations/${input.configurationId}/stands`,
+      input.body,
+    ),
+  );
+}
+
+export function useDeleteStand(): UseMutationResult<void, ApiError, string> {
+  return useTicketingMutation((api, standId) =>
+    api.delete<void>(`/api/v1/ticketing/stands/${standId}`),
+  );
+}
+
+export function useCreateSection(): UseMutationResult<
+  { id: string },
+  ApiError,
+  { standId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.post<{ id: string }>(`/api/v1/ticketing/stands/${input.standId}/sections`, input.body),
+  );
+}
+
+export function useDeleteSection(): UseMutationResult<void, ApiError, string> {
+  return useTicketingMutation((api, sectionId) =>
+    api.delete<void>(`/api/v1/ticketing/sections/${sectionId}`),
+  );
+}
+
+export function useCreatePriceZone(): UseMutationResult<
+  { id: string },
+  ApiError,
+  { configurationId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.post<{ id: string }>(
+      `/api/v1/ticketing/configurations/${input.configurationId}/price-zones`,
+      input.body,
+    ),
+  );
+}
+
+export function useCreateGate(): UseMutationResult<
+  { id: string },
+  ApiError,
+  { configurationId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.post<{ id: string }>(
+      `/api/v1/ticketing/configurations/${input.configurationId}/gates`,
+      input.body,
+    ),
+  );
+}
+
+export function useUpdateGate(): UseMutationResult<
+  { id: string },
+  ApiError,
+  { gateId: string; body: Record<string, unknown> }
+> {
+  return useTicketingMutation((api, input) =>
+    api.put<{ id: string }>(`/api/v1/ticketing/gates/${input.gateId}`, input.body),
+  );
+}
+
+export function useDeleteGate(): UseMutationResult<void, ApiError, string> {
+  return useTicketingMutation((api, gateId) =>
+    api.delete<void>(`/api/v1/ticketing/gates/${gateId}`),
+  );
+}

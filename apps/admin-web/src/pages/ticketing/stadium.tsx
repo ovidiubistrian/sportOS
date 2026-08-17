@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useI18n } from "../../app/locale";
 import { useSession } from "../../app/session";
+import { StadiumBuilder } from "./stadium-builder";
 import { StadiumMap } from "./stadium-map";
 
 /**
@@ -126,9 +127,11 @@ export function StadiumPage() {
           title={t("ticketing", "stadiumTitle")}
           description={t("ticketing", "stadiumDescription")}
         />
-        <EmptyState
-          title={t("ticketing", "noStadium")}
-          description={t("ticketing", "noStadiumHint")}
+        <StadiumBuilder
+          clubId={club.id}
+          editable
+          onVenueCreated={setVenueId}
+          onConfigurationCreated={setConfigId}
         />
       </div>
     );
@@ -221,6 +224,16 @@ export function StadiumPage() {
         </Card>
 
         <div className="space-y-4">
+          <StadiumBuilder
+            clubId={club.id}
+            venueId={venueId}
+            configurationId={configId}
+            layout={layout.data}
+            editable={Boolean(isDraft)}
+            onVenueCreated={setVenueId}
+            onConfigurationCreated={setConfigId}
+          />
+
           {review.isLoading ? (
             <Skeleton className="h-64" />
           ) : review.data ? (
