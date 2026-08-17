@@ -158,13 +158,22 @@
       "username": "service-account-footbola-registration",
       "enabled": true,
       "serviceAccountClientId": "footbola-registration",
-      "clientRoles": { "realm-management": ["manage-users"] }
+      "clientRoles": {
+        "realm-management": [
+          "manage-users"
+        ]
+      }
     },
     {
       "username": "service-account-footbola-domains",
       "enabled": true,
       "serviceAccountClientId": "footbola-domains",
-      "clientRoles": { "realm-management": ["view-clients", "manage-clients"] }
+      "clientRoles": {
+        "realm-management": [
+          "view-clients",
+          "manage-clients"
+        ]
+      }
     },
     {
       "id": "0192a000-0000-7000-8000-000000000001",
@@ -259,5 +268,149 @@
   },
   "clientScopeMappings": {},
   "registrationEmailAsUsername": true,
-  "rememberMe": true
+  "rememberMe": true,
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "otpPolicyLookAheadWindow": 1,
+  "otpSupportedApplications": [
+    "totpAppFreeOTPName",
+    "totpAppGoogleName",
+    "totpAppMicrosoftAuthenticatorName"
+  ],
+  "attributes": {
+    "acr.loa.map": "{\"1\": 1, \"2\": 2}"
+  },
+  "requiredActions": [
+    {
+      "alias": "CONFIGURE_TOTP",
+      "name": "Configure OTP",
+      "providerId": "CONFIGURE_TOTP",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 10,
+      "config": {}
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "browser-stepup",
+      "description": "Browser sign-in, with a one-time code when a client asks for level 2",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-cookie"
+        },
+        {
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "identity-provider-redirector"
+        },
+        {
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "flowAlias": "browser-stepup-forms"
+        }
+      ]
+    },
+    {
+      "alias": "browser-stepup-forms",
+      "description": "Password first, then a code only if level 2 was asked for",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "flowAlias": "browser-stepup-password"
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "flowAlias": "browser-stepup-otp"
+        }
+      ]
+    },
+    {
+      "alias": "browser-stepup-password",
+      "description": "Level 1: who are you",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-level-of-authentication",
+          "authenticatorConfig": "loa-level-1"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-username-password-form"
+        }
+      ]
+    },
+    {
+      "alias": "browser-stepup-otp",
+      "description": "Level 2: prove it again, with something that is not a password",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-level-of-authentication",
+          "authenticatorConfig": "loa-level-2"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-otp-form"
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "loa-level-1",
+      "config": {
+        "loa-condition-level": "1",
+        "loa-max-age": "36000"
+      }
+    },
+    {
+      "alias": "loa-level-2",
+      "config": {
+        "loa-condition-level": "2",
+        "loa-max-age": "900"
+      }
+    }
+  ],
+  "browserFlow": "browser-stepup"
 }

@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+from app.core.config import settings
 from app.core.errors import TenantContextMissing
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -31,11 +32,27 @@ class Principal:
     is_platform_user: bool = False
     auth_time: datetime | None = None
     amr: frozenset[str] = field(default_factory=frozenset)
+    # The level the identity provider says this session reached.
+    acr: str | None = None
     impersonated_by: UUID | None = None
 
     @property
     def has_second_factor(self) -> bool:
-        return bool(self.amr & {"otp", "mfa", "hwk", "swk", "webauthn"})
+        """Whether this session was proved with more than a password.
+
+        Two claims, because two vocabularies. `amr` names the methods used and
+        is what the OIDC specification offers for this; Keycloak does not emit
+        it at all without a custom mapper, and expresses the same fact as `acr`
+        — a level, mapped in the realm to a step in the authentication flow.
+
+        Reading only `amr`, as this did, meant the check could never pass
+        against Keycloak: every sensitive action answered "prove yourself
+        again" to somebody who already had, with no way to satisfy it. Reading
+        only `acr` would bind us to one identity provider's conventions.
+        """
+        if self.amr & {"otp", "mfa", "hwk", "swk", "webauthn"}:
+            return True
+        return self.acr is not None and self.acr in settings.step_up_acr_values
 
 
 @dataclass(frozen=True, slots=True)

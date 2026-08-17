@@ -119,6 +119,13 @@ class Settings(BaseSettings):
     # match what the merchant registered, so this is not merely cosmetic.
     api_public_url: str = "http://api.footbola.localhost"
 
+    # Which `acr` values count as a second factor. Keycloak maps these to
+    # steps in its authentication flow — the realm's `acr.loa.map` says which
+    # level demands a one-time code, and this says which levels we accept as
+    # having supplied one. A list because a realm may define more than one
+    # level above the password, and all of them are stronger than none.
+    step_up_acr_values: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["2"])
+
     permission_cache_seconds: int = 60
     entitlement_cache_seconds: int = 300
 
@@ -200,7 +207,9 @@ class Settings(BaseSettings):
 
     seed_demo_data: bool = True
 
-    @field_validator("cors_origins", "oidc_allowed_clients", mode="before")
+    @field_validator(
+        "cors_origins", "oidc_allowed_clients", "step_up_acr_values", mode="before"
+    )
     @classmethod
     def _split_csv(cls, value: object) -> object:
         """A comma-separated list, or a JSON array.

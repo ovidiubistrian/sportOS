@@ -108,6 +108,7 @@ async def get_principal(
         is_platform_user=is_platform,
         auth_time=claims.auth_time,
         amr=claims.amr,
+        acr=claims.acr,
     )
 
 

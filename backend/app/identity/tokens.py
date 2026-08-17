@@ -34,6 +34,9 @@ class TokenClaims:
     authorised_party: str | None
     auth_time: datetime | None
     amr: frozenset[str]
+    # Keycloak's answer to "how hard did they prove it". A level, not a list of
+    # methods — see `Principal.has_second_factor` for why both are read.
+    acr: str | None
     raw: dict[str, Any]
 
 
@@ -143,5 +146,6 @@ async def verify_access_token(token: str) -> TokenClaims:
             datetime.fromtimestamp(int(auth_time_raw), tz=UTC) if auth_time_raw else None
         ),
         amr=frozenset(claims.get("amr", []) or []),
+        acr=(str(claims["acr"]) if claims.get("acr") is not None else None),
         raw=claims,
     )
