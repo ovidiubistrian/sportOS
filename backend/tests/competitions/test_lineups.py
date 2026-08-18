@@ -8,9 +8,9 @@ own work, and these are the rules protecting it.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import select
@@ -18,7 +18,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool
 
 from app.competitions.models import (
+    Competition,
     CompetitionSeason,
+    Country,
     DirectoryClub,
     Match,
     MatchLineup,
@@ -26,7 +28,6 @@ from app.competitions.models import (
 )
 from app.core import model_registry  # noqa: F401
 from app.core.config import settings
-from app.tenants.models import Club
 
 pytestmark = pytest.mark.competitions
 
@@ -48,31 +49,62 @@ async def db() -> AsyncIterator[AsyncSession]:
 
 
 async def _fixture_with_sheet(db: AsyncSession, demo: dict[str, Any]):
-    """A match this club is playing, with a provider team sheet already on it."""
-    club = await db.scalar(select(Club).where(Club.id == UUID(demo["club_id"])))
-    assert club is not None and club.directory_club_id, "the demo club needs a directory entry"
+    """A fixture between two clubs, with a provider team sheet on the home side.
 
-    home = await db.scalar(
-        select(DirectoryClub).where(DirectoryClub.id == club.directory_club_id)
-    )
-    opponent = DirectoryClub(
-        name=f"Opponent {uuid4().hex[:6]}",
-        short_name="OPP",
-        slug=f"opp-{uuid4().hex[:8]}",
-        country_id=home.country_id,
-    )
-    db.add(opponent)
+    Builds both directory clubs itself rather than reaching for the demo club's
+    own entry. What is under test is a set of database constraints on the team
+    sheet, and they hold for any match — so depending on whether a particular
+    club happens to be linked to the league directory is a dependency on state
+    the suite does not own. It passed locally and failed in CI for exactly that
+    reason.
+    """
+    sides = []
+    for label in ("Home", "Away"):
+        club = DirectoryClub(
+            name=f"{label} {uuid4().hex[:6]}",
+            short_name=label[:3].upper(),
+            slug=f"{label.lower()}-{uuid4().hex[:8]}",
+            # `country_id` is left unset: it is nullable and, across the 1,900
+            # clubs the provider has supplied, never populated. Requiring it
+            # here would be inventing a precondition the real data does not
+            # have.
+        )
+        db.add(club)
+        sides.append(club)
     await db.flush()
 
-    # Any season will do — what is under test is the team sheet, not the
-    # competition it hangs from.
-    season = await db.scalar(select(CompetitionSeason).limit(1))
-    assert season is not None, "the demo database needs at least one season"
+    # The season is built here rather than borrowed. Nothing in the seeds
+    # creates one — the rows on a developer's machine come from having run a
+    # provider sync — so a test that picked "any existing season" passed
+    # locally and failed on a fresh database. Twice, in the same way.
+    country = await db.scalar(select(Country).limit(1))
+    assert country is not None, "the reference seed provides countries"
+
+    competition = Competition(
+        key=f"test-{uuid4().hex[:8]}",
+        name="Test Competition",
+        format="LEAGUE",
+        scope="DOMESTIC_LEAGUE",
+        # A domestic league has a tier and a cup does not; the database says so.
+        tier=2,
+        country_id=country.id,
+    )
+    db.add(competition)
+    await db.flush()
+
+    season = CompetitionSeason(
+        competition_id=competition.id,
+        name="2026/27",
+        start_date=date(2026, 7, 1),
+        end_date=date(2027, 6, 30),
+    )
+    db.add(season)
+    await db.flush()
 
     match = Match(
         competition_season_id=season.id,
-        home_club_id=club.directory_club_id,
-        away_club_id=opponent.id,
+        home_club_id=sides[0].id,
+        away_club_id=sides[1].id,
         kickoff_at=datetime.now(UTC) + timedelta(days=3),
         status="SCHEDULED",
         source="API_FOOTBALL",
