@@ -8,8 +8,8 @@ match it is playing in, and nothing else.
 
 from __future__ import annotations
 
-from datetime import date, datetime
-from typing import Annotated
+from datetime import UTC, date, datetime
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -26,6 +26,8 @@ from app.competitions.models import (
     CompetitionSeason,
     DirectoryClub,
     Match,
+    MatchLineup,
+    MatchLineupPlayer,
 )
 from app.competitions.standings import compute_table
 from app.core.context import RequestContext
@@ -734,3 +736,153 @@ async def table(
         )
         for index, row in enumerate(rows)
     ]
+
+
+class LineupSlot(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=160)
+    # "row:column" from the goalkeeper out, the provider's own format. Null
+    # puts the player back on the unplaced list without removing them.
+    grid: str | None = Field(default=None, max_length=8)
+
+
+class LineupArrangement(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    formation: str | None = Field(default=None, max_length=16)
+    positions: list[LineupSlot] = Field(default_factory=list)
+
+
+class LineupOut(BaseModel):
+    side: str
+    formation: str | None
+    coach_name: str | None
+    source: str
+    starters: list[dict[str, Any]]
+    substitutes: list[dict[str, Any]]
+
+
+def _lineup_view(lineup: MatchLineup, players: list[MatchLineupPlayer]) -> LineupOut:
+    def shape(p: MatchLineupPlayer) -> dict[str, Any]:
+        return {
+            "name": p.name,
+            "shirt_number": p.shirt_number,
+            "position": p.position,
+            "grid": p.grid,
+        }
+
+    return LineupOut(
+        side=lineup.side,
+        formation=lineup.formation,
+        coach_name=lineup.coach_name,
+        source=lineup.source,
+        starters=[shape(p) for p in players if p.is_starter],
+        substitutes=[shape(p) for p in players if not p.is_starter],
+    )
+
+
+async def _match_this_club_plays(db: Db, ctx: RequestContext, match_id: UUID, club_id: UUID):
+    match = await db.get(Match, match_id)
+    if match is None:
+        raise NotFound(object_type="match", object_id=str(match_id))
+
+    directory = await _directory_entry(db, ctx, club_id)
+    if directory.id not in (match.home_club_id, match.away_club_id):
+        raise NotFound(object_type="match", object_id=str(match_id))
+    return match
+
+
+@router.get(
+    "/matches/{match_id}/lineups",
+    response_model=list[LineupOut],
+    summary="Both team sheets for a fixture",
+)
+async def read_lineups(
+    match_id: UUID,
+    club_id: UUID,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(READ))],
+) -> list[LineupOut]:
+    await _match_this_club_plays(db, ctx, match_id, club_id)
+
+    out: list[LineupOut] = []
+    for lineup in await db.scalars(
+        select(MatchLineup).where(MatchLineup.match_id == match_id).order_by(MatchLineup.side)
+    ):
+        players = list(
+            await db.scalars(
+                select(MatchLineupPlayer)
+                .where(MatchLineupPlayer.lineup_id == lineup.id)
+                .order_by(MatchLineupPlayer.display_order)
+            )
+        )
+        out.append(_lineup_view(lineup, players))
+    return out
+
+
+@router.put(
+    "/matches/{match_id}/lineups/{side}",
+    response_model=LineupOut,
+    summary="Arrange one side on the pitch",
+)
+async def arrange_lineup(
+    match_id: UUID,
+    side: Literal["HOME", "AWAY"],
+    payload: LineupArrangement,
+    club_id: UUID,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+) -> LineupOut:
+    """Set the formation and where each starter stands.
+
+    **Allowed on a provider fixture, unlike editing the fixture itself.** A
+    match from the league feed is kept in step by the sync and an edit to its
+    score would survive until the next run — but the arrangement is precisely
+    what the provider does *not* supply for most leagues, so it is the club's
+    to set and the sync is written to preserve it.
+
+    Names are matched against the sheet rather than trusted: a position can
+    only be given to somebody the provider listed, so this cannot be used to
+    invent a player.
+    """
+    await _match_this_club_plays(db, ctx, match_id, club_id)
+
+    lineup = await db.scalar(
+        select(MatchLineup).where(MatchLineup.match_id == match_id, MatchLineup.side == side)
+    )
+    if lineup is None:
+        raise NotFound(
+            "There is no team sheet for that side yet. "
+            "It arrives from the league feed about an hour before kick-off."
+        )
+
+    players = list(
+        await db.scalars(
+            select(MatchLineupPlayer).where(MatchLineupPlayer.lineup_id == lineup.id)
+        )
+    )
+    by_name = {p.name.casefold(): p for p in players}
+
+    wanted = {slot.name.casefold(): slot.grid for slot in payload.positions}
+    unknown = sorted(name for name in wanted if name not in by_name)
+    if unknown:
+        raise ValidationFailed(
+            "Those names are not on this team sheet.", field="positions", names=unknown
+        )
+
+    # Cleared first, so a player moved off the pitch does not keep their old
+    # square — and so two arrangements cannot collide on the unique index.
+    for player in players:
+        player.grid = None
+    await db.flush()
+
+    for name, grid in wanted.items():
+        by_name[name].grid = grid
+
+    lineup.formation = payload.formation
+    lineup.source = "CLUB"
+    lineup.arranged_at = datetime.now(UTC)
+    await db.flush()
+
+    return _lineup_view(lineup, sorted(players, key=lambda p: p.display_order))

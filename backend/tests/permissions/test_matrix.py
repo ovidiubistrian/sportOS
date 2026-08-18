@@ -183,6 +183,12 @@ MATRIX: dict[tuple[str, str], dict[str, int]] = {
 
 # Routes intentionally excluded from the matrix, with the reason.
 EXEMPT = {
+    # Team sheets need a real fixture the club is playing in, and the
+    # arrangement needs a sheet the provider has already published — so both
+    # are exercised as a sequence in tests/competitions/test_lineups.py rather
+    # than as bare probes.
+    ("GET", "/api/v1/matches/{match_id}/lineups"),
+    ("PUT", "/api/v1/matches/{match_id}/lineups/{side}"),
     # Buying a ticket is unauthenticated and Host-scoped, like the rest of
     # the public API — a supporter must not need an account to get in. The
     # seat hold, the ten-minute expiry and what the map does *not* reveal
