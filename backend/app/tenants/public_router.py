@@ -79,6 +79,10 @@ class BrandingOut(BaseModel):
     # Whether this club can take a card at all. The shop asks before offering
     # one: a button that answers "not available here" is worse than no button.
     accepts_cards: bool = False
+    # How this club wants a team sheet shown: a list of names, or the eleven
+    # arranged on a pitch. Defaults to the list, which is what the provider's
+    # data supports for every league — see `club_branding.lineup_display`.
+    lineup_display: str = "LIST"
     announcement: str | None = None
     tickets_url: str | None = None
     tickets_label: str | None = None
@@ -329,6 +333,7 @@ async def get_site(
             hero_alt=_asset_alt(images, branding.hero_media_id if branding else None),
             hero_focus=_asset_focus(images, branding.hero_media_id if branding else None),
             accepts_cards=accepts_cards,
+            lineup_display=branding.lineup_display if branding else "LIST",
             announcement=(
                 branding.announcement_text
                 if branding and branding.announcement_is_active

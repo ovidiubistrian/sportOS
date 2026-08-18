@@ -73,6 +73,7 @@ async def _maintenance_loop(stop: asyncio.Event) -> None:
         reconcile_card_payments,
         release_abandoned_orders,
     )
+    from app.integrations.scheduler import tick as sync_league_feeds
     from app.ticketing.maintenance import expire_cart_holds, release_expired_allocations
 
     jobs = [
@@ -97,6 +98,15 @@ async def _maintenance_loop(stop: asyncio.Event) -> None:
         PeriodicJob(
             "release_ticket_allocations", timedelta(minutes=15), release_expired_allocations
         ),
+        # The league feed. `tick` decides for itself whether anything is due —
+        # nothing between matches, every fifteen minutes in the hour before
+        # kick-off, every minute while a match is on — so it is asked often and
+        # answers cheaply from our own calendar rather than the provider's.
+        #
+        # It was written, tested and never scheduled: the module had an entry
+        # point and nothing called it, so no club's score, events or team
+        # sheets ever updated on their own.
+        PeriodicJob("league_feed_sync", timedelta(seconds=30), sync_league_feeds),
         PeriodicJob("outbox_cleanup", timedelta(hours=6), cleanup_published),
         PeriodicJob("audit_partitions", timedelta(hours=12), ensure_audit_partitions),
     ]
