@@ -9,6 +9,7 @@ import { MatchTimeline } from "@/templates/events";
 import { ClubRecord } from "@/templates/history";
 import { Newsletter } from "@/templates/newsletter";
 import { OpeningHero } from "@/templates/opening";
+import { Lineups } from "@/templates/lineups";
 import { FeaturedMatch, LeagueTable } from "@/templates/matchday";
 
 /**
@@ -61,6 +62,10 @@ export default async function HomePage() {
         }}
       />
       <FeaturedMatch site={site} match={matches[0]} i18n={i18n} locale={locale} />
+      {/* Under the scoreboard, and only once a sheet exists — which is an hour
+          before kick-off at the earliest, and for some leagues not until after
+          the match. It renders nothing the rest of the time. */}
+      {matches[0] && <Lineups match={matches[0]} i18n={i18n} />}
       {matches[0] && (
         <MatchTimeline
           match={matches[0]}

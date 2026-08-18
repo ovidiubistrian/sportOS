@@ -69,11 +69,11 @@ async def _maintenance_loop(stop: asyncio.Event) -> None:
     from app.audit.maintenance import ensure_audit_partitions
     from app.cms.scheduler import publish_due_content
     from app.events.relay import cleanup_published
+    from app.integrations.scheduler import tick as sync_league_feeds
     from app.payments.maintenance import (
         reconcile_card_payments,
         release_abandoned_orders,
     )
-    from app.integrations.scheduler import tick as sync_league_feeds
     from app.ticketing.maintenance import expire_cart_holds, release_expired_allocations
 
     jobs = [

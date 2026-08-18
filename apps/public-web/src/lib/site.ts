@@ -37,6 +37,8 @@ export interface Branding {
   /** Whether this club can take a card. Decided server-side from whether a
    *  gateway is configured and switched on. */
   accepts_cards: boolean;
+  /** LIST or PITCH — how this club wants a team sheet shown. */
+  lineup_display: string;
   announcement: string | null;
   tickets_url: string | null;
   tickets_label: string | null;
@@ -221,6 +223,21 @@ export interface MatchEvent {
   is_home: boolean;
 }
 
+export interface LineupPlayer {
+  name: string;
+  shirt_number: number | null;
+  position: string | null;
+  /** "row:column" from the goalkeeper out, when somebody has placed them. */
+  grid: string | null;
+}
+
+export interface MatchLineup {
+  formation: string | null;
+  coach_name: string | null;
+  starters: LineupPlayer[];
+  substitutes: LineupPlayer[];
+}
+
 export interface PublicMatch {
   id: string;
   competition: string;
@@ -233,6 +250,14 @@ export interface PublicMatch {
   kickoff_is_confirmed: boolean;
   minute: number | null;
   events: MatchEvent[];
+  /**
+   * Absent until the provider publishes a team sheet, about an hour before
+   * kick-off — and for a league it does not cover fully, sometimes not until
+   * after the match. `formation` and every `grid` are null in that case, which
+   * is why the list is the default presentation and the pitch is opt-in.
+   */
+  home_lineup: MatchLineup | null;
+  away_lineup: MatchLineup | null;
   venue_name: string | null;
   status: string;
   home_score: number | null;

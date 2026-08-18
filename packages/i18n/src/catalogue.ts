@@ -1073,6 +1073,9 @@ export const en = {
     ticketsRowSeat: "Row/seat",
     ticketsGate: "Enter through",
     ticketsKeepSafe: "Show this code at the turnstile. A screenshot works.",
+    lineupTitle: "Team sheets",
+    lineupSubstitutes: "Substitutes",
+    lineupCoach: "Coach",
     language: "Language",
     readMore: "Read more",
     translationMissing:

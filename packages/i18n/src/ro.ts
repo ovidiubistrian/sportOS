@@ -1065,6 +1065,9 @@ export const ro: Catalogue = {
     ticketsRowSeat: "Rând/loc",
     ticketsGate: "Intri pe",
     ticketsKeepSafe: "Arată codul la turnichet. O captură de ecran e suficientă.",
+    lineupTitle: "Echipele de start",
+    lineupSubstitutes: "Rezerve",
+    lineupCoach: "Antrenor",
     language: "Limba",
     readMore: "Citește mai mult",
     translationMissing:
