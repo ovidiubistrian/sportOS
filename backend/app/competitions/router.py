@@ -874,11 +874,16 @@ async def arrange_lineup(
     lineup = await db.scalar(
         select(MatchLineup).where(MatchLineup.match_id == match_id, MatchLineup.side == side)
     )
+
+    # No sheet at all means the feed has never carried this fixture — a
+    # friendly, a youth match, anything the club arranged itself. The club then
+    # supplies the names as well as the shape, which is the only way those
+    # matches could ever have a lineup.
+    building_from_scratch = lineup is None
     if lineup is None:
-        raise NotFound(
-            "There is no team sheet for that side yet. "
-            "It arrives from the league feed about an hour before kick-off."
-        )
+        lineup = MatchLineup(match_id=match_id, side=side, source="CLUB")
+        db.add(lineup)
+        await db.flush()
 
     players = list(
         await db.scalars(
@@ -888,11 +893,35 @@ async def arrange_lineup(
     by_name = {p.name.casefold(): p for p in players}
 
     wanted = {slot.name.casefold(): slot.grid for slot in payload.positions}
-    unknown = sorted(name for name in wanted if name not in by_name)
-    if unknown:
-        raise ValidationFailed(
-            "Those names are not on this team sheet.", field="positions", names=unknown
-        )
+
+    if building_from_scratch or not players:
+        # Names given here become the sheet. Ordered as they arrived, so the
+        # list reads the way whoever typed it expects.
+        for order, slot in enumerate(payload.positions):
+            key = slot.name.casefold()
+            if key in by_name:
+                continue
+            player = MatchLineupPlayer(
+                lineup_id=lineup.id,
+                name=slot.name.strip(),
+                is_starter=True,
+                display_order=order,
+            )
+            db.add(player)
+            by_name[key] = player
+        await db.flush()
+        players = list(by_name.values())
+    else:
+        # A sheet the provider published is not the club's to add to. Placing
+        # somebody it never listed would put a player on the pitch who was not
+        # selected, which is worse than refusing a typo.
+        unknown = sorted(name for name in wanted if name not in by_name)
+        if unknown:
+            raise ValidationFailed(
+                "Those names are not on this team sheet.",
+                field="positions",
+                names=unknown,
+            )
 
     # Cleared first, so a player moved off the pitch does not keep their old
     # square — and so two arrangements cannot collide on the unique index.

@@ -5,7 +5,16 @@ import {
   type LineupSheet,
   type LineupSheetPlayer,
 } from "@footbola/api-client";
-import { Badge, Button, Card, Segmented, Select, Skeleton, useToast } from "@footbola/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Input,
+  Segmented,
+  Select,
+  Skeleton,
+  useToast,
+} from "@footbola/ui";
 import { useEffect, useMemo, useState } from "react";
 
 import { useI18n } from "../../app/locale";
@@ -78,6 +87,10 @@ export function LineupEditor({
   const [formation, setFormation] = useState("4-4-2");
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [holding, setHolding] = useState<string | null>(null);
+  // Names typed in for a fixture the league feed never carried — a friendly, a
+  // youth match. They join the bench and are saved with the arrangement.
+  const [added, setAdded] = useState<string[]>([]);
+  const [typing, setTyping] = useState("");
 
   const sheet: LineupSheet | undefined = sheets.data?.find((row) => row.side === side);
 
@@ -92,6 +105,7 @@ export function LineupEditor({
     }
     setPlaced(next);
     setHolding(null);
+    setAdded([]);
   }, [sheet]);
 
   const rows = useMemo(() => slotsFor(formation), [formation]);
@@ -108,7 +122,11 @@ export function LineupEditor({
   }, [placed, validSlots]);
 
   const taken = new Set(Object.values(effective));
-  const bench = (sheet?.starters ?? []).filter((player) => !taken.has(player.name));
+  const roster: LineupSheetPlayer[] = [
+    ...(sheet?.starters ?? []),
+    ...added.map((name) => ({ name, shirt_number: null, position: null, grid: null })),
+  ];
+  const bench = roster.filter((player) => !taken.has(player.name));
 
   const place = (slot: string) => {
     if (!holding) {
@@ -261,6 +279,33 @@ export function LineupEditor({
                 </li>
               )}
             </ul>
+
+            {/* Only when the feed has given nothing. A provider sheet is not
+                the club's to add to — placing somebody it never listed would
+                put an unselected player on the pitch. */}
+            {(sheet?.starters.length ?? 0) === 0 && (
+              <form
+                className="mt-3 flex gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const name = typing.trim();
+                  if (!name || roster.some((p) => p.name === name)) return;
+                  setAdded((current) => [...current, name]);
+                  setTyping("");
+                }}
+              >
+                <Input
+                  value={typing}
+                  onChange={(event) => setTyping(event.target.value)}
+                  placeholder={t("matchday", "addPlayer")}
+                  aria-label={t("matchday", "addPlayer")}
+                  className="min-w-0 flex-1"
+                />
+                <Button type="submit" variant="secondary" size="sm">
+                  +
+                </Button>
+              </form>
+            )}
 
             {sheet.source === "CLUB" && (
               <Badge tone="outline" size="sm" className="mt-3">

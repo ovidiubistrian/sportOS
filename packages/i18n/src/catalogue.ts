@@ -816,6 +816,7 @@ export const en = {
     lineupTitle: "Starting eleven",
     lineupWaiting:
       "The team sheet arrives from the league feed about an hour before kick-off — and later than that for smaller divisions.",
+    addPlayer: "Add a player",
     lineupSaved: "Lineup saved.",
     tapAPlayer: "Tap a player, then a position",
     tapASlot: "Now tap where they play",

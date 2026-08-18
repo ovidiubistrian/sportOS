@@ -812,6 +812,7 @@ export const ro: Catalogue = {
     lineupTitle: "Echipa de start",
     lineupWaiting:
       "Foaia de echipă vine din fluxul ligii cu aproximativ o oră înainte de start — și mai târziu la eșaloanele mici.",
+    addPlayer: "Adaugă un jucător",
     lineupSaved: "Echipa a fost salvată.",
     tapAPlayer: "Apasă un jucător, apoi o poziție",
     tapASlot: "Acum apasă unde joacă",
