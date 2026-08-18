@@ -235,7 +235,10 @@ function FixtureDialog({
         competition_season_id: seasonId,
         opponent_club_id: opponent.id,
         at_home: atHome === "HOME",
-        round_kind: isLeague ? "MATCHDAY" : "ROUND",
+        // "STAGE" is the vocabulary a cup or a friendly uses; a league has
+        // numbered matchdays. "ROUND" was never a valid kind, so every
+        // non-league fixture was a 422 the form could not explain.
+        round_kind: isLeague ? "MATCHDAY" : "STAGE",
         round_number: roundNumber ? Number(roundNumber) : null,
         kickoff_at: fromLocalInput(kickoff),
         kickoff_is_confirmed: confirmed,
