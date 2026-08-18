@@ -39,6 +39,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -415,3 +416,108 @@ class ClubSeasonRecord(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
     # Kept because finishing third can mean promoted or nothing at all
     # depending on the division, and only the competition knows which.
     outcome: Mapped[str | None] = mapped_column(String(120))
+
+
+# Which half of the fixture a lineup belongs to. Cheaper and clearer than
+# repeating the club id, which the match already carries on both sides.
+LINEUP_SIDES = ("HOME", "AWAY")
+
+# Where the arrangement came from. The provider supplies names and shirt
+# numbers for every league; it supplies *positions* only for the ones it covers
+# fully, which does not include the Romanian second division. So a club that
+# wants a pitch rather than a list arranges it itself, and this records that it
+# did — a later re-sync must not overwrite somebody's work with a flat list.
+LINEUP_SOURCES = ("PROVIDER", "CLUB")
+
+# Goalkeeper, defender, midfielder, forward. The provider's own vocabulary,
+# kept as-is so its data drops straight in where it does supply positions.
+LINEUP_POSITIONS = ("G", "D", "M", "F")
+
+
+class MatchLineup(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
+    """One team's selection for one match.
+
+    Global, for the reason the module docstring gives and `MatchEvent` repeats:
+    a match is one event, and two clubs keeping their own copy of who started
+    would let the same eleven disagree with itself.
+
+    `formation` is nullable on purpose. The provider gives one for the leagues
+    it covers fully and `null` everywhere else, and a lineup with names but no
+    shape is still worth showing as a list — inventing "4-4-2" to fill the
+    column would put a formation on the club's website that nobody chose.
+    """
+
+    __tablename__ = "match_lineup"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["match_id"], ["match.id"], name="fk_lineup_match", ondelete="CASCADE"
+        ),
+        UniqueConstraint("match_id", "side", name="uq_lineup_match_side"),
+        CheckConstraint("side IN " + str(LINEUP_SIDES), name="lineup_side_valid"),
+        CheckConstraint("source IN " + str(LINEUP_SOURCES), name="lineup_source_valid"),
+    )
+
+    match_id: Mapped[UUID] = mapped_column(PgUUID(as_uuid=True))
+    side: Mapped[str] = mapped_column(String(4))
+
+    formation: Mapped[str | None] = mapped_column(String(16))
+    coach_name: Mapped[str | None] = mapped_column(String(160))
+
+    source: Mapped[str] = mapped_column(String(8), default="PROVIDER")
+    # Set when a club arranged the pitch by hand. The sync reads this and
+    # refreshes only what it owns, so a re-run an hour before kick-off adds a
+    # late substitute without flattening the shape somebody set this morning.
+    arranged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MatchLineupPlayer(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
+    """One name on one team sheet.
+
+    Names are text, not a foreign key to `player`, for exactly the reason
+    `MatchEvent` gives: most of these are the opponent's players, who this
+    platform has no row for and never will. `player_id` is filled in only when
+    a name matches the club's own squad, and is a convenience — nothing depends
+    on it.
+    """
+
+    __tablename__ = "match_lineup_player"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["lineup_id"],
+            ["match_lineup.id"],
+            name="fk_lineup_player_lineup",
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "position IS NULL OR position IN " + str(LINEUP_POSITIONS),
+            name="lineup_player_position_valid",
+        ),
+        # Two players cannot stand on the same spot. Partial, because every
+        # substitute has a null grid and nulls must not collide.
+        Index(
+            "uq_lineup_player_grid",
+            "lineup_id",
+            "grid",
+            unique=True,
+            postgresql_where=text("grid IS NOT NULL"),
+        ),
+        Index("ix_lineup_player_lineup", "lineup_id", "is_starter"),
+    )
+
+    lineup_id: Mapped[UUID] = mapped_column(PgUUID(as_uuid=True))
+
+    name: Mapped[str] = mapped_column(String(160))
+    shirt_number: Mapped[int | None] = mapped_column(SmallInteger)
+    position: Mapped[str | None] = mapped_column(String(1))
+
+    # "row:column", counting from the goalkeeper out — the provider's own
+    # format, so its data drops straight in for the leagues it covers. Null for
+    # substitutes, and for a starter nobody has placed yet.
+    grid: Mapped[str | None] = mapped_column(String(8))
+
+    is_starter: Mapped[bool] = mapped_column(default=True)
+    display_order: Mapped[int] = mapped_column(SmallInteger, default=0)
+
+    # Filled when the name matches a player this club has registered. Lets the
+    # site link a starter to their profile; absent for every opponent.
+    player_id: Mapped[UUID | None] = mapped_column(PgUUID(as_uuid=True))

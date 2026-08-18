@@ -9,6 +9,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.models import Base, TenantScoped, Timestamped
 
+# How a club shows a team sheet. Not a cosmetic choice: the provider gives
+# positions only for the leagues it covers fully, so a club in a division it
+# does not cover has names and shirt numbers and nothing else. `LIST` is
+# always honest; `PITCH` is better when somebody has arranged the eleven, and
+# falls back to a list on its own when nobody has.
+LINEUP_DISPLAYS = ("LIST", "PITCH")
+
 # A closed set. Clubs choose a template; they cannot supply one, and there is
 # no mechanism for arbitrary CSS. That constraint is what lets sixty screens
 # built over two years still look like one product (doc 14 §8).
@@ -37,6 +44,10 @@ class ClubBranding(Base, Timestamped, TenantScoped):
             "template IN " + str(SITE_TEMPLATES), name="club_branding_template_valid"
         ),
         CheckConstraint(
+            "lineup_display IN " + str(LINEUP_DISPLAYS),
+            name="lineup_display_valid",
+        ),
+        CheckConstraint(
             "color_mode IN " + str(COLOR_MODES), name="club_branding_color_mode_valid"
         ),
         CheckConstraint(
@@ -59,6 +70,10 @@ class ClubBranding(Base, Timestamped, TenantScoped):
     club_id: Mapped[UUID] = mapped_column(PgUUID(as_uuid=True), primary_key=True)
 
     template: Mapped[str] = mapped_column(String(16), default="CLASSIC")
+
+    # Defaults to the list, because that is what every club can show from the
+    # provider alone. A club that arranges its eleven turns on the pitch.
+    lineup_display: Mapped[str] = mapped_column(String(8), default="LIST")
     color_mode: Mapped[str] = mapped_column(String(8), default="LIGHT")
 
     color_primary: Mapped[str] = mapped_column(String(7), default="#1F4B99")

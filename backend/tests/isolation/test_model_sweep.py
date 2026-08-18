@@ -43,6 +43,8 @@ GLOBAL_MODELS = {
     "directory_club",
     "match",
     "match_event",  # two clubs play one game; one set of goals
+    "match_lineup",  # and one team sheet per side, not one per tenant
+    "match_lineup_player",
     "club_season_record",  # a club's finishing position is public record
     # Provider mappings for the reference data above. A fixture's API-Football
     # id is a property of the fixture, which no tenant owns; keeping a copy per
