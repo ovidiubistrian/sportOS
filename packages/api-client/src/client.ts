@@ -62,6 +62,16 @@ export interface ClientOptions {
   getToken: () => string | null;
   getTenantId: () => string | null;
   onUnauthenticated?: () => void;
+  /**
+   * Called when the server rejects the tenant this client asked for.
+   *
+   * The stored tenant belongs to the *browser*, not the account, so signing in
+   * as somebody else leaves the previous one behind and every request carries
+   * it — including `/me`, which is the call that would have told us the truth.
+   * The host clears what it remembers and the request is retried once without
+   * the header.
+   */
+  onTenantRejected?: () => void;
 }
 
 type Query = Record<string, string | number | boolean | undefined | null>;
@@ -87,6 +97,8 @@ export class ApiClient {
       body?: unknown;
       form?: FormData;
       idempotencyKey?: string;
+      /** Set on the single retry after a stale tenant was cleared. */
+      retriedWithoutTenant?: boolean;
     } = {},
   ): Promise<T> {
     const headers: Record<string, string> = { Accept: "application/json" };
@@ -96,7 +108,7 @@ export class ApiClient {
 
     // The server validates this against the caller's memberships; sending it
     // is a request for a tenant, never an assertion of authority.
-    const tenantId = this.options.getTenantId();
+    const tenantId = init.retriedWithoutTenant ? null : this.options.getTenantId();
     if (tenantId) headers["X-Tenant-Id"] = tenantId;
 
     if (init.body !== undefined) headers["Content-Type"] = "application/json";
@@ -123,6 +135,15 @@ export class ApiClient {
       };
       const error = new ApiError(response.status, body);
       if (error.isAuthError) this.options.onUnauthenticated?.();
+
+      // A tenant the caller does not hold is almost always a stale value from
+      // a previous account rather than a real mistake. Forget it and try once
+      // more; a second failure is genuine and is thrown.
+      if (body.code === "TENANT_CONTEXT_MISSING" && !init.retriedWithoutTenant) {
+        this.options.onTenantRejected?.();
+        return this.request<T>(method, path, { ...init, retriedWithoutTenant: true });
+      }
+
       throw error;
     }
 

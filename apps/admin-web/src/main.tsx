@@ -123,6 +123,11 @@ function Authenticated() {
         baseUrl: import.meta.env.VITE_API_URL as string,
         getToken: () => tokenRef.current,
         getTenantId: () => getStoredTenantId(),
+        // The stored tenant is per browser, not per account. Signing in as
+        // somebody else leaves the previous one behind, and it then rides on
+        // every request — including `/me`, the one call that could have
+        // corrected it. Forget it and the client retries once without it.
+        onTenantRejected: () => clearStoredWorkspace(),
         onUnauthenticated: () => {
           // The session is gone server-side; clearing it locally keeps the UI
           // from looping on a token the API has already rejected.
