@@ -196,6 +196,18 @@ jobs:
             docker compose -f docker-compose.prod.yml run --rm api \
               .venv/bin/alembic upgrade head
 
+            # Permissions and role templates are code, not data: a release
+            # that adds a permission key ships a database that has never heard
+            # of it, and every route and menu behind it is silently invisible
+            # until somebody reseeds by hand. That is exactly how the ticketing
+            # and card-payment screens shipped and stayed hidden.
+            #
+            # Idempotent, and it clears the permission cache itself, so running
+            # it on every deploy costs a second and removes a whole class of
+            # "it deployed but it is not there".
+            docker compose -f docker-compose.prod.yml run --rm api \
+              .venv/bin/python -m app.platform.seeds.reference
+
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker compose -f docker-compose.prod.yml run --rm admin-dist
 
