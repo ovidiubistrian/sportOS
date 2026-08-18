@@ -81,3 +81,26 @@ def enable_all(tables: list[str]) -> list[str]:
 
 def disable_all(tables: list[str]) -> list[str]:
     return [stmt for table in tables for stmt in disable(table)]
+
+
+def lift_force(tables: list[str]) -> list[str]:
+    """Let the table owner through the tenant policy, for one transaction.
+
+    A data migration that touches a tenant-scoped table needs this, and the
+    need is not obvious. `FORCE ROW LEVEL SECURITY` applies the policy to the
+    owner too — deliberately, so nothing bypasses isolation by accident — and
+    migrations run as that owner with no `app.tenant_id` set. The policy then
+    compares against NULL, matches no rows, and the UPDATE reports success
+    having changed nothing at all. It fails closed *and* silently, which is
+    the one combination a migration can least afford.
+
+    Lifting FORCE rather than disabling RLS keeps the policy in place for every
+    other connection. Pair with `restore_force`, and rely on PostgreSQL's
+    transactional DDL: if the migration raises in between, the FORCE returns
+    with the rollback.
+    """
+    return [f"ALTER TABLE {table} NO FORCE ROW LEVEL SECURITY" for table in tables]
+
+
+def restore_force(tables: list[str]) -> list[str]:
+    return [f"ALTER TABLE {table} FORCE ROW LEVEL SECURITY" for table in tables]

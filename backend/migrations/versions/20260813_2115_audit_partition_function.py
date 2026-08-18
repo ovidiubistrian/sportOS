@@ -57,9 +57,7 @@ $$;
 def upgrade() -> None:
     op.execute(CREATE_FUNCTION)
     op.execute("REVOKE ALL ON FUNCTION create_audit_partition(date) FROM PUBLIC")
-    op.execute(
-        "GRANT EXECUTE ON FUNCTION create_audit_partition(date) TO app_platform"
-    )
+    op.execute("GRANT EXECUTE ON FUNCTION create_audit_partition(date) TO app_platform")
 
 
 def downgrade() -> None:

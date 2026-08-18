@@ -12,7 +12,6 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "5e229cbe4f42"
 down_revision: str | None = "b17b99727013"
 branch_labels: str | Sequence[str] | None = None
@@ -25,12 +24,13 @@ def upgrade() -> None:
         "club_branding", sa.Column("announcement_text", sa.String(length=300), nullable=True)
     )
     op.add_column(
-        "club_branding", sa.Column(
+        "club_branding",
+        sa.Column(
             "announcement_is_active",
             sa.Boolean(),
             nullable=False,
             server_default=sa.text("false"),
-        )
+        ),
     )
     op.add_column(
         "club_branding", sa.Column("tickets_url", sa.String(length=500), nullable=True)

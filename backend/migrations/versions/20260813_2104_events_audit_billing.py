@@ -366,9 +366,7 @@ def upgrade() -> None:
     # by the relay process, keeps the window rolling forward.
     for statement in partition_statements(months_ahead=3, today=date(2026, 8, 1)):
         op.execute(statement)
-    op.execute(
-        "GRANT SELECT, INSERT, UPDATE, DELETE ON audit_log TO app_runtime, app_platform"
-    )
+    op.execute("GRANT SELECT, INSERT, UPDATE, DELETE ON audit_log TO app_runtime, app_platform")
 
     # --- row level security ---------------------------------------------
     for statement in enable_all(RLS_TABLES):

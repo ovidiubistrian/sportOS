@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-from app.core.rls import disable_all, enable_all
+from app.core.rls import disable_all, enable_all, lift_force, restore_force
 
 revision: str = "c4e91a7b0d38"
 down_revision: str | None = "b1d7c40a9e52"
@@ -52,9 +52,7 @@ def upgrade() -> None:
             nullable=False,
             server_default="{}",
         ),
-        sa.Column(
-            "is_live", sa.Boolean(), nullable=False, server_default=sa.false()
-        ),
+        sa.Column("is_live", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("updated_by", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column(
             "created_at",
@@ -70,14 +68,10 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name="pk_payment_credential"),
         sa.UniqueConstraint("tenant_id", "provider", name="uq_payment_credential"),
-        sa.UniqueConstraint(
-            "tenant_id", "id", name="uq_payment_credential_tenant_id_id"
-        ),
+        sa.UniqueConstraint("tenant_id", "id", name="uq_payment_credential_tenant_id_id"),
         sa.CheckConstraint("provider IN ('btipay')", name="payment_provider_known"),
     )
-    op.create_index(
-        "ix_payment_credential_tenant_id", "payment_credential", ["tenant_id"]
-    )
+    op.create_index("ix_payment_credential_tenant_id", "payment_credential", ["tenant_id"])
 
     op.create_table(
         "payment_provider_call",
@@ -117,9 +111,7 @@ def upgrade() -> None:
             server_default=sa.func.now(),
         ),
         sa.PrimaryKeyConstraint("id", name="pk_payment_provider_call"),
-        sa.UniqueConstraint(
-            "tenant_id", "id", name="uq_payment_provider_call_tenant_id_id"
-        ),
+        sa.UniqueConstraint("tenant_id", "id", name="uq_payment_provider_call_tenant_id_id"),
     )
     op.create_index(
         "ix_payment_provider_call_tenant_id", "payment_provider_call", ["tenant_id"]
@@ -145,9 +137,7 @@ def upgrade() -> None:
         sa.Column("amount_minor", sa.Integer(), nullable=False),
         sa.Column("currency", sa.String(length=3), nullable=False),
         sa.Column("settled_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column(
-            "state", sa.String(length=24), nullable=False, server_default="pending"
-        ),
+        sa.Column("state", sa.String(length=24), nullable=False, server_default="pending"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -178,29 +168,33 @@ def upgrade() -> None:
         "payment_attempt",
         ["tenant_id", "order_id", "created_at"],
     )
-    op.create_index(
-        "ix_payment_attempt_open", "payment_attempt", ["tenant_id", "settled_at"]
-    )
+    op.create_index("ix_payment_attempt_open", "payment_attempt", ["tenant_id", "settled_at"])
 
     for statement in enable_all(RLS_TABLES):
         op.execute(statement)
 
     # The order status a card payment passes through.
     op.drop_constraint("order_status_valid", "shop_order", type_="check")
-    op.create_check_constraint(
-        "order_status_valid", "shop_order", f"status IN {_NEW_STATUSES}"
-    )
+    op.create_check_constraint("order_status_valid", "shop_order", f"status IN {_NEW_STATUSES}")
 
 
 def downgrade() -> None:
     # Orders mid-payment have nowhere to go in the old vocabulary. `PENDING`
     # is where they came from and is the safe direction: an order that was
     # about to be paid becomes one nobody has paid, which is recoverable.
-    op.execute("UPDATE shop_order SET status = 'PENDING' WHERE status = 'AWAITING_PAYMENT'")
+    # `shop_order` carries FORCE ROW LEVEL SECURITY, so this UPDATE matches no
+    # rows as the migrator — and the constraint recreated just below would then
+    # reject any order still sitting in AWAITING_PAYMENT, blocking the whole
+    # downgrade. See `lift_force`.
+    for statement in lift_force(["shop_order"]):
+        op.execute(statement)
+    try:
+        op.execute("UPDATE shop_order SET status = 'PENDING' WHERE status = 'AWAITING_PAYMENT'")
+    finally:
+        for statement in restore_force(["shop_order"]):
+            op.execute(statement)
     op.drop_constraint("order_status_valid", "shop_order", type_="check")
-    op.create_check_constraint(
-        "order_status_valid", "shop_order", f"status IN {_OLD_STATUSES}"
-    )
+    op.create_check_constraint("order_status_valid", "shop_order", f"status IN {_OLD_STATUSES}")
 
     for statement in disable_all(RLS_TABLES):
         op.execute(statement)

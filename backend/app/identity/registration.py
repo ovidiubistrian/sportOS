@@ -35,7 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.authz.models import Role, RoleAssignment
 from app.core.config import settings
-from app.core.countries import currency_for
+from app.core.countries import currency_for, timezone_for
 from app.core.errors import Conflict, ValidationFailed
 from app.core.ids import new_id
 from app.core.locales import normalise, validate
@@ -222,7 +222,7 @@ async def _create_records(session: AsyncSession, signup: SignUp, subject_id: str
         default_locale=locale,
         supported_locales=supported,
         default_currency=currency,
-        timezone="UTC",
+        timezone=timezone_for(signup.country_code),
         # Not ACTIVE. The address is claimed but the account is unproven until
         # the verification email is answered — otherwise anyone could take a
         # club's name with an address they do not control.
@@ -248,7 +248,7 @@ async def _create_records(session: AsyncSession, signup: SignUp, subject_id: str
         country_code=signup.country_code.upper(),
         default_locale=locale,
         currency=currency,
-        timezone="UTC",
+        timezone=timezone_for(signup.country_code),
         status="ACTIVE",
     )
     session.add(club)

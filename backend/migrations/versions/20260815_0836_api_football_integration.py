@@ -99,9 +99,7 @@ def upgrade() -> None:
     # Autogenerate does not see CHECK changes. LIVE now carries a score, and
     # `source` needs its own constraint — without these the column exists and
     # the first live update is rejected by the database.
-    op.execute(
-        "ALTER TABLE match DROP CONSTRAINT ck_match_match_score_matches_status"
-    )
+    op.execute("ALTER TABLE match DROP CONSTRAINT ck_match_match_score_matches_status")
     op.execute(
         "ALTER TABLE match ADD CONSTRAINT ck_match_match_score_matches_status "
         "CHECK ((status IN ('FINISHED', 'AWARDED', 'LIVE')) = "

@@ -11,9 +11,9 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 from app.core.rls import disable_all, enable_all
-from sqlalchemy.dialects import postgresql
 
 revision: str = "37a0dc6e78e0"
 down_revision: str | None = "3043c5982317"

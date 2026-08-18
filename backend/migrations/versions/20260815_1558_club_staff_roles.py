@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-import sqlalchemy as sa
 from alembic import op
 
+from app.core.rls import lift_force, restore_force
 
 revision: str = "f9b44764b0f4"
 down_revision: str | None = "8a1eadb86839"
@@ -31,7 +31,19 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute("DELETE FROM team_staff WHERE role IN ('PRESS_OFFICER', 'PRESIDENT', 'DIRECTOR')")
+    # `team_staff` carries FORCE ROW LEVEL SECURITY, so as the migrator this
+    # DELETE matches nothing — and the narrower constraint recreated below
+    # would then reject the very rows it was meant to remove, blocking the
+    # downgrade. See `lift_force`.
+    for statement in lift_force(["team_staff"]):
+        op.execute(statement)
+    try:
+        op.execute(
+            "DELETE FROM team_staff WHERE role IN ('PRESS_OFFICER', 'PRESIDENT', 'DIRECTOR')"
+        )
+    finally:
+        for statement in restore_force(["team_staff"]):
+            op.execute(statement)
     op.execute("ALTER TABLE team_staff DROP CONSTRAINT ck_team_staff_team_staff_role_valid")
     op.execute(
         "ALTER TABLE team_staff ADD CONSTRAINT ck_team_staff_team_staff_role_valid "

@@ -13,7 +13,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import inspect
 
-
 revision: str = "b17b99727013"
 down_revision: str | None = "6d962b1c1340"
 branch_labels: str | Sequence[str] | None = None
@@ -43,6 +42,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     if not _has("tenant", "directory_club_id"):
         op.add_column(
-            "tenant", sa.Column("directory_club_id", sa.UUID(), autoincrement=False, nullable=True)
+            "tenant",
+            sa.Column("directory_club_id", sa.UUID(), autoincrement=False, nullable=True),
         )
     op.drop_column("club", "directory_club_id")

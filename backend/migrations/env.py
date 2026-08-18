@@ -35,8 +35,7 @@ def include_object(
     if type_ == "table" and PARTITION_CHILD.match(name):
         return False
     return not (
-        type_ == "index"
-        and PARTITION_CHILD.match(getattr(obj, "table", obj).name or "")
+        type_ == "index" and PARTITION_CHILD.match(getattr(obj, "table", obj).name or "")
     )
 
 
