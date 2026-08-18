@@ -29,6 +29,8 @@ from app.competitions.models import (
     DirectoryClub,
     Match,
     MatchEvent,
+    MatchLineup,
+    MatchLineupPlayer,
 )
 from app.competitions.standings import compute_table
 from app.core.db import platform_session, tenant_session
@@ -737,6 +739,30 @@ class PublicMatchEvent(BaseModel):
     is_home: bool
 
 
+class PublicLineupPlayer(BaseModel):
+    name: str
+    shirt_number: int | None = None
+    position: str | None = None
+    # "row:column" from the goalkeeper out, when somebody has placed them.
+    # Null for a substitute, and for a starter nobody has arranged.
+    grid: str | None = None
+
+
+class PublicLineup(BaseModel):
+    """One side's team sheet.
+
+    `formation` and every `grid` are null for a league the provider does not
+    cover fully — which is most of them below the top division. The site falls
+    back to a list in that case rather than inventing a shape; see
+    `club_branding.lineup_display`.
+    """
+
+    formation: str | None = None
+    coach_name: str | None = None
+    starters: list[PublicLineupPlayer] = Field(default_factory=list)
+    substitutes: list[PublicLineupPlayer] = Field(default_factory=list)
+
+
 class PublicMatch(BaseModel):
     id: UUID
     competition: str
@@ -753,6 +779,9 @@ class PublicMatch(BaseModel):
     # finished game reads as a live one.
     minute: int | None = None
     events: list[PublicMatchEvent] = Field(default_factory=list)
+    # Absent until the provider publishes them, about an hour before kick-off.
+    home_lineup: PublicLineup | None = None
+    away_lineup: PublicLineup | None = None
     venue_name: str | None
     status: str
     home_score: int | None
@@ -838,6 +867,51 @@ async def public_matches(
                 name=entry.name, short_name=entry.short_name, crest_url=entry.crest_url
             )
 
+        # Team sheets, in two queries for the whole page rather than two per
+        # match. Most fixtures have none — they are published about an hour
+        # before kick-off — so this is usually a pair of empty results.
+        sheets: dict[tuple[UUID, str], PublicLineup] = {}
+        lineup_rows = list(
+            await session.scalars(
+                select(MatchLineup).where(MatchLineup.match_id.in_([m.id for m in matches]))
+            )
+        )
+        if lineup_rows:
+            squads: dict[UUID, list[MatchLineupPlayer]] = {}
+            for player in await session.scalars(
+                select(MatchLineupPlayer)
+                .where(MatchLineupPlayer.lineup_id.in_([row.id for row in lineup_rows]))
+                .order_by(MatchLineupPlayer.display_order)
+            ):
+                squads.setdefault(player.lineup_id, []).append(player)
+
+            for row in lineup_rows:
+                members = squads.get(row.id, [])
+                sheets[(row.match_id, row.side)] = PublicLineup(
+                    formation=row.formation,
+                    coach_name=row.coach_name,
+                    starters=[
+                        PublicLineupPlayer(
+                            name=p.name,
+                            shirt_number=p.shirt_number,
+                            position=p.position,
+                            grid=p.grid,
+                        )
+                        for p in members
+                        if p.is_starter
+                    ],
+                    substitutes=[
+                        PublicLineupPlayer(
+                            name=p.name,
+                            shirt_number=p.shirt_number,
+                            position=p.position,
+                            grid=p.grid,
+                        )
+                        for p in members
+                        if not p.is_starter
+                    ],
+                )
+
         # One query for every match's events rather than one per match.
         timeline: dict[UUID, list[MatchEvent]] = {}
         for event in await session.scalars(
@@ -864,6 +938,8 @@ async def public_matches(
                 away_score=m.away_score,
                 ticket_url=m.ticket_url,
                 is_home=m.home_club_id == club.directory_club_id,
+                home_lineup=sheets.get((m.id, "HOME")),
+                away_lineup=sheets.get((m.id, "AWAY")),
                 events=[
                     PublicMatchEvent(
                         minute=e.minute,

@@ -49,7 +49,9 @@ TICK_SECONDS = 60
 
 # How long after kick-off a match is still worth polling. Ninety minutes plus
 # half-time, stoppage and the wait for the final whistle to be recorded.
-MATCH_WINDOW = timedelta(hours=2, minutes=30)
+# Kick-off plus the match itself plus the hour after it. A fixture that
+# started three hours ago is finished whatever the provider still says.
+MATCH_WINDOW = timedelta(hours=3)
 
 
 async def _club_directory_id(session, provider_team_id: str):
@@ -63,28 +65,54 @@ async def _club_directory_id(session, provider_team_id: str):
     return link.local_id if link else None
 
 
-async def _has_match_in_progress(session, provider_team_id: str) -> bool:
-    """Is one of this club's fixtures being played right now?
+# How often to ask, by how close the football is. Answered from our own
+# calendar rather than by asking the provider, which would cost a call to find
+# out whether to spend a call.
+#
+# The shape of it matters more than the numbers. Polling on a fixed interval
+# all week spends an allowance on a calendar that changes twice a season; not
+# polling until kick-off misses the team sheets, which the provider publishes
+# about an hour before. So the cadence follows the match: quiet, then watchful,
+# then every minute while it is actually on.
+BUILD_UP = timedelta(hours=1)
+BUILD_UP_INTERVAL = timedelta(minutes=15)
+LIVE_INTERVAL = timedelta(minutes=1)
 
-    Answered from our own calendar rather than by asking the provider, which
-    would cost a call to find out whether to spend a call.
+
+async def _live_cadence(session, provider_team_id: str) -> timedelta | None:
+    """How often this club should be polled right now, or `None` for not at all.
+
+    `None` is the answer on all but a handful of days a season, and that is the
+    point: between matches there is nothing to learn, and a fixture list that
+    moves is caught by the twice-daily fixtures sync instead.
     """
     club_id = await _club_directory_id(session, provider_team_id)
     if club_id is None:
-        return False
+        return None
 
     now = datetime.now(UTC)
-    found = await session.scalar(
-        select(Match.id).where(
+    kickoff = await session.scalar(
+        select(Match.kickoff_at).where(
             or_(Match.home_club_id == club_id, Match.away_club_id == club_id),
             Match.source == PROVIDER,
             Match.status.in_(("SCHEDULED", "LIVE")),
             Match.kickoff_at.isnot(None),
-            Match.kickoff_at <= now,
+            # From the build-up to the end of the window a match can still be
+            # in. Anything outside it is not today's business.
             Match.kickoff_at >= now - MATCH_WINDOW,
+            Match.kickoff_at <= now + BUILD_UP,
         )
     )
-    return found is not None
+    if kickoff is None:
+        return None
+
+    # Kicked off and not yet out of the window: the score is changing.
+    if kickoff <= now:
+        return LIVE_INTERVAL
+
+    # Still to come. Watch loosely — this is the window in which the team
+    # sheets appear, and nothing else changes.
+    return BUILD_UP_INTERVAL
 
 
 def _due(last: datetime | None, every: timedelta) -> bool:
@@ -118,10 +146,17 @@ async def sync_one(feed: ClubFeed) -> None:
     async with platform_session(
         reason=f"scheduled league-feed sync for club {feed.club_id}", routine=True
     ) as session:
-        live_due = (
-            feed.sync_live
-            and _due(feed.last_live_at, timedelta(minutes=feed.live_interval_minutes))
-            and await _has_match_in_progress(session, feed.provider_team_id or "")
+        # The club's configured interval is now a floor, not the schedule: it
+        # stops an over-eager setting from polling faster than the football
+        # actually changes, and the cadence decides the rest.
+        cadence = (
+            await _live_cadence(session, feed.provider_team_id or "")
+            if feed.sync_live
+            else None
+        )
+        live_due = cadence is not None and _due(
+            feed.last_live_at,
+            max(cadence, timedelta(minutes=min(feed.live_interval_minutes, 1))),
         )
         if not fixtures_due and not live_due:
             return
@@ -173,6 +208,13 @@ async def sync_one(feed: ClubFeed) -> None:
                     # While a match is on, the goals are the point.
                     await syncer.sync_events_for_club(
                         session, client, provider_team_id=feed.provider_team_id or "", limit=2
+                    )
+                    # And who is on the pitch. The provider publishes a team
+                    # sheet about an hour before kick-off, so this only ever
+                    # asks about a match that is on or about to be — see
+                    # `sync_lineups_for_club`.
+                    await syncer.sync_lineups_for_club(
+                        session, client, provider_team_id=feed.provider_team_id or ""
                     )
                     await _record(session, "LIVE", feed, live, None)
                     log.info(

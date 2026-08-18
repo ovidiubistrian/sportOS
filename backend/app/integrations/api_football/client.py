@@ -180,5 +180,17 @@ class ApiFootball:
         """
         return await self.get("/coachs", team=team)
 
+    async def lineups(self, *, fixture: str) -> list[dict[str, Any]]:
+        """Both team sheets for one fixture.
+
+        Published by the provider around an hour before kick-off and kept
+        afterwards, so there is nothing to fetch for a match next Saturday.
+
+        What comes back depends on how fully the league is covered: every
+        league gives names and shirt numbers, and only the well-covered ones
+        give `formation`, `pos` and `grid`. See `sync_lineups`.
+        """
+        return await self.get("/fixtures/lineups", fixture=fixture)
+
     async def squad(self, *, team: str) -> list[dict[str, Any]]:
         return await self.get("/players/squads", team=team)

@@ -17,12 +17,12 @@ from __future__ import annotations
 
 import contextlib
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.competitions.models import (
@@ -33,6 +33,8 @@ from app.competitions.models import (
     DirectoryClub,
     Match,
     MatchEvent,
+    MatchLineup,
+    MatchLineupPlayer,
 )
 from app.core.ids import new_id
 from app.identity.registration import slugify
@@ -770,13 +772,21 @@ EVENT_KIND_MAP = {
 
 
 async def sync_match_events(
-    session: AsyncSession, client: ApiFootball, *, match: Match
+    session: AsyncSession,
+    client: ApiFootball,
+    *,
+    match: Match,
+    payload: list[dict[str, Any]] | None = None,
 ) -> SyncResult:
     """Goals, cards and substitutions for one match.
 
     One call per match, and only for matches worth spending it on: a fixture
     that has not kicked off has no events, and one whose events we already
     hold does not change once the referee has gone home.
+
+    `payload` skips the call entirely. A single `/fixtures?id=` response
+    carries the score, the events *and* the team sheets, so during a live match
+    one request feeds everything — see `sync_live_snapshot_for_club`.
     """
     result = SyncResult()
 
@@ -790,7 +800,8 @@ async def sync_match_events(
     if link is None:
         return result
 
-    payload = await client.get("/fixtures/events", fixture=link.provider_id)
+    if payload is None:
+        payload = await client.get("/fixtures/events", fixture=link.provider_id)
 
     existing = {
         (e.minute, e.kind, e.player_name): e
@@ -1038,3 +1049,176 @@ async def sync_league_fixtures(
     result.requests = client.usage.requests
     result.remaining = client.usage.remaining
     return result
+
+
+def _shirt_number(raw: Any) -> int | None:
+    try:
+        number = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return number if 0 < number < 200 else None
+
+
+async def sync_match_lineups(
+    session: AsyncSession,
+    client: ApiFootball,
+    *,
+    match: Match,
+    payload: list[dict[str, Any]] | None = None,
+) -> SyncResult:
+    """Both team sheets for one match.
+
+    **What arrives depends on the league.** Every league the provider carries
+    gives names and shirt numbers; only the ones it covers fully give
+    `formation`, `pos` and `grid`. For the Romanian second division those three
+    come back null, which is why they are nullable here and why a club that
+    wants a pitch rather than a list arranges the eleven itself.
+
+    A lineup a club has arranged is not flattened by a later sync. Names and
+    substitutes are refreshed — a late change to the bench should show — but
+    the shape somebody set that morning is left exactly where they put it.
+    """
+    result = SyncResult()
+
+    if payload is None:
+        provider_link = await session.scalar(
+            select(ProviderLink).where(
+                ProviderLink.provider == PROVIDER,
+                ProviderLink.entity_type == "MATCH",
+                ProviderLink.local_id == match.id,
+            )
+        )
+        if provider_link is None:
+            return result
+        payload = await client.lineups(fixture=provider_link.provider_id)
+    if not payload:
+        return result
+
+    for entry in payload:
+        team = entry.get("team") or {}
+        team_id = str(team.get("id") or "")
+        club_link = await session.scalar(
+            select(ProviderLink).where(
+                ProviderLink.provider == PROVIDER,
+                ProviderLink.entity_type == "DIRECTORY_CLUB",
+                ProviderLink.provider_id == team_id,
+            )
+        )
+        if club_link is None:
+            continue
+
+        if club_link.local_id == match.home_club_id:
+            side = "HOME"
+        elif club_link.local_id == match.away_club_id:
+            side = "AWAY"
+        else:
+            continue
+
+        lineup = await session.scalar(
+            select(MatchLineup).where(
+                MatchLineup.match_id == match.id, MatchLineup.side == side
+            )
+        )
+        if lineup is None:
+            lineup = MatchLineup(match_id=match.id, side=side)
+            session.add(lineup)
+            await session.flush()
+            result.created += 1
+        else:
+            result.updated += 1
+
+        arranged = lineup.source == "CLUB"
+        coach = (entry.get("coach") or {}).get("name")
+        if coach:
+            lineup.coach_name = coach
+        # Only taken when the provider actually has one. Overwriting a club's
+        # chosen shape with null is how an arranged pitch becomes a list again.
+        if entry.get("formation") and not arranged:
+            lineup.formation = entry["formation"]
+
+        # Positions are rebuilt wholesale, because a team sheet is a set and a
+        # diff against names is guesswork. A club's arrangement survives
+        # because the grid is carried over by name below.
+        existing_grid: dict[str, str] = {}
+        if arranged:
+            for row in await session.scalars(
+                select(MatchLineupPlayer).where(MatchLineupPlayer.lineup_id == lineup.id)
+            ):
+                if row.grid:
+                    existing_grid[row.name.casefold()] = row.grid
+
+        await session.execute(
+            delete(MatchLineupPlayer).where(MatchLineupPlayer.lineup_id == lineup.id)
+        )
+
+        for starter, group in (("startXI", True), ("substitutes", False)):
+            for order, item in enumerate(entry.get(starter) or []):
+                player = item.get("player") or {}
+                name = (player.get("name") or "").strip()
+                if not name:
+                    continue
+                session.add(
+                    MatchLineupPlayer(
+                        lineup_id=lineup.id,
+                        name=name,
+                        shirt_number=_shirt_number(player.get("number")),
+                        position=(player.get("pos") or None),
+                        grid=player.get("grid") or existing_grid.get(name.casefold()),
+                        is_starter=group,
+                        display_order=order,
+                    )
+                )
+
+    await session.flush()
+    return result
+
+
+async def sync_lineups_for_club(
+    session: AsyncSession, client: ApiFootball, *, provider_team_id: str, limit: int = 2
+) -> SyncResult:
+    """Team sheets for what is about to kick off, or just has.
+
+    Deliberately narrow. The provider publishes a lineup about an hour before
+    kick-off, so asking about next Saturday spends a call to be told nothing.
+    The window is the match that is on, and the one starting shortly.
+    """
+    total = SyncResult()
+
+    club_link = await session.scalar(
+        select(ProviderLink).where(
+            ProviderLink.provider == PROVIDER,
+            ProviderLink.entity_type == "DIRECTORY_CLUB",
+            ProviderLink.provider_id == str(provider_team_id),
+        )
+    )
+    if club_link is None:
+        return total
+
+    now = datetime.now(UTC)
+    candidates = list(
+        await session.scalars(
+            select(Match)
+            .where(
+                or_(
+                    Match.home_club_id == club_link.local_id,
+                    Match.away_club_id == club_link.local_id,
+                ),
+                Match.source == PROVIDER,
+                Match.status.in_(("SCHEDULED", "LIVE", "FINISHED")),
+                Match.kickoff_at.isnot(None),
+                # From ninety minutes before kick-off to a few hours after: the
+                # window in which a sheet exists and can still change.
+                Match.kickoff_at >= now - timedelta(hours=4),
+                Match.kickoff_at <= now + timedelta(minutes=90),
+            )
+            .order_by(Match.kickoff_at)
+            .limit(limit)
+        )
+    )
+
+    for match in candidates:
+        one = await sync_match_lineups(session, client, match=match)
+        total.created += one.created
+        total.updated += one.updated
+
+    return total
