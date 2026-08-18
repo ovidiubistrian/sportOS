@@ -799,6 +799,26 @@ export const en = {
     almostGone: "Almost gone",
     unavailable: "Unavailable",
   },
+  matchday: {
+    live: "Live",
+    addEvent: "Record what happened",
+    addEventHint:
+      "The league feed carries goals within a few minutes and cards late or not at all below the top divisions. Anything you put in here is kept — the feed will not overwrite it.",
+    minute: "Minute",
+    player: "Player",
+    playerHint: "Optional",
+    forWhom: "For",
+    eventGoal: "Goal",
+    eventYellow: "Yellow card",
+    eventRed: "Red card",
+    eventSubstitution: "Substitution",
+    recorded: "Recorded.",
+    roundTitle: "Round",
+    roundHint:
+      "Providers mislabel cup rounds — a preliminary tie can arrive as \"Final\". Your correction is stored separately, so the feed will not undo it.",
+    roundLabel: "Show this round as",
+    roundSaved: "Round updated.",
+  },
   payments: {
     eyebrow: "Money",
     title: "Card payments",

@@ -35,6 +35,7 @@ import { useMemo, useState } from "react";
 import { useI18n } from "../../app/locale";
 import { ResultsFeed } from "./results-feed";
 import { useSession } from "../../app/session";
+import { MatchdayConsole } from "./matchday-console";
 import { OpponentPicker } from "./opponent-picker";
 
 /**
@@ -671,6 +672,20 @@ export function MatchesPage() {
   const scheduled = rows.filter((match) => match.status === "SCHEDULED");
   const done = rows.filter((match) => match.status !== "SCHEDULED");
 
+  // The console appears for the match that is actually on, and for the one
+  // about to be — which is when somebody is standing at the ground with a
+  // phone. The rest of the season it is not there, because the rest of the
+  // season nobody needs it.
+  const soon = Date.now() + 3 * 60 * 60 * 1000;
+  const onNow =
+    rows.find((match) => match.status === "LIVE") ??
+    rows.find(
+      (match) =>
+        match.status === "SCHEDULED" &&
+        match.kickoff_at != null &&
+        new Date(match.kickoff_at).getTime() < soon,
+    );
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -700,6 +715,8 @@ export function MatchesPage() {
           )
         }
       />
+
+      {canManage && onNow && <MatchdayConsole match={onNow} clubId={club.id} />}
 
       {entries.isLoading ? (
         <Skeleton className="h-24" />

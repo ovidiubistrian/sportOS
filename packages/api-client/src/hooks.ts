@@ -95,6 +95,8 @@ import type {
   TicketedEvent,
   Venue,
   VenueConfiguration,
+  MatchEventEntry,
+  MatchEventInput,
 } from "./types";
 
 const ApiContext = createContext<ApiClient | null>(null);
@@ -1843,4 +1845,44 @@ export function useDeleteGate(): UseMutationResult<void, ApiError, string> {
   return useTicketingMutation((api, gateId) =>
     api.delete<void>(`/api/v1/ticketing/gates/${gateId}`),
   );
+}
+
+// --- matchday console -------------------------------------------------------
+
+/**
+ * Record something the league feed has not reported.
+ *
+ * Providers carry goals within a few minutes and cards late or not at all for
+ * smaller divisions, so a club watching from the stand can put them in itself.
+ * The server marks these `source: "CLUB"` and the sync leaves them alone.
+ */
+export function useAddMatchEvent(
+  clubId: string,
+): UseMutationResult<MatchEventEntry, ApiError, { matchId: string; event: MatchEventInput }> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ matchId, event }) =>
+      api.post<MatchEventEntry>(
+        `/api/v1/matches/${matchId}/events?club_id=${clubId}`,
+        event,
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.matches.all });
+    },
+  });
+}
+
+export function useDeleteMatchEvent(
+  clubId: string,
+): UseMutationResult<void, ApiError, { matchId: string; eventId: string }> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ matchId, eventId }) =>
+      api.delete<void>(`/api/v1/matches/${matchId}/events/${eventId}?club_id=${clubId}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.matches.all });
+    },
+  });
 }

@@ -528,6 +528,9 @@ export interface DirectoryClub {
 
 export type MatchStatus =
   | "SCHEDULED"
+  // A match that has kicked off and not finished. The backend has always had
+  // it; this type did not, so a live fixture could not be represented here.
+  | "LIVE"
   | "POSTPONED"
   | "CANCELLED"
   | "FINISHED"
@@ -542,6 +545,10 @@ export interface Match {
   round_kind: string;
   round_number: number | null;
   round_label: string | null;
+  /** Set when the club has corrected the feed's label. */
+  round_label_override?: string | null;
+  /** Minute of play while the match is on; null otherwise. */
+  minute?: number | null;
   kickoff_at: string | null;
   kickoff_is_confirmed: boolean;
   venue_name: string | null;
@@ -665,6 +672,12 @@ export interface MatchUpdate {
   status?: MatchStatus;
   home_score?: number | null;
   away_score?: number | null;
+  /**
+   * The club's correction when the feed mislabels a round. Stored separately
+   * from the provider's own label, so a sync does not undo it — and the one
+   * field a feed fixture will accept.
+   */
+  round_label_override?: string | null;
 }
 
 /* --- shop ------------------------------------------------------------------ */
@@ -1362,4 +1375,22 @@ export interface EventGate {
   name: string;
   kind: string;
   is_accessible: boolean;
+}
+
+/** What a club types in when the feed is behind. */
+export interface MatchEventInput {
+  kind: "GOAL" | "CARD" | "SUBSTITUTION" | "VAR";
+  minute?: number | null;
+  extra_minute?: number | null;
+  /** The provider's own vocabulary — "Yellow Card", "Normal Goal", "Penalty". */
+  detail?: string | null;
+  player_name?: string | null;
+  related_name?: string | null;
+  is_home: boolean;
+}
+
+export interface MatchEventEntry extends MatchEventInput {
+  id: string;
+  /** PROVIDER or CLUB. Only a club's own entries can be removed. */
+  source: string;
 }

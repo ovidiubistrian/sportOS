@@ -795,6 +795,26 @@ export const ro: Catalogue = {
     almostGone: "Aproape epuizat",
     unavailable: "Indisponibil",
   },
+  matchday: {
+    live: "În direct",
+    addEvent: "Notează ce s-a întâmplat",
+    addEventHint:
+      "Fluxul ligii aduce golurile în câteva minute, iar cartonașele târziu sau deloc sub primele eșaloane. Ce introduci aici rămâne — fluxul nu îl suprascrie.",
+    minute: "Minutul",
+    player: "Jucător",
+    playerHint: "Opțional",
+    forWhom: "Pentru",
+    eventGoal: "Gol",
+    eventYellow: "Cartonaș galben",
+    eventRed: "Cartonaș roșu",
+    eventSubstitution: "Schimbare",
+    recorded: "Notat.",
+    roundTitle: "Etapa",
+    roundHint:
+      "Furnizorii etichetează greșit tururile de cupă — un tur preliminar poate ajunge ca \"Final\". Corectura ta se păstrează separat, deci fluxul nu o desface.",
+    roundLabel: "Arată etapa ca",
+    roundSaved: "Etapa a fost actualizată.",
+  },
   payments: {
     eyebrow: "Bani",
     title: "Plăți cu cardul",
