@@ -105,6 +105,20 @@ CATALOGUE: tuple[Permission, ...] = (
     _p("commerce.product.manage", "commerce", "Add and edit shop products"),
     _p("commerce.order.read", "commerce", "View shop orders"),
     _p("commerce.order.manage", "commerce", "Mark orders collected or cancelled"),
+    # --- matchday ----------------------------------------------------------
+    # Split away from `teams.team.*` so somebody can be given the fixture list
+    # and nothing else. A commentator hired for the afternoon should not be
+    # able to read the squad, the staff list or a player's documents, and
+    # before this the only way to let them see a match was to let them see all
+    # of that too.
+    _p("matches.match.read", "matches", "View fixtures and results", (T, C, G)),
+    # Recording a goal or a card while the match is on. Narrow on purpose: it
+    # is the whole job of a matchday commentator, and it is all they get.
+    _p("matches.event.record", "matches", "Record live match events", (T, C)),
+    # Arranging the team sheet before kick-off. Separate from recording events
+    # because the two are done by different people at different times — a press
+    # officer sets the eleven at two o'clock and somebody else calls the game.
+    _p("matches.lineup.manage", "matches", "Set the starting eleven", (T, C)),
     # --- stadium & ticketing ----------------------------------------------
     # Split along the lines of who actually does the work on a matchday. A
     # ticketing manager draws the ground and sets prices; a box-office clerk

@@ -42,8 +42,15 @@ from app.tenants.models import Club
 
 router = APIRouter(tags=["competitions"])
 
-READ = "teams.team.read"
+READ = "matches.match.read"
 MANAGE = "teams.team.manage"
+
+# Matchday, held by people who hold nothing else: a press officer setting the
+# eleven at two o'clock, somebody calling the game at three. Neither of them
+# should need `teams.team.manage`, which is the right to restructure the club's
+# age groups.
+RECORD_EVENT = "matches.event.record"
+MANAGE_LINEUP = "matches.lineup.manage"
 
 
 class CompetitionOut(BaseModel):
@@ -848,7 +855,7 @@ async def arrange_lineup(
     payload: LineupArrangement,
     club_id: UUID,
     db: Db,
-    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE_LINEUP))],
 ) -> LineupOut:
     """Set the formation and where each starter stands.
 
@@ -941,7 +948,7 @@ async def add_match_event(
     payload: MatchEventIn,
     club_id: UUID,
     db: Db,
-    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+    ctx: Annotated[RequestContext, Depends(Requires(RECORD_EVENT))],
 ) -> MatchEventOut:
     """Add a goal or a card by hand, during a match or after it.
 
@@ -1006,7 +1013,7 @@ async def delete_match_event(
     event_id: UUID,
     club_id: UUID,
     db: Db,
-    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+    ctx: Annotated[RequestContext, Depends(Requires(RECORD_EVENT))],
 ) -> None:
     """Only the club's own entries.
 

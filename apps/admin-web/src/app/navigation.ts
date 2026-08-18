@@ -78,7 +78,9 @@ export const NAVIGATION: NavGroup[] = [
         labelKey: "matches",
         descriptionKey: "matchesHint",
         icon: CalendarDays,
-        permission: "teams.team.read",
+        // Its own permission, not the squad's. A match commentator brought in
+        // for one afternoon gets the fixture list and nothing else.
+        permission: "matches.match.read",
         keywords: [
           "fixtures", "results", "league", "table", "cup", "standings",
           "meciuri", "rezultate", "clasament", "campionat", "cupa", "cupă", "etapa", "etapă",

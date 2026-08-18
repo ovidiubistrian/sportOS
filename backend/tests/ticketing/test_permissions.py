@@ -123,3 +123,54 @@ class TestTenantIsolation:
         response = await client.get("/api/v1/ticketing/venues", headers=as_user("coach"))
         assert response.status_code == 403
         assert response.json()["code"] == "PERMISSION_DENIED"
+
+
+class TestMatchdayRoles:
+    """Who may call a match, and what else they can see while doing it."""
+
+    def test_a_commentator_sees_the_fixture_list_and_nothing_else(self) -> None:
+        """The whole point of splitting these permissions out.
+
+        Somebody brought in for one afternoon must not get the squad, the staff
+        list or anybody's documents. Before `matches.match.read` existed, the
+        only way to let them see a match was `teams.team.read` — which is the
+        squad, and everything hanging off it.
+        """
+        held = set(BY_KEY_TEMPLATE["MATCH_COMMENTATOR"].permissions)
+
+        assert held == {"matches.match.read", "matches.event.record"}
+        assert "teams.team.read" not in held
+        assert not any(p.startswith(("players.", "people.", "staff.")) for p in held)
+        assert not any(p.startswith("medical.") for p in held)
+
+    def test_a_press_officer_writes_but_does_not_publish(self) -> None:
+        """Proposing and approving are different jobs.
+
+        `cms.content.publish` is the approval, and it stays with whoever is
+        accountable for what the club says in its own name.
+        """
+        held = set(BY_KEY_TEMPLATE["PRESS_OFFICER"].permissions)
+
+        assert "cms.content.write" in held
+        assert "cms.content.publish" not in held
+        # And the matchday half of the job.
+        assert "matches.lineup.manage" in held
+        assert "matches.event.record" in held
+
+    def test_a_press_officer_does_not_run_the_club(self) -> None:
+        held = set(BY_KEY_TEMPLATE["PRESS_OFFICER"].permissions)
+
+        for forbidden in (
+            "teams.team.manage",
+            "players.player.update",
+            "authz.role.grant",
+            "commerce.order.manage",
+        ):
+            assert forbidden not in held, forbidden
+
+    def test_a_club_administrator_can_do_both(self) -> None:
+        held = set(BY_KEY_TEMPLATE["CLUB_ADMIN"].permissions)
+
+        assert "matches.event.record" in held
+        assert "matches.lineup.manage" in held
+        assert "cms.content.publish" in held

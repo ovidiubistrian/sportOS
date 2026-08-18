@@ -27,6 +27,7 @@ class RoleTemplate:
 _READ_ONLY_CLUB = (
     "clubs.club.read",
     "teams.team.read",
+    "matches.match.read",
     "people.person.read",
     "players.player.read",
     "staff.profile.read",
@@ -36,6 +37,7 @@ _READ_ONLY_CLUB = (
 _COACH = (
     "clubs.club.read",
     "teams.team.read",
+    "matches.match.read",
     "people.person.read",
     "players.player.read",
     "players.document.read",
@@ -129,9 +131,41 @@ TEMPLATES: tuple[RoleTemplate, ...] = (
             "commerce.product.manage",
             "commerce.order.read",
             "commerce.order.manage",
+            "matches.event.record",
+            "matches.lineup.manage",
             *_TICKETING_FULL,
         ),
         "Day-to-day administration of one club.",
+    ),
+    RoleTemplate(
+        "PRESS_OFFICER",
+        "Press Officer",
+        ScopeLevel.CLUB,
+        (
+            "clubs.club.read",
+            "matches.match.read",
+            # Writes and submits; does not publish. `cms.content.publish` is
+            # the approval, and it stays with whoever is accountable for what
+            # the club says in its own name.
+            "cms.content.read",
+            "cms.content.write",
+            # Matchday: sets the eleven before kick-off and calls the game.
+            "matches.lineup.manage",
+            "matches.event.record",
+        ),
+        "Writes news for approval, sets the lineup and covers matches live.",
+    ),
+    RoleTemplate(
+        "MATCH_COMMENTATOR",
+        "Match Commentator",
+        ScopeLevel.CLUB,
+        # Two permissions, and the second exists only so they can find the
+        # match. Somebody brought in for one afternoon has no business seeing
+        # the squad, the staff list or anybody's documents — and before these
+        # were split out, letting them see a fixture meant letting them see all
+        # of that too.
+        ("matches.match.read", "matches.event.record"),
+        "Covers matches live. Sees the fixture list and nothing else.",
     ),
     RoleTemplate(
         "TICKETING_MANAGER",
