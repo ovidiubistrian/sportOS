@@ -31,6 +31,7 @@ import { StadiumPage } from "./pages/ticketing/stadium";
 import { SitePage } from "./pages/site/site";
 import { MatchesPage } from "./pages/matches/matches";
 import { LocaleProvider } from "./app/locale";
+import { clearStoredWorkspace } from "./app/session";
 import { PlatformConsole } from "./pages/platform/console";
 import { ShopPage } from "./pages/shop/shop";
 import { TeamsPage } from "./pages/teams";
@@ -193,6 +194,11 @@ function Authenticated() {
  * bounce them to the workspace picker.
  */
 function PlatformShell() {
+  // A platform operator belongs to no tenant, so whatever this browser
+  // remembers is another account's and the API client would send it on every
+  // call. Cleared before the console mounts, or every request comes back 400.
+  clearStoredWorkspace();
+
   // Its own LocaleProvider. The one every other screen uses is mounted inside
   // `SessionProvider`, which wraps the club routes — and a platform operator
   // has no club, so this route bypassed it and the console threw on its first

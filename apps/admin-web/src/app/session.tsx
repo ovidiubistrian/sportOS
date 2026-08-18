@@ -54,6 +54,20 @@ export function getStoredTenantId(): string | null {
   return window.localStorage.getItem(TENANT_KEY);
 }
 
+/**
+ * Forget which club and tenant this browser was last in.
+ *
+ * The two keys are per *browser*, not per account, so signing in as somebody
+ * else leaves the previous account's tenant behind — and the API client sends
+ * it on every request. For a platform operator, who is a member of no tenant
+ * at all, that produced a 400 on every call with "Unknown tenant for this
+ * account", which reads like a permissions problem and is not one.
+ */
+export function clearStoredWorkspace(): void {
+  window.localStorage.removeItem(TENANT_KEY);
+  window.localStorage.removeItem(CLUB_KEY);
+}
+
 export function setStoredTenantId(tenantId: string): void {
   window.localStorage.setItem(TENANT_KEY, tenantId);
 }
