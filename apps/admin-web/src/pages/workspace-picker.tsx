@@ -33,14 +33,19 @@ export function WorkspacePicker({ unknownSlug }: { unknownSlug?: string }) {
   const remembered = getStoredClubSlug();
 
   useEffect(() => {
-    if (!data || unknownSlug) return;
+    if (!data) return;
 
-    // A platform operator is not a member of any club, so there is nothing to
-    // pick — they belong in the super-admin console.
+    // Checked before the remembered slug, deliberately. A platform operator is
+    // not a member of any club, so *every* remembered slug is one they cannot
+    // reach — and when the slug check came first it returned early and left
+    // them on "no club access" with no way through. Anyone who had ever signed
+    // in to a club was then locked out of the console for good.
     if (data.is_platform_user && workspaces.length === 0) {
       navigate("/platform", { replace: true });
       return;
     }
+
+    if (unknownSlug) return;
 
     // One club, or the one they were last in: go straight there. The picker is
     // for the minority who genuinely have a choice to make.

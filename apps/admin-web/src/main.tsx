@@ -30,6 +30,7 @@ import { ScannerPage } from "./pages/ticketing/scanner";
 import { StadiumPage } from "./pages/ticketing/stadium";
 import { SitePage } from "./pages/site/site";
 import { MatchesPage } from "./pages/matches/matches";
+import { LocaleProvider } from "./app/locale";
 import { PlatformConsole } from "./pages/platform/console";
 import { ShopPage } from "./pages/shop/shop";
 import { TeamsPage } from "./pages/teams";
@@ -192,10 +193,17 @@ function Authenticated() {
  * bounce them to the workspace picker.
  */
 function PlatformShell() {
+  // Its own LocaleProvider. The one every other screen uses is mounted inside
+  // `SessionProvider`, which wraps the club routes — and a platform operator
+  // has no club, so this route bypassed it and the console threw on its first
+  // `useI18n`, rendering a blank page with the error only in the browser
+  // console. No tenant locale to pass, for the same reason: there is no tenant.
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-6 py-10">
-      <PlatformConsole />
-    </div>
+    <LocaleProvider tenantLocale={null}>
+      <div className="mx-auto min-h-screen max-w-6xl px-6 py-10">
+        <PlatformConsole />
+      </div>
+    </LocaleProvider>
   );
 }
 
