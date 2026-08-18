@@ -97,6 +97,8 @@ import type {
   VenueConfiguration,
   MatchEventEntry,
   MatchEventInput,
+  LineupArrangement,
+  LineupSheet,
 } from "./types";
 
 const ApiContext = createContext<ApiClient | null>(null);
@@ -1883,6 +1885,41 @@ export function useDeleteMatchEvent(
       api.delete<void>(`/api/v1/matches/${matchId}/events/${eventId}?club_id=${clubId}`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.matches.all });
+    },
+  });
+}
+
+/** Both team sheets for a fixture, as the club may arrange them. */
+export function useMatchLineups(
+  matchId: string | undefined,
+  clubId: string,
+): UseQueryResult<LineupSheet[], ApiError> {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["matches", "lineups", matchId],
+    queryFn: () =>
+      api.get<LineupSheet[]>(`/api/v1/matches/${matchId}/lineups`, { club_id: clubId }),
+    enabled: Boolean(matchId),
+  });
+}
+
+export function useArrangeLineup(
+  clubId: string,
+): UseMutationResult<
+  LineupSheet,
+  ApiError,
+  { matchId: string; side: "HOME" | "AWAY"; arrangement: LineupArrangement }
+> {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ matchId, side, arrangement }) =>
+      api.put<LineupSheet>(
+        `/api/v1/matches/${matchId}/lineups/${side}?club_id=${clubId}`,
+        arrangement,
+      ),
+    onSuccess: (_sheet, { matchId }) => {
+      void queryClient.invalidateQueries({ queryKey: ["matches", "lineups", matchId] });
     },
   });
 }

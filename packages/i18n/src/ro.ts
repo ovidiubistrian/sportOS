@@ -809,6 +809,15 @@ export const ro: Catalogue = {
     eventRed: "Cartonaș roșu",
     eventSubstitution: "Schimbare",
     recorded: "Notat.",
+    lineupTitle: "Echipa de start",
+    lineupWaiting:
+      "Foaia de echipă vine din fluxul ligii cu aproximativ o oră înainte de start — și mai târziu la eșaloanele mici.",
+    lineupSaved: "Echipa a fost salvată.",
+    tapAPlayer: "Apasă un jucător, apoi o poziție",
+    tapASlot: "Acum apasă unde joacă",
+    emptySlot: "Poziție liberă",
+    everyonePlaced: "Toți sunt pe teren.",
+    arrangedByClub: "Aranjată de club",
     roundTitle: "Etapa",
     roundHint:
       "Furnizorii etichetează greșit tururile de cupă — un tur preliminar poate ajunge ca \"Final\". Corectura ta se păstrează separat, deci fluxul nu o desface.",

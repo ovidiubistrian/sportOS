@@ -35,6 +35,7 @@ import { useMemo, useState } from "react";
 import { useI18n } from "../../app/locale";
 import { ResultsFeed } from "./results-feed";
 import { useSession } from "../../app/session";
+import { LineupEditor } from "./lineup-editor";
 import { MatchdayConsole } from "./matchday-console";
 import { OpponentPicker } from "./opponent-picker";
 
@@ -716,7 +717,19 @@ export function MatchesPage() {
         }
       />
 
-      {canManage && onNow && <MatchdayConsole match={onNow} clubId={club.id} />}
+      {canManage && onNow && (
+        <>
+          <MatchdayConsole match={onNow} clubId={club.id} />
+          {/* The eleven, arranged before kick-off. Shown beside the console
+              because whoever is at the ground does both. */}
+          <LineupEditor
+            matchId={onNow.id}
+            clubId={club.id}
+            homeName={onNow.home.name}
+            awayName={onNow.away.name}
+          />
+        </>
+      )}
 
       {entries.isLoading ? (
         <Skeleton className="h-24" />

@@ -813,6 +813,15 @@ export const en = {
     eventRed: "Red card",
     eventSubstitution: "Substitution",
     recorded: "Recorded.",
+    lineupTitle: "Starting eleven",
+    lineupWaiting:
+      "The team sheet arrives from the league feed about an hour before kick-off — and later than that for smaller divisions.",
+    lineupSaved: "Lineup saved.",
+    tapAPlayer: "Tap a player, then a position",
+    tapASlot: "Now tap where they play",
+    emptySlot: "Empty position",
+    everyonePlaced: "Everyone is on the pitch.",
+    arrangedByClub: "Arranged by the club",
     roundTitle: "Round",
     roundHint:
       "Providers mislabel cup rounds — a preliminary tie can arrive as \"Final\". Your correction is stored separately, so the feed will not undo it.",

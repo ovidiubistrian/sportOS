@@ -1394,3 +1394,26 @@ export interface MatchEventEntry extends MatchEventInput {
   /** PROVIDER or CLUB. Only a club's own entries can be removed. */
   source: string;
 }
+
+export interface LineupSheetPlayer {
+  name: string;
+  shirt_number: number | null;
+  position: string | null;
+  /** "row:column" from the goalkeeper out. Null until somebody places them. */
+  grid: string | null;
+}
+
+export interface LineupSheet {
+  side: "HOME" | "AWAY";
+  formation: string | null;
+  coach_name: string | null;
+  /** PROVIDER until a club arranges it, then CLUB. */
+  source: string;
+  starters: LineupSheetPlayer[];
+  substitutes: LineupSheetPlayer[];
+}
+
+export interface LineupArrangement {
+  formation?: string | null;
+  positions: { name: string; grid: string | null }[];
+}
