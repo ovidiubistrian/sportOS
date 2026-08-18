@@ -26,6 +26,7 @@ from app.competitions.models import (
     CompetitionSeason,
     DirectoryClub,
     Match,
+    MatchEvent,
     MatchLineup,
     MatchLineupPlayer,
 )
@@ -36,6 +37,7 @@ from app.events.base import MatchScheduleChanged
 from app.events.publisher import publish
 from app.identity.registration import slugify
 from app.integrations.api_football import autolink
+from app.sports.registry import profile
 from app.tenants.models import Club
 
 router = APIRouter(tags=["competitions"])
@@ -172,6 +174,9 @@ class MatchUpdate(BaseModel):
     status: str | None = None
     home_score: int | None = Field(default=None, ge=0, le=99)
     away_score: int | None = Field(default=None, ge=0, le=99)
+    # The club's correction when the feed mislabels a round — a preliminary cup
+    # tie arriving as "Final" is what prompted it.
+    round_label_override: str | None = Field(default=None, max_length=48)
 
     @field_validator("status")
     @classmethod
@@ -610,16 +615,27 @@ async def update_match(
         # business either.
         raise NotFound(object_type="match", object_id=str(match_id))
 
-    if match.source != "CLUB":
-        # One writer per row. This fixture is kept in step with the provider,
-        # and an edit here would survive exactly until the next sync — which is
-        # worse than being told no.
-        raise ValidationFailed(
-            "This fixture comes from the league feed and updates automatically.",
-            field="source",
-        )
-
     changes = payload.model_dump(exclude_unset=True)
+
+    if match.source != "CLUB":
+        # One writer per row, with one exception. This fixture is kept in step
+        # with the provider and an ordinary edit would survive exactly until
+        # the next sync — worse than being told no.
+        #
+        # The round label is the exception, and it has its own column for the
+        # purpose. Providers mislabel cup rounds routinely: a preliminary tie
+        # arriving as "Final" is what prompted this. The club knows which round
+        # it is playing, the correction goes to `round_label_override`, and the
+        # sync keeps writing `round_label` underneath without touching it.
+        correctable = {"round_label_override"}
+        refused = sorted(set(changes) - correctable)
+        if refused:
+            raise ValidationFailed(
+                "This fixture comes from the league feed and updates "
+                "automatically. Only the round it is played in can be corrected.",
+                field="source",
+                fields=refused,
+            )
     before = {field: getattr(match, field) for field in changes}
     for field, value in changes.items():
         setattr(match, field, value)
@@ -886,3 +902,126 @@ async def arrange_lineup(
     await db.flush()
 
     return _lineup_view(lineup, sorted(players, key=lambda p: p.display_order))
+
+
+class MatchEventIn(BaseModel):
+    """One thing a club saw happen, typed in while the feed lags."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: str = Field(max_length=16)
+    minute: int | None = Field(default=None, ge=0, le=130)
+    extra_minute: int | None = Field(default=None, ge=0, le=30)
+    detail: str | None = Field(default=None, max_length=80)
+    player_name: str | None = Field(default=None, max_length=160)
+    related_name: str | None = Field(default=None, max_length=160)
+    # Which side it was for. The club knows; the feed would have told us.
+    is_home: bool = True
+
+
+class MatchEventOut(BaseModel):
+    id: UUID
+    kind: str
+    minute: int | None
+    extra_minute: int | None
+    detail: str | None
+    player_name: str | None
+    source: str
+    is_home: bool
+
+
+@router.post(
+    "/matches/{match_id}/events",
+    response_model=MatchEventOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record something the feed has not reported",
+)
+async def add_match_event(
+    match_id: UUID,
+    payload: MatchEventIn,
+    club_id: UUID,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+) -> MatchEventOut:
+    """Add a goal or a card by hand, during a match or after it.
+
+    **Allowed on a feed fixture**, unlike editing the fixture itself. Providers
+    report goals within a few minutes and cards late or not at all for smaller
+    divisions, and a club watching from the stand should not have to wait for
+    somebody else's database to catch up.
+
+    Marked `source = CLUB`, which the sync respects: it writes only rows it
+    owns, so an event typed in here survives the feed catching up rather than
+    being overwritten or duplicated by it.
+    """
+    match = await _match_this_club_plays(db, ctx, match_id, club_id)
+
+    kind = payload.kind.strip().upper()
+    # The sport comes from the club doing the reporting: a match is between two
+    # clubs of the same sport, and this is the one whose scope we already hold.
+    club = await db.scalar(select(Club).where(Club.id == club_id))
+    if club is None:
+        raise NotFound(object_type="club", object_id=str(club_id))
+    if kind not in profile(club.sport).event_kinds:
+        raise ValidationFailed(
+            f"{kind} is not something that happens in this sport.", field="kind"
+        )
+
+    directory = await _directory_entry(db, ctx, club_id)
+    opponent = match.away_club_id if directory.id == match.home_club_id else match.home_club_id
+
+    event = MatchEvent(
+        match_id=match_id,
+        kind=kind,
+        minute=payload.minute,
+        extra_minute=payload.extra_minute,
+        detail=payload.detail,
+        player_name=payload.player_name,
+        related_name=payload.related_name,
+        club_id=directory.id if payload.is_home else opponent,
+        source="CLUB",
+    )
+    db.add(event)
+    await db.flush()
+
+    return MatchEventOut(
+        id=event.id,
+        kind=event.kind,
+        minute=event.minute,
+        extra_minute=event.extra_minute,
+        detail=event.detail,
+        player_name=event.player_name,
+        source=event.source,
+        is_home=event.club_id == match.home_club_id,
+    )
+
+
+@router.delete(
+    "/matches/{match_id}/events/{event_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove an event the club entered",
+)
+async def delete_match_event(
+    match_id: UUID,
+    event_id: UUID,
+    club_id: UUID,
+    db: Db,
+    ctx: Annotated[RequestContext, Depends(Requires(MANAGE))],
+) -> None:
+    """Only the club's own entries.
+
+    A feed event is the provider's record and deleting it here would restore
+    itself on the next sync — which reads as the delete having failed.
+    """
+    await _match_this_club_plays(db, ctx, match_id, club_id)
+
+    event = await db.get(MatchEvent, event_id)
+    if event is None or event.match_id != match_id:
+        raise NotFound(object_type="match_event", object_id=str(event_id))
+    if event.source != "CLUB":
+        raise ValidationFailed(
+            "That event came from the league feed and would come back on the next sync.",
+            field="source",
+        )
+
+    await db.delete(event)

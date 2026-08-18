@@ -181,7 +181,6 @@ def upgrade() -> None:
     )
     # ### end Alembic commands ###
 
-
     # How each club wants a team sheet presented. Defaults to the list, which
     # is what the provider's data supports everywhere; a club that arranges its
     # eleven on a pitch switches it.

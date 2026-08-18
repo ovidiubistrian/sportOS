@@ -930,7 +930,7 @@ async def public_matches(
             PublicMatch(
                 id=m.id,
                 competition=names.get(m.competition_season_id, ""),
-                round_label=m.round_label,
+                round_label=m.round_display,
                 round_number=m.round_number,
                 home=ref(m.home_club_id),
                 away=ref(m.away_club_id),

@@ -289,7 +289,21 @@ class Match(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
     round_kind: Mapped[str] = mapped_column(String(12), default="MATCHDAY")
     round_number: Mapped[int | None] = mapped_column(SmallInteger)
     round_label: Mapped[str | None] = mapped_column(String(48))
+    # The club's correction, when the provider's label is wrong — which happens
+    # to cup competitions in particular, where preliminary rounds are often
+    # mapped as "Final".
+    #
+    # A separate column rather than an edit to `round_label`, so the sync can
+    # keep writing what the provider says without a club's fix being quietly
+    # overwritten on the next run. Whoever reads a round prefers this one; see
+    # `Match.round_display`.
+    round_label_override: Mapped[str | None] = mapped_column(String(48))
     group_label: Mapped[str | None] = mapped_column(String(8))
+
+    @property
+    def round_display(self) -> str | None:
+        """What to show: the club's correction if it made one, else the feed's."""
+        return self.round_label_override or self.round_label
 
     # Stored in UTC; the club's timezone turns it into a kick-off time. A
     # fixture without one is meaningless, and one without a zone is worse —
@@ -321,6 +335,12 @@ class Match(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
         return self.status in ("FINISHED", "AWARDED")
 
 
+# Who put an event on the record. A club entering goals by hand while the feed
+# lags is not the same as the feed reporting them, and the difference has to
+# survive the next sync.
+EVENT_SOURCES = ("PROVIDER", "CLUB")
+
+
 class MatchEvent(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
     """A goal, a card, a substitution — the story of a match.
 
@@ -339,6 +359,7 @@ class MatchEvent(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
             ["match_id"], ["match.id"], name="fk_event_match", ondelete="CASCADE"
         ),
         CheckConstraint("kind IN " + str(EVENT_KINDS), name="event_kind_valid"),
+        CheckConstraint("source IN " + str(EVENT_SOURCES), name="event_source_valid"),
         # One event per match, minute, kind and player. A re-sync must update
         # the goal it already knows about rather than add it a second time.
         UniqueConstraint(
@@ -355,6 +376,11 @@ class MatchEvent(Base, UUIDPrimaryKey, Timestamped, GlobalModel):
     match_id: Mapped[UUID] = mapped_column(PgUUID(as_uuid=True))
     # Which side. Null when the provider does not say, rather than guessed.
     club_id: Mapped[UUID | None] = mapped_column(PgUUID(as_uuid=True))
+
+    # PROVIDER unless a club typed it in. The sync only ever writes rows it
+    # owns, so an event entered by hand during a match the feed is lagging on
+    # is not overwritten when the feed catches up.
+    source: Mapped[str] = mapped_column(String(8), default="PROVIDER")
 
     minute: Mapped[int | None] = mapped_column(SmallInteger)
     extra_minute: Mapped[int | None] = mapped_column(SmallInteger)

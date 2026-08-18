@@ -183,6 +183,11 @@ MATRIX: dict[tuple[str, str], dict[str, int]] = {
 
 # Routes intentionally excluded from the matrix, with the reason.
 EXEMPT = {
+    # Entering a goal or a card by hand needs a fixture the club is playing in
+    # and, to be worth anything, a feed that has fallen behind. Covered as a
+    # sequence in tests/competitions/test_lineups.py alongside the team sheet.
+    ("POST", "/api/v1/matches/{match_id}/events"),
+    ("DELETE", "/api/v1/matches/{match_id}/events/{event_id}"),
     # Team sheets need a real fixture the club is playing in, and the
     # arrangement needs a sheet the provider has already published — so both
     # are exercised as a sequence in tests/competitions/test_lineups.py rather
