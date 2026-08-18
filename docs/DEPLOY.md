@@ -239,8 +239,42 @@ are built and the server pulls them. The deploy takes a database dump first,
 runs migrations before the new code, and fails loudly if the health check does
 not answer.
 
-**Rolling back** — Actions → Deploy → Run workflow → paste the previous commit
-SHA. Images are tagged by SHA precisely so this is possible.
+### Rolling back
+
+Two ways, and they do the same thing.
+
+**From the server, one command:**
+
+```bash
+cd /opt/teamsport360
+./infrastructure/scripts/rollback.sh                 # the deploy before this one
+./infrastructure/scripts/rollback.sh <commit-sha>    # a specific one
+```
+
+It reads `deploys.log` — written by every successful deploy — to find the
+image tag, the commit and the Alembic revision that were live, takes a dump of
+what it is about to replace, checks the tree out to the matching commit, pulls
+those images, **walks the schema back**, reseeds permissions and health-checks.
+It asks you to type the tag before it does any of it.
+
+**From GitHub:** Actions → Deploy → Run workflow → paste the SHA. Images are
+tagged by SHA precisely so this is possible. The workflow now checks the tree
+out to that SHA too, so the compose file and the Caddyfile match the images
+rather than being whatever is newest on `main`.
+
+**The database is not restored unless you ask.** `--with-database` replaces it
+from the last pre-deploy dump and throws away everything written since — every
+order, ticket and article. Occasionally the right answer, never the automatic
+one:
+
+```bash
+./infrastructure/scripts/rollback.sh <sha> --with-database
+```
+
+**Why the schema goes back too.** Rolling images back on their own leaves the
+old application talking to the newer schema. Migrations are additive by policy,
+so it usually works — and when it does not, it fails quietly, which is the
+worst way for a rollback to fail.
 
 **Migrations must be additive.** Migrations run *before* the new code, so for
 one moment the old code is talking to the new schema. Adding a column is safe;
@@ -248,14 +282,22 @@ renaming or dropping one in the same release is not. Drop in the release after.
 
 ### Backups
 
-The pre-deploy dump is not a backup — it only exists when you deploy. Add:
+The pre-deploy dump is not a backup — it only exists when you deploy. Add a
+nightly one, through the same script so it is verified and pruned the same way:
 
 ```bash
 crontab -e
-0 3 * * * cd /opt/teamsport360 && docker compose -f docker-compose.prod.yml exec -T postgres \
-  pg_dump -U postgres footbola | gzip > backups/nightly-$(date +\%F).sql.gz \
-  && find backups -name 'nightly-*' -mtime +14 -delete
+0 3 * * * cd /opt/teamsport360 && BACKUP_KEEP=14 ./infrastructure/scripts/backup.sh nightly
 ```
+
+`backup.sh` dumps to a temporary name, checks the archive with `gunzip -t`,
+refuses anything implausibly small, and only then moves it into place beside a
+`.json` manifest recording the commit, the image tag and the Alembic revision.
+Retention is per label, so a run of deploys cannot age out the nightly copies.
+
+A truncated dump passes `gunzip -t` only if it is truncated on a block
+boundary; an *empty* one passes it every time, which is why the size floor is
+there and not decoration.
 
 Copy them off the server — a backup on the same disk as the database is not a
 backup. `rclone` to object storage is the usual answer.

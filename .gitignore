@@ -53,3 +53,8 @@ infrastructure/docker/keycloak/generated/*
 *.club.json
 csm.json
 exports/
+
+# Production state, written on the server. Never in the repository: a dump
+# is the whole database, and a deploy log is a list of what is running where.
+backups/
+deploys.log
