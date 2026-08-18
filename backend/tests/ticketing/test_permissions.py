@@ -174,3 +174,32 @@ class TestMatchdayRoles:
         assert "matches.event.record" in held
         assert "matches.lineup.manage" in held
         assert "cms.content.publish" in held
+
+    def test_a_press_officer_has_no_email_analytics_or_settings(self) -> None:
+        """The half of the job that is not theirs.
+
+        Writing about the team is not the same as emailing three thousand
+        supporters, reading the club's visitor figures, or changing what the
+        site looks like. Each of those had been reachable through a permission
+        broad enough to cover something else.
+        """
+        held = set(BY_KEY_TEMPLATE["PRESS_OFFICER"].permissions)
+
+        for forbidden in (
+            "marketing.campaign.read",
+            "marketing.campaign.manage",
+            "analytics.report.read",
+            # Site design and settings are both gated on editing the club.
+            "clubs.club.update",
+        ):
+            assert forbidden not in held, forbidden
+
+    def test_a_press_officer_can_read_the_squad(self) -> None:
+        """They write about players, so they need to see who the players are."""
+        held = set(BY_KEY_TEMPLATE["PRESS_OFFICER"].permissions)
+
+        assert "teams.team.read" in held
+        assert "players.player.read" in held
+        # Reading, not editing.
+        assert "players.player.update" not in held
+        assert "teams.team.manage" not in held

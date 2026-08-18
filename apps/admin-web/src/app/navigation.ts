@@ -161,7 +161,9 @@ export const NAVIGATION: NavGroup[] = [
         labelKey: "marketing",
         descriptionKey: "marketingHint",
         icon: Mail,
-        permission: "cms.content.read",
+        // Its own permission, not the newsroom's. Drafting an article and
+        // emailing three thousand supporters are different acts.
+        permission: "marketing.campaign.read",
         keywords: [
           "email", "newsletter", "campaign", "offer", "subscribers",
           "campanie", "oferta", "ofertă", "abonati", "abonați", "scrisoare",
@@ -172,7 +174,7 @@ export const NAVIGATION: NavGroup[] = [
         labelKey: "analytics",
         descriptionKey: "analyticsHint",
         icon: BarChart3,
-        permission: "clubs.club.read",
+        permission: "analytics.report.read",
         keywords: [
           "traffic", "visitors", "statistics", "stats", "sessions", "funnel",
           "trafic", "vizitatori", "statistici", "analiza", "analiză",
@@ -183,7 +185,9 @@ export const NAVIGATION: NavGroup[] = [
         labelKey: "site",
         descriptionKey: "siteHint",
         icon: Palette,
-        permission: "clubs.club.read",
+        // Editing the club's own site is an edit, so it is gated on the edit
+        // permission rather than on being able to read the club at all.
+        permission: "clubs.club.update",
         keywords: ["template", "colours", "colors", "brand", "domain", "theme", "culori", "sablon", "șablon", "domeniu", "design"],
       },
     ],
@@ -218,7 +222,7 @@ export const NAVIGATION: NavGroup[] = [
         labelKey: "settings",
         descriptionKey: "settingsHint",
         icon: Building2,
-        permission: "clubs.club.read",
+        permission: "clubs.club.update",
         keywords: ["tenant", "locale", "currency", "plan", "billing", "setari", "setări", "limba", "limbă", "abonament"],
       },
     ],

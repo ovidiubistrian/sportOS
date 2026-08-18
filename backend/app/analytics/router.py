@@ -26,7 +26,7 @@ from app.core.context import RequestContext
 
 router = APIRouter(tags=["analytics"])
 
-READ = "clubs.club.read"
+READ = "analytics.report.read"
 
 # What counts as "on the site now". Long enough that somebody reading an
 # article still shows, short enough to mean "now".

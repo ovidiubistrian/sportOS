@@ -100,24 +100,26 @@ MATRIX: dict[tuple[str, str], dict[str, int]] = {
         "coach": 403,
     },
     ("GET", "/api/v1/email-templates"): {
-        # The club's letters, gated on reading its content — the same
-        # permission that governs the news they are written alongside.
+        # The club's letters, on their own permission. They used to be gated on
+        # `cms.content.read`, which meant anyone trusted to draft an article
+        # could read the whole mailing list — writing a match report and
+        # emailing three thousand supporters are not the same act.
         "owner": 200,
-        "academy": 200,
+        "academy": 403,
         "coach": 403,
     },
     ("GET", "/api/v1/campaigns"): {
         "owner": 200,
-        "academy": 200,
+        "academy": 403,
         "coach": 403,
     },
     ("GET", "/api/v1/analytics/overview"): {
-        # The club's own numbers, gated on reading the club. A coach can see
-        # them; a different tenant sees its own, never ours — proved in
-        # tests/analytics/.
+        # Site traffic, on its own permission. It used to be gated on
+        # `clubs.club.read`, which every role holds — so nobody could be given
+        # the club without also being given its visitor figures.
         "owner": 200,
-        "academy": 200,
-        "coach": 200,
+        "academy": 403,
+        "coach": 403,
     },
     ("GET", "/api/v1/sports"): {
         # Reference data, like the locale registry: anybody who can read the

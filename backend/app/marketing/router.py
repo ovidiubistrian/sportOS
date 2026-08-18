@@ -44,8 +44,8 @@ log = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["marketing"])
 
-READ = "cms.content.read"
-WRITE = "cms.content.publish"
+READ = "marketing.campaign.read"
+WRITE = "marketing.campaign.manage"
 
 # Pause between messages. Not a rate limit so much as good manners: a relay
 # that suddenly sees four hundred messages in two seconds from a new sender

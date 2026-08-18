@@ -131,6 +131,9 @@ TEMPLATES: tuple[RoleTemplate, ...] = (
             "commerce.product.manage",
             "commerce.order.read",
             "commerce.order.manage",
+            "marketing.campaign.read",
+            "marketing.campaign.manage",
+            "analytics.report.read",
             "matches.event.record",
             "matches.lineup.manage",
             *_TICKETING_FULL,
@@ -142,7 +145,11 @@ TEMPLATES: tuple[RoleTemplate, ...] = (
         "Press Officer",
         ScopeLevel.CLUB,
         (
+            # Enough of the club to land on the dashboard and to write about
+            # the team: who plays, and who is in the squad. Read only.
             "clubs.club.read",
+            "teams.team.read",
+            "players.player.read",
             "matches.match.read",
             # Writes and submits; does not publish. `cms.content.publish` is
             # the approval, and it stays with whoever is accountable for what
@@ -153,7 +160,8 @@ TEMPLATES: tuple[RoleTemplate, ...] = (
             "matches.lineup.manage",
             "matches.event.record",
         ),
-        "Writes news for approval, sets the lineup and covers matches live.",
+        "Reads the squad, writes news for approval, and covers matches live. "
+        "No email, no analytics, no site design, no settings.",
     ),
     RoleTemplate(
         "MATCH_COMMENTATOR",

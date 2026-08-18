@@ -105,6 +105,18 @@ CATALOGUE: tuple[Permission, ...] = (
     _p("commerce.product.manage", "commerce", "Add and edit shop products"),
     _p("commerce.order.read", "commerce", "View shop orders"),
     _p("commerce.order.manage", "commerce", "Mark orders collected or cancelled"),
+    # --- marketing ---------------------------------------------------------
+    # Its own keys rather than the newsroom's. Writing a match report and
+    # emailing three thousand supporters are different acts with different
+    # consequences, and gating both on `cms.content.read` meant anyone trusted
+    # to draft an article could read the club's whole mailing list.
+    _p("marketing.campaign.read", "marketing", "View campaigns and subscribers"),
+    _p("marketing.campaign.manage", "marketing", "Write and send campaigns"),
+    # --- analytics ---------------------------------------------------------
+    # Site traffic is not "club details". It was gated on `clubs.club.read`,
+    # which every role holds, so nobody could be given the club without also
+    # being given its visitor figures.
+    _p("analytics.report.read", "analytics", "View site traffic and audience"),
     # --- matchday ----------------------------------------------------------
     # Split away from `teams.team.*` so somebody can be given the fixture list
     # and nothing else. A commentator hired for the afternoon should not be
