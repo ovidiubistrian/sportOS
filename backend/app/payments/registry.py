@@ -17,6 +17,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.secrets import decrypt
 from app.payments.base import PaymentProvider, PaymentProviderError
 from app.payments.btipay import BtIpayProvider
 from app.payments.journal import PaymentJournal
@@ -109,7 +110,10 @@ async def build_provider(
         if key == "btipay":
             return BtIpayProvider(
                 user_name=_setting(settings, "user_name", "userName"),
-                password=_setting(settings, "password"),
+                # Decrypted here, at the last possible moment, and handed
+                # straight to the provider. Nothing above this line holds a
+                # readable gateway password.
+                password=decrypt(_setting(settings, "password")),
                 # Sandbox unless told otherwise. The wrong way round would put
                 # a club's first real sale through a test gateway.
                 sandbox=bool(settings.get("sandbox", True)),

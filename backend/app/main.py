@@ -19,6 +19,7 @@ from app.core.cache import cache
 from app.core.config import settings
 from app.core.db import check_database, dispose_engines
 from app.core.logging import configure_logging
+from app.core.secrets import verify_configured
 
 # Import every module's models so they are registered on the declarative
 # metadata before Alembic autogenerate or the isolation sweep runs.
@@ -31,6 +32,12 @@ log = structlog.get_logger(__name__)
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     configure_logging()
     log.info("api_starting", env=settings.app_env)
+
+    # Before anything serves a request. Stored credentials cannot be read
+    # without this key, so an instance missing it would start cleanly and then
+    # fail on the first club that has a gateway configured — which reads as the
+    # gateway being broken rather than as the deployment being wrong.
+    verify_configured()
 
     if not settings.is_production:
         # Development convenience only. In production the bucket and its policy

@@ -214,3 +214,43 @@ impossible to miss.
 - Compute money in the frontend. Displayed totals come from the server.
 - Trust a client-submitted price, quantity, discount or fee.
 - Delete a payment, refund or fee record. Corrections are new rows.
+
+
+## Credentials at rest
+
+A club's gateway password is encrypted before it is stored, with Fernet, under
+`SECRET_ENCRYPTION_KEY`. See `app/core/secrets.py`.
+
+This reverses an earlier position, and the reasoning is worth keeping because
+the earlier one was not wrong so much as answering a different question.
+
+**The earlier argument.** The database already holds every supporter's order
+and email address; it is the trust boundary. A key sitting beside it in the
+same environment does not change what an attacker running as the application
+can read. Encryption there is ceremony.
+
+**What changed it.** That reasoning covers a breach and ignores the thing that
+actually happens: dumps travel. They get copied to a laptop for debugging,
+attached to a support thread, restored into staging. Every one of those is a
+list of working credentials for other people's bank accounts, and none of them
+carries the environment. The key and the data now have to be stolen separately.
+
+**What it does not buy**, stated so nobody assumes otherwise: nothing against
+code running as the application, which can read the key. This is protection for
+data at rest and in transit between environments, not defence in depth against
+compromise of the API.
+
+**Decisions taken with it:**
+
+- **AEAD, not CBC.** Fernet authenticates the ciphertext. Unauthenticated CBC is
+  malleable by anyone with write access to the database, and hand-rolled padding
+  invites padding oracles.
+- **A missing key stops the application** in production, checked at startup.
+  There is no fallback to a constant and no fallback to base64 when the library
+  is absent — both are ways of turning encryption off without telling anybody.
+- **Encrypted values are marked** with `enc:v1:`. That is what makes the
+  migration idempotent and what let existing rows be migrated in place: `decrypt`
+  returns an unmarked value unchanged, so nothing broke on the way.
+- **A wrong key raises** rather than returning a mangled string. A corrupted
+  password sent to a bank surfaces as the bank rejecting the club, which nobody
+  would trace back to a key rotation.

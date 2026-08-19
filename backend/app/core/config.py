@@ -135,6 +135,21 @@ class Settings(BaseSettings):
     public_web_internal_url: str = "http://public-web:3000"
     revalidate_secret: SecretStr = SecretStr("dev-only-revalidate-secret")
 
+    # Encrypts the credentials a club pastes in — a gateway password today, an
+    # invoicing provider's tomorrow. Never the platform's own keys, which are
+    # environment variables and stay that way.
+    #
+    # What it buys is a backup that is no longer a list of working credentials
+    # for other people's bank accounts. Dumps are copied, mailed and restored
+    # into staging far more often than a database is breached, and the key is
+    # not in the dump. See `app/core/secrets.py`.
+    #
+    # The default is published and worthless on purpose, so a deployment that
+    # forgot to set the real one is caught at startup rather than by nobody.
+    secret_encryption_key: SecretStr = SecretStr(
+        "dev-only-secret-encryption-key-not-for-any-other-use"
+    )
+
     # --- Ticketing ----------------------------------------------------------
     # The Ed25519 seed that signs QR credentials, base64url, 32 bytes. A
     # scanner verifies against the matching public key, which is what lets it

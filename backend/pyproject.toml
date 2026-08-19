@@ -122,4 +122,5 @@ markers = [
     "marketing: email templates, campaigns and consent",
     "platform: the super-admin console",
     "integrations: outbound providers such as API-Football",
+    "secrets: credentials at rest and the key that reads them",
 ]

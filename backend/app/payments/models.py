@@ -3,13 +3,20 @@
 Two tables, both tenant-scoped. The first holds the credentials a club pasted
 in; the second holds every call made with them.
 
-On the credentials at rest: they are stored as they were given. The database is
-the trust boundary here — the same one already holding every supporter's order
-and email — and encrypting a column with a key that sits next to it in the same
-environment buys very little. What it would buy is protection against a leaked
-backup, which is worth having; `docs/architecture/09-payments.md` is where that
-decision should be recorded when it is taken. Until then this is the honest
-position rather than an accidental one.
+On the credentials at rest: the password is encrypted, and the reasoning has
+changed since this said otherwise. The earlier position was that the database
+is already the trust boundary and a key sitting beside it in the same
+environment buys little — true, against an attacker running as the application.
+
+What it does buy is the case that actually happens: a dump copied to a laptop,
+mailed to support, or restored into staging is no longer a list of working
+credentials for other people's bank accounts. The key is in the environment and
+not in the dump, so the two have to be stolen separately. See
+`app/core/secrets.py`, and `docs/architecture/09-payments.md` for the decision.
+
+`decrypt` returns an unmarked value unchanged, which is what allowed the rows
+written before this to be migrated in place rather than breaking every club
+with a gateway configured.
 """
 
 from __future__ import annotations

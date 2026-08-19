@@ -23,6 +23,7 @@ from app.api.deps import Db, Requires
 from app.audit.service import AuditService
 from app.core.context import RequestContext
 from app.core.pagination import Page, PageMeta
+from app.core.secrets import decrypt, encrypt
 from app.payments.base import PaymentProviderError
 from app.payments.btipay import BtIpayProvider
 from app.payments.journal import PaymentJournal
@@ -108,13 +109,17 @@ async def save_settings(
     )
     existing = dict(row.settings or {}) if row else {}
 
-    password = payload.password or existing.get("password") or ""
+    # The stored value is encrypted, so re-encrypting it would double-wrap.
+    # A club editing only the series keeps the password it cannot read back.
+    password = payload.password or decrypt(existing.get("password") or "")
     if not password:
         raise PaymentProviderError("A password is needed before this can be saved.")
 
     settings = {
         "user_name": payload.user_name.strip(),
-        "password": password,
+        # At rest from here on. See `app/core/secrets.py` for what that buys
+        # and, just as importantly, what it does not.
+        "password": encrypt(password),
         "sandbox": payload.sandbox,
         "child_id": (payload.child_id or None),
     }
@@ -165,7 +170,7 @@ async def test_settings(
     try:
         gateway = BtIpayProvider(
             user_name=str(settings.get("user_name") or settings.get("userName") or ""),
-            password=str(settings.get("password") or ""),
+            password=decrypt(str(settings.get("password") or "")),
             sandbox=bool(settings.get("sandbox", True)),
             child_id=settings.get("child_id") or settings.get("childId") or None,
         ).with_journal(PaymentJournal(ctx.tenant, order_ref=None))
